@@ -1,0 +1,1240 @@
+﻿/* Tipografía y reset mínimo */
+html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
+  font-family: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Layout general */
+.admin-layout { display: flex; flex-direction: column; min-height: 100vh; }
+.content { flex-grow: 1; padding: 2rem; }
+
+
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:10;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:0.75rem 1rem;
+  background:#fff;
+  border-bottom:1px solid #eee;
+}
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+.brand-logo{
+  width:64px;
+  height:64px;
+  object-fit:contain;
+  display:block;
+}
+.topbar-title .app-title{
+  font-weight:900;
+  font-size:30px;
+  font-family:'Inter', sans-serif;
+}
+.topbar-title .app-sub{
+  font-size:.85rem;
+  color:#777;
+  margin-top:-2px;
+  font-family:'Inter', sans-serif;
+}
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.alert{
+  margin-bottom:1rem;
+  padding:.75rem 1rem;
+  border-radius:10px;
+  font-weight:500;
+}
+.alert--success{
+  background:#e8f5e9;
+  color:#256029;
+  border:1px solid #a5d6a7;
+}
+.alert--error{
+  background:#fdecea;
+  color:#b71c1c;
+  border:1px solid #f5c6cb;
+}
+
+.topbar-right .ghost{
+  background:#f5f5f5;
+  border:none;
+  padding:.45rem .8rem;
+  border-radius:8px;
+  color:#444;
+  cursor:pointer;
+}
+.topbar-right .ghost.active{
+  background:#e9efff;
+  color:#1a284b;
+}
+.topbar-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;          /* espacio entre icono y texto */
+  font-weight: 500;
+}
+
+.topbar-icon-btn .material-symbols-outlined {
+  font-size: 20px;     /* un poco más chico que el texto */
+  line-height: 1;
+}
+
+/* Cards */
+.card {
+  background:#fff; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;
+  box-shadow:0 2px 6px rgba(0,0,0,.05); transition:box-shadow .2s ease;
+}
+.card:hover { box-shadow:0 4px 10px rgba(0,0,0,.1); }
+.card h2 { font-size:1.1rem; font-weight:600; margin-bottom:1rem; font-family: 'Inter', sans-serif; }
+
+/* Grids */
+.card-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
+.card-stack { display:flex; flex-direction:column; gap:1rem; }
+.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+
+.resume-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:1rem;
+}
+.kpi.card{grid-column:span 3;}
+.activity.card{grid-column:span 7;}
+.quick.card{grid-column:span 5;}
+
+.kpi .kpi-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:.5rem;
+}
+.kpi .kpi-title{font-weight:600; color:#3a4c7a;}
+.kpi .kpi-number{font-size:2rem; font-weight:700;}
+.kpi .kpi-sub{font-size:.9rem; color:#53618d; margin-top:.25rem;}
+
+.activity-list{list-style:none; padding:0; margin:0;}
+.activity-list li{
+  display:flex;
+  align-items:flex-start;
+  gap:.6rem;
+  padding:.35rem 0;
+}
+.activity-list .dot{
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  margin-top:.45rem;
+  background:#ccc;
+}
+.activity-list .dot.ok{background:#4caf50;}
+.activity-list .dot.warn{background:#e07a00;}
+.activity-list .dot.info{background:#1976d2;}
+.a-title{font-weight:600;}
+.a-when{font-size:.8rem; color:#53618d;}
+
+.quick-list{display:flex; flex-direction:column; gap:.5rem;}
+.quick-btn{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  background:#f8f8f8;
+  border:1px solid #e5e5e5;
+  border-radius:10px;
+  padding:.7rem .9rem;
+  cursor:pointer;
+  font-weight:500;
+  color:#1f2f55;
+}
+.quick-btn:hover{background:#f1f1f1;}
+.quick-btn .material-symbols-outlined{font-size:20px;}
+
+.resume-grid,
+.setting-card,
+.activity-list,
+.quick-list {
+  font-family: 'Inter', sans-serif;
+  color: inherit;
+}
+
+@media (max-width: 1000px){
+  .kpi.card{grid-column:span 6;}
+  .activity.card{grid-column:span 12;}
+  .quick.card{grid-column:span 12;}
+}
+
+.page-header {
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem;
+}
+
+.page-header .actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;  /* separa extremos */
+  gap:1rem;
+}
+.actions-left{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+.page-header h1 { font-size:1.2rem; font-weight:600; color:#1a284b;  font-family: 'Inter', sans-serif;}
+
+/* Buscador inline */
+.inline-search { display:flex; gap:.5rem; align-items:center; }
+.inline-search input{
+  height:44px;
+  padding:.7rem .8rem;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:.95rem;
+  width: 420px;        /* << más largo */
+  max-width: 52vw;     /* limita en pantallas pequeñas */
+}
+
+
+/* Formularios */
+.nice-form .field { display:flex; flex-direction:column; margin-bottom:1rem; min-width:0; }
+.nice-form label { font-size:.85rem; font-weight:500; margin-bottom:.3rem; color:#30406b;  font-family: 'Inter', sans-serif;}
+.nice-form input, .nice-form select, .nice-form textarea{
+  width:100%; padding:.7rem .8rem; border:1px solid #ddd; border-radius:8px;
+  font-size:.95rem; background:#fff; transition:border-color .2s ease, box-shadow .2s ease; font-family: 'Inter', sans-serif;
+}
+.nice-form input, .nice-form select { height:44px; line-height:44px; }
+.nice-form textarea { min-height:120px; line-height:1.35; resize:vertical; }
+
+.nice-form input::placeholder, .nice-form textarea::placeholder{
+  color:#9aa0a6; opacity:1; text-overflow:ellipsis; white-space:nowrap; overflow:hidden;
+}
+
+/* Select nativo (para evitar warnings de prefijos) */
+.nice-form select{ appearance:auto; -webkit-appearance:auto; -moz-appearance:auto; background-image:none; padding-right:.8rem; color:#1a284b; }
+.nice-form select option{ color:#1a284b; background:#fff; }
+
+
+/* Solo inputs/ selects/ textareas, no el <form> */
+.nice-form input.ng-invalid.ng-touched,
+.nice-form select.ng-invalid.ng-touched,
+.nice-form textarea.ng-invalid.ng-touched{
+  border-color:#d32f2f;
+  box-shadow:0 0 0 3px rgba(211,47,47,.08);
+}
+
+/* Mostrar borde rojo también cuando se envía sin tocar nada */
+.ng-submitted .nice-form input.ng-invalid,
+.ng-submitted .nice-form select.ng-invalid,
+.ng-submitted .nice-form textarea.ng-invalid{
+  border-color:#d32f2f;
+  box-shadow:0 0 0 3px rgba(211,47,47,.08);
+}
+
+/* Asegurar que el <form> nunca tome estilo de error */
+.nice-form.ng-invalid{
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+/* Asterisco rojo en campos requeridos */
+.req { color:#a20000; margin-left:4px; font-weight:700; }
+
+/* Borde rojo en inputs/selects inválidos cuando fueron tocados o tras submit */
+.ng-invalid.ng-touched,
+.ng-invalid.ng-dirty {
+  border-color:#e53935 !important;
+  box-shadow:0 0 0 2px rgba(229,57,53,.08);
+}
+
+/* Mensaje de error */
+.error{
+  margin-top:.35rem;
+  font-size:.8rem;
+  color:#a20000;
+}
+
+
+
+/* Botones */
+.btn{
+  display:inline-flex; align-items:center; gap:.4rem; padding:.6rem 1.2rem; border-radius:8px;
+  font-weight:500; cursor:pointer; border:none; font-size:.9rem; transition:.2s ease;
+}
+.btn.primary{ background:#a20000; color:#fff; } .btn.primary:hover{ background:#870000; }
+.btn.ghost{ background:#f5f5f5; color:#2b3a62; }
+.btn.icon{ width:36px; height:36px; min-width:36px; min-height:36px; padding:0; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#f5f5f5; }
+.btn.icon:hover{ background:#eaeaea; }
+.btn.danger{ color:#a20000; background:#fff0f0; border:1px solid #f5b5b5; }
+.btn .material-symbols-outlined{ font-size:20px; line-height:1; }
+
+/* Badges */
+.badge { display:inline-block; padding:.25rem .6rem; border-radius:999px; font-size:.8rem; line-height:1; }
+.badge--ok { background:#eef8ea; color:#2e7d32; border:1px solid #cde8c3; }
+.badge--off { background:#fff3f3; color:#a20000; border:1px solid #f5b5b5; }
+
+/* Badges de Rol */
+.badge--rol-admin-polo {
+  background: #e8f0ff;
+  color: #1e40af;            /* azul oscuro */
+  border: 1px solid #bfd3ff;
+}
+
+.badge--rol-admin-empresa {
+  background: #f3e8ff;
+  color: #7e22ce;            /* violeta */
+  border: 1px solid #e0c8ff;
+}
+
+.badge--rol-publico {
+  background: #eef2f7;
+  color: #334155;            /* gris azulado */
+  border: 1px solid #dde3ea;
+}
+
+/* Fallback */
+.badge--rol-default {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+
+
+
+/* Tablas */
+.table { width:100%; }
+.table .thead, .table .row{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap:.5rem; padding:.8rem 0; border-bottom:1px solid #eee;
+  align-items:center;
+  font-family: 'Inter', sans-serif; font-size:15px;
+}
+.table .thead{ font-weight:600; color:#2b3a62; font-family: 'Inter', sans-serif; }
+
+/* 👉 Alinear "Acciones" a la derecha */
+.table .thead > div:last-child { justify-self:end; text-align:right; }
+.table .row .row-actions { display:flex; gap:.5rem; justify-self:end; }
+.card--table{
+  padding:1.5rem;
+}
+.card--table > h2,
+.card--table > .header-search{
+  margin-bottom:1.25rem;
+}
+.card--table .table{
+  border:1px solid #e3e6f2;
+  border-radius:14px;
+  overflow:hidden;
+  background:#ffffff;
+  box-shadow:0 12px 24px -12px rgba(34,47,90,0.22);
+}
+.card--table .table .thead,
+.card--table .table .row{
+  padding:0.9rem 1.25rem;
+  border-bottom:1px solid #e9ecf7;
+  gap:0.7rem;
+}
+.card--table .table .thead{
+  background:#f3f6fc;
+  color:#25325b;
+}
+.card--table .table .row{
+  background:#ffffff;
+}
+.card--table .table .row:nth-child(odd){
+  background:#f8f9ff;
+}
+.card--table .table .row:last-child{
+  border-bottom:none;
+}
+
+/* Variantes de tabla según entidad (columnas más cómodas) */
+.table--empresas .thead, .table--empresas .row { grid-template-columns: 140px 1.4fr 1fr 120px 160px 120px; }
+.table--usuarios .thead, .table--usuarios .row { grid-template-columns: 1.6fr 1fr 140px 130px 120px; }
+.table--servicios .thead, .table--servicios .row { grid-template-columns: 1.4fr 1fr 140px 1fr 140px 120px; }
+.table--lotes .thead, .table--lotes .row { grid-template-columns: 1.2fr 120px 120px 1fr 120px; }
+
+@media (max-width: 1000px){
+  .table--empresas .thead, .table--empresas .row { grid-template-columns: 120px 1.2fr 1fr 100px 140px 110px; }
+  .table--servicios .thead, .table--servicios .row { grid-template-columns: 1.2fr 1fr 120px 1fr 120px 110px; }
+}
+@media (max-width: 760px){
+  .table .thead{ display:none; }
+  .table .row{ grid-template-columns: 1fr auto; gap:.35rem .75rem; }
+  .table .row > div{ grid-column: 1 / -1; }
+  .table .row .row-actions { grid-column: 2 / 3; justify-self:end; }
+}
+
+/* Chips / enlaces de datos (si los necesitás) */
+.data-stack{ display:flex; flex-direction:column; gap:6px; }
+.chip-link, .chip-plain{
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+  max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1;
+}
+.chip-link{ background:#f6f7f8; border:1px solid #e9edf1; color:#1f2937; text-decoration:none; }
+.chip-link:hover{ background:#eef1f4; }
+.chip-plain{ background:#fafafa; border:1px solid #eee; color:#374151; }
+.chip-link .material-symbols-outlined, .chip-plain .material-symbols-outlined{ font-size:18px; }
+
+/* Overlays / Modales */
+.overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center; z-index:1000; animation: fadeIn .2s ease;
+}
+.modal{
+  background:#fff; border-radius:12px; padding:1.5rem; width:min(820px,95vw);
+  max-height:90vh; overflow:auto; box-shadow:0 4px 20px rgba(0,0,0,.25); animation: slideIn .2s ease;
+}
+.modal--sm{ width:min(360px, 92vw); }
+.modal--md{ width:min(640px, 94vw); }
+.modal--lg{ width:min(900px, 96vw); }
+
+.modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
+.modal-header h3{ font-size:1.2rem; font-weight:600; margin:0; }
+.icon-btn{ border:none; background:transparent; font-size:1.2rem;  cursor:pointer; transition:transform .2s ease; }
+.icon-btn:hover { transform: scale(1.1); }
+
+.modal-body{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; }
+.modal .col-2{ grid-column:span 2; } .modal .col-3{ grid-column:span 3; }
+
+.modal-actions{ display:flex; justify-content:flex-end; gap:.8rem; margin-top:1rem; }
+
+/* Inline 3 (para datos propietario/inq) */
+.inline-3{
+  display:grid; grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap:.75rem; width:100%;
+}
+@media (max-width: 980px){ .inline-3{ grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+@media (max-width: 680px){ .inline-3{ grid-template-columns: 1fr; } }
+
+/* Settings */
+.setting-card .setting-header { display:flex; align-items:center; gap:1rem; margin-bottom:.8rem; }
+.setting-icon{ font-size:28px; }
+.setting-icon.danger{ color:#a20000; }
+
+/* Animaciones */
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+@keyframes slideIn{ from{transform:translateY(-15px); opacity:0} to{transform:translateY(0); opacity:1} }
+
+
+@media (max-width: 900px){
+  .page-header .actions{ flex-direction:column; align-items:stretch; gap:.75rem; }
+  .actions-left{ order:1; }
+  .inline-search{ order:2; }
+  .inline-search input{ width:100%; max-width:none; }
+}
+
+/* Placeholders nítidos y alineados */
+.nice-form input::placeholder,
+.nice-form textarea::placeholder { color:#9aa0a6; opacity:1; }
+
+/* Ayudas siempre en bloque y sin desbordes */
+.hint{ display:block; margin-top:.25rem; font-size:.8rem; color:#53618d; line-height:1.2; }
+
+/* Quitar outline negro grueso del browser en focus */
+.nice-form input:focus,
+.nice-form select:focus,
+.nice-form textarea:focus { outline:none; }
+
+/* Asegurar que el <form> nunca tome el estilo de error global */
+.nice-form.ng-invalid{ border-color:transparent!important; box-shadow:none!important; }
+
+
+/* Altura y alineación correctas de inputs/selects (sin forzar line-height igual a la altura) */
+.nice-form input,
+.nice-form select {
+  height: 44px;        /* alto cómodo */
+  line-height: 1.25;   /* NO 44px */
+  padding: .7rem .8rem;
+}
+
+/* Placeholders nítidos y sin “brincos” */
+.nice-form input::placeholder,
+.nice-form textarea::placeholder {
+  color: #9aa0a6;
+  opacity: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* El modal nunca muestra scroll horizontal */
+.modal { overflow-x: hidden; }
+
+/* La grilla interna del modal se adapta mejor y no empuja ancho */
+.modal .modal-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* antes 220/240 */
+  gap: 1rem;
+}
+
+/* Ayudas bajo campos: que envuelvan texto y no desborden */
+.hint {
+  display: block;
+  margin-top: .25rem;
+  font-size: .8rem;
+  color: #53618d;
+  line-height: 1.2;
+  white-space: normal;         /* permite salto de línea */
+  overflow-wrap: anywhere;     /* evita barras horizontales */
+}
+
+/* Quitar outline grueso del navegador al enfocar */
+.nice-form input:focus,
+.nice-form select:focus,
+.nice-form textarea:focus {
+  outline: none;
+}
+
+
+/* ====== Tipografía unificada Admin Polo & Empresa ====== */
+
+/* Base */
+html, body {
+  font-size: 18px;   /* 👈 Ajustá aquí el tamaño global (ej. 14px o 15px) */
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
+}
+
+/* Títulos */
+.page-header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card h2,
+.modal-header h3 {
+  font-size: 1.2rem;    /* mismo tamaño para subtítulos */
+  font-weight: 600;
+}
+
+/* Texto en tablas y listas */
+.table .thead,
+.table .row,
+.data-list .chip,
+.data-stack,
+.chip-link,
+.chip-plain {
+  font-size: 0.90rem;
+}
+
+/* Formularios */
+.nice-form label {
+  font-size: 0.85rem;
+}
+
+.nice-form input,
+.nice-form select,
+.nice-form textarea {
+  font-size: 0.9rem;
+}
+
+/* Botones */
+.btn {
+  font-size: 0.9rem;
+}
+
+
+/* Grilla fija para los campos base (3 columnas estables) */
+.sp-base-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Bloques extra que van debajo y ocupan 100% */
+.sp-extra{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.full-row{ grid-column: 1 / -1; }   /* fuerza a ocupar toda la fila */
+
+/* En pantallas chicas mantené el comportamiento responsive */
+@media (max-width: 980px){
+  .sp-base-grid,
+  .sp-extra{ grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+}
+@media (max-width: 680px){
+  .sp-base-grid,
+  .sp-extra{ grid-template-columns: 1fr; }
+}
+
+/* 1) No recortar placeholders en inputs ni textareas */
+.nice-form input::placeholder,
+.nice-form textarea::placeholder{
+  text-overflow: clip;     /* en vez de ellipsis */
+  white-space: normal;     /* permite ajustar */
+  overflow: visible;       /* no los tape el borde */
+}
+
+/* Si querés mantener todo en una línea pero sin cortar: */
+/* .nice-form input::placeholder { white-space: nowrap; text-overflow: clip; overflow: visible; } */
+
+/* 2) Evitar recortes dentro de columnas de grid (base y extras) */
+.sp-base-grid .field,
+.sp-extra .field,
+.inline-3 input,
+.inline-3 select,
+.inline-3 textarea{
+  min-width: 0;            /* permite que el contenido se adapte sin “morder” el borde */
+}
+
+/* Un pelín más de respiración a la derecha */
+.nice-form input,
+.nice-form select {
+  padding-right: 1rem;
+}
+
+/* Botonera “arriba a la derecha” encima de la card */
+.card-stack > .header-actions{
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .75rem;       /* separación con la card de abajo */
+}
+
+/* Si hay varias acciones, que no desborden */
+.card-stack > .header-actions{ flex-wrap: wrap; }
+
+/* En pantallas chicas: que no quede pegado a los bordes */
+@media (max-width: 700px){
+  .card-stack > .header-actions{ padding-inline: .25rem; }
+}
+
+
+/* Header con botón arriba derecha y buscador full-width debajo */
+.page-header{
+  display: grid;
+  grid-template-columns: 1fr auto;  /* contenido + acciones a la derecha */
+  grid-auto-rows: auto;
+  gap: .75rem 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Botonera: esquina superior derecha */
+.header-actions{
+  grid-column: 2 / 3;
+  justify-self: end;
+  display: flex;
+  gap: .5rem;
+}
+
+/* Buscador: ocupa todo el ancho en la fila siguiente */
+.header-search{
+  grid-column: 1 / -1;
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: 1.75rem;   /* ⬅️ antes era 1rem: más separación con la tabla */
+
+}
+.header-search input{
+  flex: 1 1 auto;      /* ocupa todo el ancho disponible */
+  width: 100%;
+  max-width: none;
+  height: 44px;
+  padding: .7rem .8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: .95rem;
+}
+
+/* Responsive: se mantiene el mismo comportamiento */
+@media (max-width: 900px){
+  .page-header{ grid-template-columns: 1fr auto; }
+  .header-actions{ grid-column: 2 / 3; }
+  .header-search{ grid-column: 1 / -1; }
+}
+
+
+.horario-cell {
+  display: flex;
+  align-items: start;
+  gap: .5rem;
+  max-width: 320px;     /* ajustá al ancho de tu tabla */
+}
+
+.horario-cell .clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+
+  /* clamp estándar + prefijo */
+  line-clamp: 1;           /* estándar */
+  -webkit-line-clamp: 1;   /* WebKit */
+
+  overflow: hidden;
+}
+
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+/* ===== Tabla: espaciado cómodo y alineación coherente ===== */
+.table {
+  width: 100%;
+}
+
+/* Más aire vertical + más separación entre columnas */
+.table .thead,
+.table .row {
+  display: grid;
+  gap: 1rem;                 /* antes .5rem */
+  padding: 1rem 0;           /* antes .8rem 0 */
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  font-size: 14.5px;
+}
+
+/* Zebra suave para legibilidad */
+.table .row:nth-child(odd) { background: #fafafa; }
+.table .row:nth-child(odd) > * { background: transparent; }
+
+/* Columna de acciones siempre a la derecha (encabezado y filas) */
+.table .thead > div:last-child,
+.table .row  > div:last-child {
+  justify-self: end;
+  text-align: right;
+}
+
+/* Botonera de acciones */
+.table .row .row-actions {
+  display: flex;
+  gap: .6rem;
+  justify-self: end;
+}
+
+/* ===== Anchos y alineación por tabla ===== */
+
+/* EMPRESAS: CUIL | Nombre | Rubro | Empl. | Estado | Horario | Acciones */
+.table--empresas .thead,
+.table--empresas .row {
+  grid-template-columns: 140px 1.6fr 1.2fr 110px 130px 1.2fr 140px;
+}
+
+/* centrar la columna de Empleados */
+.table--empresas .thead > div:nth-child(4),
+.table--empresas .row  > div:nth-child(4) { text-align: center; }
+
+/* USUARIOS: Email | Nombre | Empresa | Estado | Acciones */
+.table--usuarios .thead,
+.table--usuarios .row {
+  grid-template-columns: 1.6fr 1fr 1.2fr 140px 140px;
+}
+
+/* centrar Estado en usuarios */
+.table--usuarios .thead > div:nth-child(4),
+.table--usuarios .row  > div:nth-child(4) { text-align: center; }
+
+/* SERVICIOS: Nombre | Horario | Propietario | Empresa | Acciones */
+.table--servicios .thead,
+.table--servicios .row {
+  grid-template-columns: 1.4fr 1.2fr 1fr 1.2fr 140px;
+}
+
+/* LOTES: Dueño | Manzana | Lote | Servicio | Acciones */
+.table--lotes .thead,
+.table--lotes .row {
+  grid-template-columns: 1.2fr 120px 120px 1fr 140px;
+  column-gap: 1.2rem;   /* un pelín más de aire */
+}
+
+/* Celda de horario con clamp + botón “Ver más” */
+.horario-cell {
+  display: flex;
+  align-items: start;
+  gap: .5rem;
+  max-width: 360px;     /* un poco más ancho */
+}
+.horario-cell .clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+.link-btn {
+  background: none; border: 0; padding: 0;
+  font: inherit; cursor: pointer; text-decoration: underline; white-space: nowrap;
+}
+
+
+.horario-cell{
+  display: flex;
+  flex-direction: column;     /* texto arriba, botón abajo */
+  align-items: stretch;
+  gap: .25rem;
+  max-width: 360px;
+}
+
+.horario-full{
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.link-btn{
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.link-btn.small{
+  font-size: .85em;           /* menos invasivo */
+  opacity: .85;
+}
+
+.vermenos{
+  align-self: flex-end;       /* “Ocultar” a la derecha de la celda */
+}
+
+
+/* Columna Horario en Empresas: texto + botón en línea, alineados a la izquierda */
+.table--empresas .row > div:nth-child(6),
+.table--empresas .thead > div:nth-child(6) {
+  /* la 6ª columna es "Horario" en tu grid de Empresas */
+  display: flex;
+  align-items: center;
+  gap: .5rem;            /* separa el texto del botón */
+  justify-content: flex-start;
+  max-width: 360px;      /* evita que la columna crezca de más */
+}
+
+/* El texto colapsado en una sola línea (sin cortar palabras raras) */
+.table--empresas .row > div:nth-child(6) .clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+
+/* Botón tipo enlace: siempre pegado al texto, sin flotar a la derecha */
+.table--empresas .row > div:nth-child(6) .link-btn,
+.table--empresas .row > div:nth-child(6) .btn-ver-mas {
+  margin-left: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Mismo layout que en Empresas, aplicado a Servicios del Polo */
+.sp-horario {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  max-width: 360px;
+}
+.sp-horario .clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+/* Reutilizamos .btn-ver-mas ya definida (colores/hover/focus) */
+
+
+/* ===== FIX HORARIO (Empresas + Servicios) ===== */
+
+/* 1) La celda "Horario" se comporta como una fila con botón pegado al texto */
+.horario-cell{
+  display: inline-flex;       /* inline para que no ocupe todo el ancho de la celda */
+  flex-direction: row;        /* texto y botón en línea */
+  align-items: baseline;      /* alinear con el texto */
+  gap: .4rem;
+  max-width: 420px;           /* ancho cómodo */
+  flex-wrap: nowrap;          /* que el botón no salte abajo */
+}
+
+/* texto recortado en 1 línea cuando está colapsado */
+.horario-cell .clamped{
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+
+/* texto expandido normal */
+.horario-full{
+  white-space: normal;
+  line-height: 1.35;
+}
+
+/* botón tipo enlace SIEMPRE al lado del texto (izquierda de la celda) */
+.horario-cell .link-btn{
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin: 0;
+  align-self: baseline;
+}
+
+/* NO empujes "Ocultar" a la derecha */
+.vermenos{ align-self: baseline !important; }
+
+/* 2) En la tabla de EMPRESAS, la 6ª columna ("Horario") alineada a la izquierda */
+.table--empresas .row > div:nth-child(6),
+.table--empresas .thead > div:nth-child(6){
+  justify-self: start !important;
+  text-align: left !important;
+}
+
+/* (por si alguna regla previa dejó .horario-cell en columna, la pisamos) */
+.table--empresas .row > div:nth-child(6) .horario-cell,
+.table--servicios .row > div:nth-child(2) .horario-cell{
+  flex-direction: row !important;
+}
+/* ===== Empresas: redistribución de columnas para dar más ancho a "Horario" ===== */
+.table--empresas .thead,
+.table--empresas .row{
+  /* CUIL | Nombre | Rubro | Empl. | Estado | Horario | Acciones */
+  grid-template-columns: 120px 1.2fr 0.9fr 90px 110px 2fr 150px !important;
+  column-gap: 1.1rem !important;   /* un poquito menos de separación */
+}
+
+/* Centrar Empleados + Estado (se mantienen) */
+.table--empresas .thead > div:nth-child(4),
+.table--empresas .row  > div:nth-child(4),
+.table--empresas .thead > div:nth-child(5),
+.table--empresas .row  > div:nth-child(5){
+  text-align:center;
+}
+
+/* Asegurar que la columna "Horario" siga alineada a la izquierda */
+.table--empresas .thead > div:nth-child(6),
+.table--empresas .row  > div:nth-child(6){
+  justify-self:start !important;
+  text-align:left !important;
+  max-width: none;                 /* que use todo el ancho asignado */
+}
+
+/* En pantallas medianas también priorizamos "Horario" */
+@media (max-width: 1000px){
+  .table--empresas .thead,
+  .table--empresas .row{
+    grid-template-columns: 110px 1.1fr 0.8fr 80px 100px 1.7fr 140px !important;
+    column-gap: .7rem !important;
+  }
+}
+.topbar-tabs{
+  display:flex;
+  align-items:center;
+  gap:.25rem;
+  flex-wrap:wrap;
+}
+.topbar .tab{
+  border:none;
+  background:transparent;
+  padding:.5rem .9rem;
+  border-radius:999px;
+  color:#555;
+  cursor:pointer;
+  transition:.2s ease;
+  white-space:nowrap;
+  font-weight:500;
+  font-size:.9rem;
+}
+.topbar .tab:hover{ background:#f5f5f5; }
+.topbar .tab.active{
+  background:#e9efff;
+  color:#1a284b;
+  font-weight:600;
+}
+
+
+/* ===== USUARIOS: Email | Nombre | Empresa | Rol | Estado | Acciones ===== */
+.table--usuarios .thead,
+.table--usuarios .row {
+  /* distribuye bien el espacio, dejando las acciones alineadas a la derecha */
+  grid-template-columns: 1.6fr 1.2fr 1.2fr 130px 130px 120px;
+  align-items: center;
+  column-gap: 0.8rem;
+}
+
+/* Centrar "Estado" (columna 5) */
+.table--usuarios .thead > div:nth-child(5),
+.table--usuarios .row  > div:nth-child(5) {
+  text-align: center;
+}
+
+/* Alinear "Acciones" completamente a la derecha */
+.table--usuarios .thead > div:last-child,
+.table--usuarios .row  > div:last-child {
+  justify-self: end;
+  text-align: right;
+  width: 120px;
+}
+
+/* Botonera dentro de la celda de acciones */
+.table--usuarios .row .row-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Asegura que los íconos no cambien de tamaño */
+.table--usuarios .row .btn.icon {
+  min-width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* En pantallas más pequeñas, mantener la proporción */
+@media (max-width: 1000px) {
+  .table--usuarios .thead,
+  .table--usuarios .row {
+    grid-template-columns: 1.4fr 1.1fr 1.1fr 100px 100px 100px;
+  }
+}
+
+.modal .readonly { opacity: .6; pointer-events: none; }
+
+
+/* =============================
+   MODO OSCURO UNIFICADO (Chat + Admin)
+   ============================= */
+.admin-layout.dark-mode {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.admin-layout.dark-mode .topbar {
+  background: #2d2d2d;
+  border-bottom: 1px solid #404040;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.admin-layout.dark-mode .tab {
+  color: #e0e0e0;
+}
+.admin-layout.dark-mode .tab.active {
+  background: #404040;
+  color: #fff;
+}
+
+.admin-layout.dark-mode .card {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+  color: #e0e0e0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.admin-layout.dark-mode .nice-form input,
+.admin-layout.dark-mode .nice-form select,
+.admin-layout.dark-mode .nice-form textarea {
+  background: #505050;
+  border: 1px solid #666;
+  color: #f0f0f0;
+}
+
+.admin-layout.dark-mode .nice-form label {
+  color: #ccc;
+}
+
+.admin-layout.dark-mode .alert--success {
+  background: #2f5132;
+  border-color: #3a6d3f;
+  color: #d4edda;
+}
+
+.admin-layout.dark-mode .alert--error {
+  background: #5c2b29;
+  border-color: #7c3b3b;
+  color: #f8d7da;
+}
+
+.admin-layout.dark-mode .table {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+.admin-layout.dark-mode .table .thead {
+  background: #3a3a3a;
+  color: #f0f0f0;
+}
+.admin-layout.dark-mode .table .row:nth-child(odd) {
+  background: #242424;
+}
+.admin-layout.dark-mode .btn.primary {
+  background: #495057;
+  border-color: #495057;
+  color: #fff;
+}
+.admin-layout.dark-mode .btn.primary:hover {
+  background: #606060;
+}
+.admin-layout.dark-mode .btn.ghost {
+  background: #383838;
+  color: #e0e0e0;
+  border-color: #555;
+}
+.admin-layout.dark-mode .overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+.admin-layout.dark-mode .modal {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ============================
+   DARK MODE (match con el chat)
+   ============================ */
+.admin-layout.dark-mode {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+/* Topbar */
+.admin-layout.dark-mode .topbar{
+  background:#2d2d2d;
+  border-bottom:1px solid #404040;
+  box-shadow:0 2px 4px rgba(0,0,0,.35);
+}
+.admin-layout.dark-mode .topbar-title .app-title{ color:#f0f0f0; }
+.admin-layout.dark-mode .topbar-title .app-sub{ color:#a0a0a0; }
+
+/* Tabs */
+.admin-layout.dark-mode .topbar .tab{ color:#dcdcdc; }
+.admin-layout.dark-mode .topbar .tab:hover{ background:#383838; }
+.admin-layout.dark-mode .topbar .tab.active{
+  background:#404040; color:#fff; box-shadow: inset 0 0 0 1px #4c4c4c;
+}
+
+/* Botones del header */
+.admin-layout.dark-mode .topbar-right .ghost{
+  background:#383838; color:#e0e0e0; border:1px solid #4b4b4b;
+}
+.admin-layout.dark-mode .topbar-right .ghost.active{
+  background:#404040; color:#fff; border-color:#5a5a5a;
+}
+.admin-layout.dark-mode .topbar-icon-btn .material-symbols-outlined{ color:#eaeaea; }
+
+/* Cards / KPI */
+.admin-layout.dark-mode .card{
+  background:#2d2d2d;
+  color:#e0e0e0;
+  border:1px solid #404040;
+  box-shadow:0 2px 6px rgba(0,0,0,.35);
+}
+.admin-layout.dark-mode .card h2{ color:#f0f0f0; }
+.admin-layout.dark-mode .kpi .kpi-title{ color:#b8c0c8; }
+.admin-layout.dark-mode .kpi .kpi-number{ color:#ffffff; }
+.admin-layout.dark-mode .kpi .kpi-sub{ color:#a0a0a0; }
+
+/* Quick actions */
+.admin-layout.dark-mode .quick-btn{
+  background:#343434; border:1px solid #505050; color:#e6e6e6;
+}
+.admin-layout.dark-mode .quick-btn:hover{ background:#3c3c3c; }
+
+/* Textos utilitarios */
+.admin-layout.dark-mode .muted{ color:#a0a0a0; }
+.admin-layout.dark-mode a, 
+.admin-layout.dark-mode .link-btn{ color:#e6e6e6; }
+
+/* Formularios */
+.admin-layout.dark-mode .nice-form label{ color:#d0d0d0; }
+.admin-layout.dark-mode .nice-form input,
+.admin-layout.dark-mode .nice-form select,
+.admin-layout.dark-mode .nice-form textarea{
+  background:#505050; border:1px solid #666; color:#f2f2f2;
+}
+.admin-layout.dark-mode .nice-form input::placeholder,
+.admin-layout.dark-mode .nice-form textarea::placeholder{ color:#a0a0a0; }
+.admin-layout.dark-mode .nice-form input:focus,
+.admin-layout.dark-mode .nice-form select:focus,
+.admin-layout.dark-mode .nice-form textarea:focus{
+  border-color:#8a8a8a; box-shadow:0 0 0 2px rgba(138,138,138,.18);
+}
+
+/* Alerts */
+.admin-layout.dark-mode .alert--success{
+  background:#22362a; border-color:#365b45; color:#cfe9db;
+}
+.admin-layout.dark-mode .alert--error{
+  background:#3a2626; border-color:#5a3a3a; color:#f3d1d1;
+}
+
+/* Badges */
+.admin-layout.dark-mode .badge--ok{ background:#253628; color:#b9e3c2; border-color:#375a3e; }
+.admin-layout.dark-mode .badge--off{ background:#3a2626; color:#f0b3b3; border-color:#5a3a3a; }
+
+/* Tablas */
+.admin-layout.dark-mode .card--table .table{
+  background:#2b2b2b; border:1px solid #3f3f3f; box-shadow:0 12px 24px -12px rgba(0,0,0,.45);
+}
+.admin-layout.dark-mode .table .thead{
+  background:#353535; color:#f0f0f0; border-bottom:1px solid #454545;
+}
+.admin-layout.dark-mode .table .row{
+  background:#2d2d2d; border-bottom:1px solid #3f3f3f;
+}
+.admin-layout.dark-mode .table .row:nth-child(odd){ background:#252525; }
+.admin-layout.dark-mode .table .row:hover{ background:#333333; }
+.admin-layout.dark-mode .table .thead > div:last-child,
+.admin-layout.dark-mode .table .row  > div:last-child{ color:#e6e6e6; }
+
+/* Botones */
+.admin-layout.dark-mode .btn.ghost{
+  background:#383838; color:#e0e0e0; border:1px solid #555;
+}
+.admin-layout.dark-mode .btn.icon{ background:#3a3a3a; }
+.admin-layout.dark-mode .btn.icon:hover{ background:#444; }
+.admin-layout.dark-mode .btn.primary{
+  background:#495057; border:1px solid #56606a; color:#fff;
+}
+.admin-layout.dark-mode .btn.primary:hover{ background:#5a636d; }
+.admin-layout.dark-mode .btn.danger{
+  color:#ffd3d3; background:#3a2626; border:1px solid #5a3a3a;
+}
+
+/* Modales */
+.admin-layout.dark-mode .overlay{ background:rgba(0,0,0,.8); }
+.admin-layout.dark-mode .modal{
+  background:#2d2d2d; color:#e0e0e0; border:1px solid #404040;
+  box-shadow:0 22px 46px rgba(0,0,0,.55);
+}
+.admin-layout.dark-mode .modal-header h3{ color:#f2f2f2; }
+
+/* Inputs inválidos en dark (no “gritan”) */
+.admin-layout.dark-mode .ng-invalid.ng-touched,
+.admin-layout.dark-mode .ng-invalid.ng-dirty{
+  border-color:#d66; box-shadow:0 0 0 2px rgba(214,102,102,.15);
+}
+
+/* Scrollbars (como el chat) */
+.admin-layout.dark-mode ::-webkit-scrollbar{ width:10px; height:10px; }
+.admin-layout.dark-mode ::-webkit-scrollbar-track{ background:#404040; border-radius:6px; }
+.admin-layout.dark-mode ::-webkit-scrollbar-thumb{ background:#666; border-radius:6px; }
+.admin-layout.dark-mode ::-webkit-scrollbar-thumb:hover{ background:#777; }
+
+/* Iconos/material */
+.admin-layout.dark-mode .material-symbols-outlined{ color:#e6e6e6; }
+
+/* Encabezados internos */
+.admin-layout.dark-mode .page-header h1{ color:#f0f0f0; }

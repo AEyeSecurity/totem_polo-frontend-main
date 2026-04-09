@@ -1,0 +1,1506 @@
+﻿<!-- admin-empresa.component.html -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:FILL@0..1"
+  rel="stylesheet"
+/>
+
+<div class="admin-layout" [class.dark-mode]="isDarkMode">
+  <!-- NAVBAR SUPERIOR -->
+  <!-- TOP NAV -->
+  <nav class="topbar">
+    <div class="topbar-left">
+      <img
+        class="brand-logo"
+        src="../../assets/images/polologo-blanco.png"
+        alt="Polo 52"
+      />
+      <div class="topbar-title">
+        <div class="app-title">POLO 52</div>
+        <div class="app-sub">
+          {{ empresaData?.nombre || "Parque Industrial" }}
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-tabs">
+      <button
+        class="tab"
+        [class.active]="activeTab === 'dashboard'"
+        (click)="goTo('dashboard')"
+      >
+        Dashboard
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'vehiculos'"
+        (click)="goTo('vehiculos')"
+      >
+        Vehiculos
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'servicios'"
+        (click)="goTo('servicios')"
+      >
+        Servicios
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'contactos'"
+        (click)="goTo('contactos')"
+      >
+        Contactos
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'serviciosPolo'"
+        (click)="goTo('serviciosPolo')"
+      >
+        Servicios del Polo
+      </button>
+    </div>
+
+    <div class="topbar-right">
+      <button
+        type="button"
+        class="ghost topbar-icon-btn"
+        [class.active]="activeTab === 'perfil'"
+        (click)="goTo('perfil')"
+        aria-label="Ver informacion de la empresa"
+      >
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
+      <button
+        class="ghost topbar-icon-btn"
+        (click)="goTo('config')"
+        aria-label="Abrir configuracion"
+      >
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <app-logout-button></app-logout-button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="content">
+    <div
+      class="alert"
+      [class.alert--error]="messageType === 'error'"
+      [class.alert--success]="messageType === 'success'"
+      *ngIf="message"
+    >
+      {{ message }}
+    </div>
+    <div class="alert alert--error" *ngIf="formErrors['general']?.length">
+      <div *ngFor="let err of formErrors['general']">
+        {{ err.message }}
+      </div>
+    </div>
+    <!-- ========== DASHBOARD ============================================================================ -->
+    <!-- DASHBOARD -->
+    <section *ngIf="activeTab === 'dashboard'" class="resume-grid">
+      <!-- Metricas -->
+      <div class="kpi card">
+        <div class="kpi-head">
+          <div class="kpi-title">Vehiculos Activos</div>
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="kpi-number">{{ vehiculosActivos }}</div>
+        <div class="kpi-sub">de {{ vehiculosActivos }} total</div>
+      </div>
+
+      <div class="kpi card">
+        <div class="kpi-head">
+          <div class="kpi-title">Servicios</div>
+          <span class="material-symbols-outlined">stacked_bar_chart</span>
+        </div>
+        <div class="kpi-number">{{ totalServicios }}</div>
+        <div class="kpi-sub">servicios disponibles</div>
+      </div>
+
+      <div class="kpi card">
+        <div class="kpi-head">
+          <div class="kpi-title">Contactos</div>
+          <span class="material-symbols-outlined">group</span>
+        </div>
+        <div class="kpi-number">{{ totalContactos }}</div>
+        <div class="kpi-sub">contacto/s</div>
+      </div>
+
+      <div class="kpi card">
+        <div class="kpi-head">
+          <div class="kpi-title">Estado</div>
+          <span class="material-symbols-outlined">schedule</span>
+        </div>
+        <div
+          class="status"
+          [class.active]="estaActiva"
+          [class.inactive]="!estaActiva"
+        >
+          {{ estaActiva ? "Activo" : "Inactivo" }}
+        </div>
+        <div class="kpi-sub">desde {{ desdeIngreso }}</div>
+      </div>
+
+      <!-- Actividad reciente -->
+      <div class="card activity">
+        <h2>Actividad reciente</h2>
+        <ul class="activity-list" *ngIf="actividadReciente.length; else noAct">
+          <li *ngFor="let a of actividadReciente">
+            <span
+              class="dot"
+              [class.ok]="a.tipo === 'ok'"
+              [class.warn]="a.tipo === 'warn'"
+              [class.info]="a.tipo === 'info'"
+            ></span>
+            <div class="a-texts">
+              <div class="a-title">{{ a.titulo }}</div>
+              <div class="a-when">{{ a.cuando }}</div>
+            </div>
+          </li>
+        </ul>
+        <ng-template #noAct>
+          <div class="muted">Sin actividad registrada todavia.</div>
+        </ng-template>
+      </div>
+
+      <!-- Accesos rapidos -->
+      <div class="card quick">
+        <h2>Accesos Rapidos</h2>
+        <div class="quick-list">
+          <button class="quick-btn" (click)="quickAddVehiculo()">
+            <span class="material-symbols-outlined">add</span> Agregar Vehiculo
+          </button>
+          <button class="quick-btn" (click)="quickAddServicio()">
+            <span class="material-symbols-outlined">add</span> Nuevo Servicio
+          </button>
+          <button class="quick-btn" (click)="quickAddContacto()">
+            <span class="material-symbols-outlined">add</span> Agregar Contacto
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section *ngIf="activeTab === 'perfil'" class="card-grid">
+      <div class="card">
+        <div class="company-info-head">
+          <div>
+            <h2>{{ empresaData?.nombre || "Perfil de empresa" }}</h2>
+            <p class="muted">
+              Revisa o edita los datos principales de tu empresa.
+            </p>
+          </div>
+          <button
+            class="btn outline-primary"
+            type="button"
+            [disabled]="!empresaData"
+            (click)="openEmpresaEditForm()"
+          >
+            <span class="material-symbols-outlined">edit</span>
+            <span>Editar datos</span>
+          </button>
+        </div>
+
+        <ng-container *ngIf="empresaData; else perfilSinDatos">
+          <div class="grid-2 nice-form profile-readout-grid">
+            <div class="field">
+              <label>CUIL</label>
+              <input
+                class="readout"
+                type="text"
+                [value]="empresaData.cuil || '-'"
+                readonly
+              />
+            </div>
+            <div class="field">
+              <label>Rubro</label>
+              <input
+                class="readout"
+                type="text"
+                [value]="empresaData.rubro || '-'"
+                readonly
+              />
+            </div>
+            <div class="field">
+              <label>Fecha de ingreso</label>
+              <input
+                class="readout"
+                type="text"
+                [value]="formatDate(empresaData.fecha_ingreso || '')"
+                readonly
+              />
+            </div>
+            <div class="field">
+              <label>Cantidad de empleados</label>
+              <input
+                class="readout"
+                type="text"
+                [value]="
+                  empresaData.cant_empleados !== null &&
+                  empresaData.cant_empleados !== undefined
+                    ? empresaData.cant_empleados
+                    : '-'
+                "
+                readonly
+              />
+            </div>
+            <div class="field">
+              <label>Horario de trabajo</label>
+              <input
+                class="readout"
+                type="text"
+                [value]="empresaData.horario_trabajo || '-'"
+                readonly
+              />
+            </div>
+            <div class="field">
+              <label>Estado</label>
+              <input
+                class="readout"
+                type="text"
+                [value]="estaActiva ? 'Activa' : 'Inactiva'"
+                readonly
+              />
+            </div>
+            <div class="field col-2">
+              <label>Descripcion</label>
+              <textarea
+                class="readout multiline"
+                readonly
+                [value]="
+                  empresaData.observaciones || 'Sin observaciones registradas.'
+                "
+              ></textarea>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #perfilSinDatos>
+          <div class="muted">
+            Aun no hay informacion disponible de la empresa.
+          </div>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- VEHICULOS ============================================================ -->
+    <section *ngIf="activeTab === 'vehiculos'" class="card-stack">
+      <div class="header-actions">
+        <button class="btn primary" type="button" (click)="openVehiculoForm()">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Nuevo vehiculo</span>
+        </button>
+      </div>
+
+      <!-- Listado -->
+      <div class="card card--table">
+        <h2>Listado</h2>
+        <div class="header-search">
+          <input
+            type="text"
+            placeholder="Buscar por tipo, patente o datos..."
+            [(ngModel)]="vehiculoSearchTerm"
+            (input)="filterVehiculos()"
+          />
+          <button
+            class="btn ghost"
+            type="button"
+            (click)="clearVehiculoSearch()"
+          >
+            Limpiar
+          </button>
+        </div>
+        <div class="table">
+          <div class="thead">
+            <div>Tipo</div>
+            <div>Horarios</div>
+            <div>Frecuencia</div>
+            <div>Datos</div>
+            <div>Acciones</div>
+          </div>
+
+          <div class="row" *ngFor="let v of filteredVehiculos">
+            <div>
+              {{
+                v.id_tipo_vehiculo
+                  ? getTipoVehiculoName(v.id_tipo_vehiculo)
+                  : "-"
+              }}
+            </div>
+
+            <div>{{ v.horarios || "-" }}</div>
+            <div>{{ v.frecuencia || "-" }}</div>
+            <div class="details-cell">
+              <ng-container
+                *ngIf="v.datos && hasKeys(v.datos); else vehiculoSinDatos"
+              >
+                <ng-container
+                  *ngIf="
+                    isVehiculoExpanded(v.id_vehiculo);
+                    else vehiculoResumen
+                  "
+                >
+                  <div
+                    class="det-row"
+                    *ngIf="
+                      v.datos.cantidad !== undefined &&
+                      v.datos.cantidad !== null &&
+                      v.datos.cantidad !== ''
+                    "
+                  >
+                    Cantidad: {{ v.datos.cantidad }}
+                  </div>
+                  <div class="det-row" *ngIf="v.datos.patente">
+                    Patente: {{ v.datos.patente }}
+                  </div>
+                  <div
+                    class="det-row"
+                    *ngIf="
+                      v.datos.carga !== undefined &&
+                      v.datos.carga !== null &&
+                      v.datos.carga !== ''
+                    "
+                  >
+                    Carga: {{ v.datos.carga }}
+                  </div>
+                  <div class="det-row" *ngIf="v.datos.descripcion">
+                    {{ v.datos.descripcion }}
+                  </div>
+                  <button
+                    class="link-btn small vermenos"
+                    type="button"
+                    (click)="toggleVehiculoDatos(v.id_vehiculo)"
+                  >
+                    Ocultar
+                  </button>
+                </ng-container>
+                <ng-template #vehiculoResumen>
+                  <span class="clamped">{{
+                    getVehiculoDatosResumen(v.datos)
+                  }}</span>
+                  <button
+                    class="link-btn"
+                    type="button"
+                    (click)="toggleVehiculoDatos(v.id_vehiculo)"
+                  >
+                    Ver mas
+                  </button>
+                </ng-template>
+              </ng-container>
+              <ng-template #vehiculoSinDatos>-</ng-template>
+            </div>
+
+            <div class="row-actions">
+              <button
+                class="btn icon"
+                title="Editar"
+                (click)="openVehiculoForm(v)"
+              >
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button
+                class="btn icon danger"
+                title="Eliminar"
+                (click)="deleteVehiculo(v.id_vehiculo)"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACTOS ===================================================================================-->
+    <section *ngIf="activeTab === 'contactos'" class="card-stack">
+      <div class="header-actions">
+        <button class="btn primary" type="button" (click)="openContactoForm()">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Nuevo contacto</span>
+        </button>
+      </div>
+      <div class="card card--table">
+        <h2>Listado</h2>
+        <div class="header-search">
+          <input
+            type="text"
+            placeholder="Buscar por nombre, telefono o datos..."
+            [(ngModel)]="contactoSearchTerm"
+            (input)="filterContactos()"
+          />
+          <button
+            class="btn ghost"
+            type="button"
+            (click)="clearContactoSearch()"
+          >
+            Limpiar
+          </button>
+        </div>
+
+        <!-- tabla contactos con layout propio -->
+        <div class="table table--contactos">
+          <div class="thead">
+            <div>Tipo</div>
+            <div>Nombre</div>
+            <div>Telefono</div>
+            <div>Direccion</div>
+            <div>Datos</div>
+            <div>Acciones</div>
+          </div>
+
+          <div class="row" *ngFor="let c of filteredContactos">
+            <div>
+              {{
+                c.id_tipo_contacto
+                  ? getTipoContactoName(c.id_tipo_contacto)
+                  : "-"
+              }}
+            </div>
+
+            <div>{{ c.nombre }}</div>
+            <div>{{ c.telefono || "-" }}</div>
+            <div>{{ c.direccion || "-" }}</div>
+
+            <!-- DATOS: chips en columna; cada chip es 1 linea con ellipsis -->
+            <div>
+              <div class="data-stack">
+                <a
+                  *ngIf="c.datos?.pagina_web"
+                  class="chip-link"
+                  [href]="externalHref(c.datos.pagina_web)"
+                  target="_blank"
+                  rel="noopener"
+                  title="{{ c.datos.pagina_web }}"
+                >
+                  <span class="material-symbols-outlined">language</span>
+                  <span class="text">{{ displayUrl(c.datos.pagina_web) }}</span>
+                </a>
+
+                <a
+                  *ngIf="c.datos?.correo"
+                  class="chip-link"
+                  [href]="'mailto:' + c.datos.correo"
+                  title="{{ c.datos.correo }}"
+                >
+                  <span class="material-symbols-outlined">mail</span>
+                  <span class="text">{{ c.datos.correo }}</span>
+                </a>
+
+                <a
+                  *ngIf="c.datos?.redes_sociales"
+                  class="chip-link"
+                  [href]="externalHref(c.datos.redes_sociales)"
+                  target="_blank"
+                  rel="noopener"
+                  title="{{ c.datos.redes_sociales }}"
+                >
+                  <span class="material-symbols-outlined">link</span>
+                  <span class="text">{{
+                    displayUrl(c.datos.redes_sociales)
+                  }}</span>
+                </a>
+
+                <span
+                  *ngIf="c.datos?.descripcion"
+                  class="chip-plain"
+                  title="{{ c.datos.descripcion }}"
+                >
+                  <span class="material-symbols-outlined">notes</span>
+                  <span class="text">{{ c.datos.descripcion }}</span>
+                </span>
+
+                <span *ngIf="!c.datos || !hasKeys(c.datos)">-</span>
+              </div>
+            </div>
+
+            <!-- Acciones: pegadas a la derecha -->
+            <div class="row-actions">
+              <button
+                class="btn icon"
+                title="Editar"
+                (click)="openContactoForm(c)"
+              >
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button
+                class="btn icon danger"
+                title="Eliminar"
+                (click)="deleteContacto(c.id_contacto)"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICIOS PROPIOS ==============================================================================-->
+    <section *ngIf="activeTab === 'servicios'" class="card-stack">
+      <div class="header-actions">
+        <button class="btn primary" type="button" (click)="openServicioForm()">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Nuevo servicio</span>
+        </button>
+      </div>
+
+      <div class="card card--table">
+        <h2>Listado</h2>
+        <div class="header-search">
+          <input
+            type="text"
+            placeholder="Buscar por tipo o datos..."
+            [(ngModel)]="servicioSearchTerm"
+            (input)="filterServicios()"
+          />
+          <button
+            class="btn ghost"
+            type="button"
+            (click)="clearServicioSearch()"
+          >
+            Limpiar
+          </button>
+        </div>
+        <div class="table">
+          <div class="thead">
+            <div>Tipo</div>
+            <div>Datos</div>
+            <div>Acciones</div>
+          </div>
+
+          <div class="row" *ngFor="let s of filteredServicios">
+            <div>
+              {{
+                s.id_tipo_servicio
+                  ? getTipoServicioName(s.id_tipo_servicio)
+                  : "-"
+              }}
+            </div>
+
+            <div class="details-cell">
+              <ng-container
+                *ngIf="s.datos && hasKeys(s.datos); else servicioSinDatos"
+              >
+                <ng-container
+                  *ngIf="
+                    isServicioExpanded(s.id_servicio);
+                    else servicioResumen
+                  "
+                >
+                  <ng-container [ngSwitch]="s.id_tipo_servicio">
+                    <ng-container *ngSwitchCase="1">
+                      <div
+                        class="det-row"
+                        *ngIf="
+                          s.datos.biofiltro !== undefined &&
+                          s.datos.biofiltro !== null
+                        "
+                      >
+                        Biofiltro: {{ formatBoolean(s.datos.biofiltro) }}
+                      </div>
+                      <div
+                        class="det-row"
+                        *ngIf="s.datos.tratamiento_aguas_grises"
+                      >
+                        Tratamiento: {{ s.datos.tratamiento_aguas_grises }}
+                      </div>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="2">
+                      <div
+                        class="det-row"
+                        *ngIf="
+                          s.datos.abierto !== undefined &&
+                          s.datos.abierto !== null
+                        "
+                      >
+                        Abierto: {{ formatBoolean(s.datos.abierto) }}
+                      </div>
+                      <div class="det-row" *ngIf="s.datos.m2">
+                        Superficie: {{ s.datos.m2 }} m²
+                      </div>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="3">
+                      <div class="det-row" *ngIf="s.datos.tipo">
+                        Tipo: {{ s.datos.tipo }}
+                      </div>
+                      <div class="det-row" *ngIf="s.datos.proveedor">
+                        Proveedor: {{ s.datos.proveedor }}
+                      </div>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="4">
+                      <div class="det-row" *ngIf="s.datos.tipo">
+                        Tipo: {{ s.datos.tipo }}
+                      </div>
+                      <div class="det-row" *ngIf="s.datos.cantidad">
+                        Cantidad: {{ s.datos.cantidad }}
+                      </div>
+                    </ng-container>
+                    <ng-container *ngSwitchDefault>
+                      <div class="det-row" *ngIf="s.datos.descripcion">
+                        {{ s.datos.descripcion }}
+                      </div>
+                    </ng-container>
+                  </ng-container>
+                  <button
+                    class="link-btn small vermenos"
+                    type="button"
+                    (click)="toggleServicioDatos(s.id_servicio)"
+                  >
+                    Ocultar
+                  </button>
+                </ng-container>
+                <ng-template #servicioResumen>
+                  <span class="clamped">{{ getServicioDatosResumen(s) }}</span>
+                  <button
+                    class="link-btn"
+                    type="button"
+                    (click)="toggleServicioDatos(s.id_servicio)"
+                  >
+                    Ver mas
+                  </button>
+                </ng-template>
+              </ng-container>
+              <ng-template #servicioSinDatos>-</ng-template>
+            </div>
+            <div class="row-actions">
+              <button
+                class="btn icon"
+                title="Editar"
+                (click)="openServicioForm(s)"
+              >
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button
+                class="btn icon danger"
+                title="Eliminar"
+                (click)="deleteServicio(s.id_servicio)"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICIOS POLO (solo lectura) ==================================================================-->
+    <section *ngIf="activeTab === 'serviciosPolo'" class="card-stack">
+      <div class="card card--table">
+        <h2>Servicios del Polo asociados</h2>
+        <div class="header-search">
+          <input
+            type="text"
+            placeholder="Buscar por nombre, tipo o lote..."
+            [(ngModel)]="servicioPoloSearchTerm"
+            (input)="filterServiciosPolo()"
+          />
+          <button
+            class="btn ghost"
+            type="button"
+            (click)="clearServicioPoloSearch()"
+          >
+            Limpiar
+          </button>
+        </div>
+        <div class="table table--serviciosPolo">
+          <div class="thead">
+            <div>Nombre</div>
+            <div>Tipo</div>
+            <div>Horario</div>
+            <div>Propietario</div>
+            <div>Lotes</div>
+          </div>
+
+          <div class="row" *ngFor="let sp of filteredServiciosPolo">
+            <div>{{ sp.nombre }}</div>
+            <div>{{ getTipoServicioPoloName(sp.id_tipo_servicio_polo) }}</div>
+            <div>{{ sp.horario || "-" }}</div>
+            <div>{{ sp.propietario || "-" }}</div>
+            <div>
+              <ng-container *ngIf="sp.lotes?.length; else sinLotes">
+                <span *ngFor="let l of sp.lotes">
+                  M{{ l.manzana }}-L{{ l.lote }}&nbsp;
+                </span>
+              </ng-container>
+              <ng-template #sinLotes>-</ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIGURACION  ==============================================================================-->
+    <section *ngIf="activeTab === 'config'" class="card-grid">
+      <!-- Contrasena -->
+      <div class="card setting-card">
+        <div class="setting-header">
+          <span class="material-symbols-outlined setting-icon">vpn_key</span>
+          <div>
+            <h2>Contrasena</h2>
+            <p class="muted">Actualiza tu contrasena de acceso</p>
+          </div>
+        </div>
+        <button
+          class="btn outline-primary"
+          type="button"
+          (click)="openPasswordModal()"
+        >
+          <span class="material-symbols-outlined">edit</span>
+          <span>Cambiar contrasena</span>
+        </button>
+        <app-password-change-modal
+          #passwordModal
+          [showModal]="showPasswordModal"
+          (modalClosed)="onPasswordModalClosed()"
+          (passwordChanged)="onPasswordChanged($event)"
+        >
+        </app-password-change-modal>
+      </div>
+
+      <!-- Tema -->
+      <div class="card setting-card">
+        <div class="setting-header">
+          <span class="material-symbols-outlined setting-icon">dark_mode</span>
+          <div>
+            <h2>Modo oscuro</h2>
+            <p class="muted">Modifica el esquema de colores de la app</p>
+          </div>
+        </div>
+        <button
+          class="btn outline-primary"
+          type="button"
+          (click)="toggleDarkMode()"
+        >
+          <span class="material-symbols-outlined">
+            {{ isDarkMode ? "light_mode" : "dark_mode" }}
+          </span>
+          <span>{{ isDarkMode ? "Modo claro" : "Modo oscuro" }}</span>
+        </button>
+      </div>
+
+      <!-- Sesion -->
+      <div class="card setting-card">
+        <div class="setting-header">
+          <span class="material-symbols-outlined setting-icon danger"
+            >logout</span
+          >
+          <div>
+            <h2>Sesion</h2>
+            <p class="muted">Salir de la cuenta de empresa</p>
+          </div>
+        </div>
+        <app-logout-button></app-logout-button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- =============== OVERLAYS DE FORMULARIO ======================================================== -->
+<!-- ============================================================================================== -->
+
+<!-- Empresa: editar propios -->
+<div class="overlay" *ngIf="showEmpresaEditForm">
+  <div class="modal modal--md">
+    <div class="modal-header">
+      <h3>Editar datos de la empresa</h3>
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="cancelForm('empresa')"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form
+      (ngSubmit)="confirmAndSubmit('empresa', fEmp)"
+      class="nice-form"
+      #fEmp="ngForm"
+      novalidate
+    >
+      <div class="alert alert--error" *ngIf="formErrors['empresa']?.length">
+        <div *ngFor="let err of formErrors['empresa']">
+          <span *ngIf="err.field && err.field !== 'general'">
+            <strong>{{ err.field }}</strong
+            >:
+          </span>
+          {{ err.message }}
+        </div>
+      </div>
+      <div class="modal-body grid-3">
+        <div class="field">
+          <label>Cant. empleados</label>
+          <input
+            type="number"
+            [(ngModel)]="empresaEditForm.cant_empleados"
+            name="cant_empleados"
+          />
+        </div>
+        <div class="field">
+          <label>Horario trabajo</label>
+          <input
+            type="text"
+            [(ngModel)]="empresaEditForm.horario_trabajo"
+            name="horario_trabajo"
+            placeholder="Lun-Vie 8-17"
+          />
+        </div>
+        <div class="field col-3">
+          <label>Observaciones</label>
+          <textarea
+            rows="4"
+            [(ngModel)]="empresaEditForm.observaciones"
+            name="observaciones"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">Guardar cambios</button>
+        <button class="btn ghost" type="button" (click)="cancelForm('empresa')">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Vehiculo: crear/editar -->
+<div class="overlay" *ngIf="showVehiculoForm">
+  <div class="modal modal--lg">
+    <div class="modal-header">
+      <h3>{{ editingVehiculo ? "Editar vehiculo" : "Nuevo vehiculo" }}</h3>
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="cancelForm('vehiculo')"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- 👇 usa tu helper markAllAndSubmit(fVeh) -->
+    <form
+      (ngSubmit)="confirmAndSubmit('vehiculo', fVeh)"
+      #fVeh="ngForm"
+      class="nice-form"
+      novalidate
+    >
+      <div class="alert alert--error" *ngIf="formErrors['vehiculo']?.length">
+        <div *ngFor="let err of formErrors['vehiculo']">
+          <span *ngIf="err.field && err.field !== 'general'">
+            <strong>{{ err.field }}</strong
+            >:
+          </span>
+          {{ err.message }}
+        </div>
+      </div>
+      <div class="modal-body grid-3">
+        <!-- Tipo (req) -->
+        <div class="field col-3">
+          <label>Tipo <span class="req">*</span></label>
+          <select
+            [(ngModel)]="vehiculoForm.id_tipo_vehiculo"
+            name="v_tipo"
+            (ngModelChange)="onVehiculoTipoChange()"
+            required
+            #vTipo="ngModel"
+          >
+            <option [ngValue]="null">—</option>
+            <option
+              *ngFor="let t of tiposVehiculo"
+              [ngValue]="t.id_tipo_vehiculo"
+            >
+              {{ t.tipo }}
+            </option>
+          </select>
+          <div
+            class="error"
+            *ngIf="vTipo.invalid && (vTipo.touched || fVeh.submitted)"
+          >
+            Selecciona un tipo.
+          </div>
+        </div>
+
+        <!-- Horarios (req) -->
+        <div class="field">
+          <label>Horarios <span class="req">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="vehiculoForm.horarios"
+            name="v_horarios"
+            required
+            #vHor="ngModel"
+            placeholder="08-18"
+          />
+          <div
+            class="error"
+            *ngIf="vHor.invalid && (vHor.touched || fVeh.submitted)"
+          >
+            Campo obligatorio.
+          </div>
+        </div>
+
+        <!-- Frecuencia (req) -->
+        <div class="field">
+          <label>Frecuencia <span class="req">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="vehiculoForm.frecuencia"
+            name="v_frecuencia"
+            required
+            #vFreq="ngModel"
+            placeholder="Diaria / Semanal"
+          />
+          <div
+            class="error"
+            *ngIf="vFreq.invalid && (vFreq.touched || fVeh.submitted)"
+          >
+            Campo obligatorio.
+          </div>
+        </div>
+
+        <!-- Reglas por tipo -->
+        <ng-container [ngSwitch]="vehiculoForm.id_tipo_vehiculo">
+          <!-- 1: Corporativo (Cantidad, Patente, Carga) -->
+          <ng-container *ngSwitchCase="1">
+            <div class="field">
+              <label>Cantidad <span class="req">*</span></label>
+              <input
+                type="number"
+                [(ngModel)]="vehiculoForm.datos.cantidad"
+                name="v_cant_corp"
+                min="1"
+                required
+                #vCantCorp="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="
+                  vCantCorp.invalid && (vCantCorp.touched || fVeh.submitted)
+                "
+              >
+                Ingresa una cantidad ≥ 1.
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Patente <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="vehiculoForm.datos.patente"
+                name="v_pat_corp"
+                required
+                #vPatCorp="ngModel"
+                placeholder="ABC123 / AA123AA"
+              />
+              <div
+                class="error"
+                *ngIf="vPatCorp.invalid && (vPatCorp.touched || fVeh.submitted)"
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Carga <span class="req">*</span></label>
+              <select
+                [(ngModel)]="vehiculoForm.datos.carga"
+                name="v_carga_corp"
+                required
+                #vCarCorp="ngModel"
+              >
+                <option [ngValue]="null">—</option>
+                <option value="baja">Baja</option>
+                <option value="mediana">Mediana</option>
+                <option value="alta">Alta</option>
+              </select>
+              <div
+                class="error"
+                *ngIf="vCarCorp.invalid && (vCarCorp.touched || fVeh.submitted)"
+              >
+                Selecciona la carga.
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- 2: Personal (Cantidad req, Patente opcional) -->
+          <ng-container *ngSwitchCase="2">
+            <div class="field">
+              <label>Cantidad <span class="req">*</span></label>
+              <input
+                type="number"
+                [(ngModel)]="vehiculoForm.datos.cantidad"
+                name="v_cant_per"
+                min="1"
+                required
+                #vCantPer="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="vCantPer.invalid && (vCantPer.touched || fVeh.submitted)"
+              >
+                Ingresa una cantidad ≥ 1.
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Patente</label>
+              <input
+                type="text"
+                [(ngModel)]="vehiculoForm.datos.patente"
+                name="v_pat_per"
+                placeholder="ABC123 / AA123AA"
+              />
+            </div>
+          </ng-container>
+
+          <!-- 3: Terceros (Cantidad y Carga req) -->
+          <ng-container *ngSwitchCase="3">
+            <div class="field">
+              <label>Cantidad <span class="req">*</span></label>
+              <input
+                type="number"
+                [(ngModel)]="vehiculoForm.datos.cantidad"
+                name="v_cant_ter"
+                min="1"
+                required
+                #vCantTer="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="vCantTer.invalid && (vCantTer.touched || fVeh.submitted)"
+              >
+                Ingresa una cantidad ≥ 1.
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Carga <span class="req">*</span></label>
+              <select
+                [(ngModel)]="vehiculoForm.datos.carga"
+                name="v_carga_ter"
+                required
+                #vCarTer="ngModel"
+              >
+                <option [ngValue]="null">—</option>
+                <option value="baja">Baja</option>
+                <option value="mediana">Mediana</option>
+                <option value="alta">Alta</option>
+              </select>
+              <div
+                class="error"
+                *ngIf="vCarTer.invalid && (vCarTer.touched || fVeh.submitted)"
+              >
+                Selecciona la carga.
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">
+          {{ editingVehiculo ? "Actualizar" : "Agregar" }}
+        </button>
+        <button
+          class="btn ghost"
+          type="button"
+          (click)="cancelForm('vehiculo')"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Contacto: crear/editar -->
+<div class="overlay" *ngIf="showContactoForm">
+  <div class="modal modal--md">
+    <div class="modal-header">
+      <h3>
+        {{ editingContacto ? "Editar contacto" : "Nuevo contacto" }}
+      </h3>
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="cancelForm('contacto')"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form
+      (ngSubmit)="confirmAndSubmit('contacto', fCont)"
+      class="nice-form"
+      #fCont="ngForm"
+      novalidate
+    >
+      <div class="alert alert--error" *ngIf="formErrors['contacto']?.length">
+        <div *ngFor="let err of formErrors['contacto']">
+          <span *ngIf="err.field && err.field !== 'general'">
+            <strong>{{ err.field }}</strong
+            >:
+          </span>
+          {{ err.message }}
+        </div>
+      </div>
+      <div class="modal-body grid-3">
+        <div class="field">
+          <label>Tipo <span class="req">*</span></label>
+          <select
+            [(ngModel)]="contactoForm.id_tipo_contacto"
+            name="c_tipo"
+            required
+            #cTipo="ngModel"
+            (ngModelChange)="onTipoContactoChange()"
+          >
+            <option [ngValue]="null">—</option>
+            <option
+              *ngFor="let t of tiposContacto"
+              [ngValue]="t.id_tipo_contacto"
+            >
+              {{ t.tipo }}
+            </option>
+          </select>
+          <div
+            class="error"
+            *ngIf="cTipo.invalid && (cTipo.touched || fCont.submitted)"
+          >
+            Selecciona un tipo.
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Nombre <span class="req">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="contactoForm.nombre"
+            name="c_nombre"
+            required
+            #cNom="ngModel"
+          />
+          <div
+            class="error"
+            *ngIf="cNom.invalid && (cNom.touched || fCont.submitted)"
+          >
+            Ingresa un nombre.
+          </div>
+        </div>
+
+        <div class="field">
+          <label>telefono <span class="req">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="contactoForm.telefono"
+            name="c_telefono"
+            required
+            #cTel="ngModel"
+            placeholder="Ej: +54 9 11 1234-5678"
+          />
+          <div
+            class="error"
+            *ngIf="cTel.invalid && (cTel.touched || fCont.submitted)"
+          >
+            Ingresa un telefono.
+          </div>
+        </div>
+
+        <div class="field col-3">
+          <label>Direccion <span class="req">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="contactoForm.direccion"
+            name="c_direccion"
+            required
+            #cDir="ngModel"
+            placeholder="Calle 123, Ciudad"
+          />
+          <div
+            class="error"
+            *ngIf="cDir.invalid && (cDir.touched || fCont.submitted)"
+          >
+            Ingresa una direccion.
+          </div>
+        </div>
+
+        <!-- Comerciales (id=1) -->
+        <div class="field col-3" *ngIf="contactoForm.id_tipo_contacto === 1">
+          <label>Datos comerciales</label>
+          <div class="inline-3">
+            <input
+              type="url"
+              [(ngModel)]="contactoForm.datos.pagina_web"
+              name="c_web"
+              placeholder="https://empresa.com"
+            />
+            <input
+              type="email"
+              [(ngModel)]="contactoForm.datos.correo"
+              name="c_mail"
+              placeholder="mail@empresa.com"
+            />
+            <input
+              type="text"
+              [(ngModel)]="contactoForm.datos.redes_sociales"
+              name="c_rrss"
+              placeholder="@empresa"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">
+          {{ editingContacto ? "Actualizar" : "Agregar" }}
+        </button>
+        <button
+          class="btn ghost"
+          type="button"
+          (click)="cancelForm('contacto')"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Servicio propio: crear/editar -->
+<div class="overlay" *ngIf="showServicioForm">
+  <div class="modal modal--md">
+    <div class="modal-header">
+      <h3>
+        {{ editingServicio ? "Editar servicio" : "Nuevo servicio" }}
+      </h3>
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="cancelForm('servicio')"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form
+      (ngSubmit)="confirmAndSubmit('servicio', fServ)"
+      #fServ="ngForm"
+      class="nice-form"
+      novalidate
+    >
+      <div class="alert alert--error" *ngIf="formErrors['servicio']?.length">
+        <div *ngFor="let err of formErrors['servicio']">
+          <span *ngIf="err.field && err.field !== 'general'">
+            <strong>{{ err.field }}</strong
+            >:
+          </span>
+          {{ err.message }}
+        </div>
+      </div>
+      <div class="modal-body grid-3">
+        <div class="field">
+          <label>Tipo <span class="req">*</span></label>
+          <select
+            [(ngModel)]="servicioForm.id_tipo_servicio"
+            (ngModelChange)="onTipoServicioChange()"
+            name="s_tipo"
+            required
+            #sTipo="ngModel"
+          >
+            <option [ngValue]="null">—</option>
+            <option
+              *ngFor="let t of tiposServicio"
+              [ngValue]="t.id_tipo_servicio"
+            >
+              {{ t.tipo }}
+            </option>
+          </select>
+          <div
+            class="error"
+            *ngIf="sTipo.invalid && (sTipo.touched || fServ.submitted)"
+          >
+            Selecciona un tipo.
+          </div>
+        </div>
+
+        <ng-container [ngSwitch]="servicioForm.id_tipo_servicio">
+          <!-- 1: Agua -->
+          <ng-container *ngSwitchCase="1">
+            <div class="field col-3"><label>Servicio de Agua</label></div>
+            <div class="field col-3">
+              <label>Biofiltro <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="servicioForm.datos.biofiltro"
+                name="s_biofiltro"
+                required
+                #sBio="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="sBio.invalid && (sBio.touched || fServ.submitted)"
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+            <div class="field col-3">
+              <label>Tratamiento aguas grises <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="servicioForm.datos.tratamiento_aguas_grises"
+                name="s_aguas"
+                required
+                #sAguas="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="sAguas.invalid && (sAguas.touched || fServ.submitted)"
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- 2: Espacios Verdes -->
+          <ng-container *ngSwitchCase="2">
+            <div class="field col-3">
+              <label>Servicio de Espacios Verdes</label>
+            </div>
+            <div class="field col-3">
+              <label>Abierto al publico <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="servicioForm.datos.abierto"
+                name="s_abierto"
+                required
+                #sAbierto="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="
+                  sAbierto.invalid && (sAbierto.touched || fServ.submitted)
+                "
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+            <div class="field col-3">
+              <label>Superficie (m²) <span class="req">*</span></label>
+              <input
+                type="number"
+                [(ngModel)]="servicioForm.datos.m2"
+                name="s_m2"
+                min="1"
+                required
+                #sM2="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="sM2.invalid && (sM2.touched || fServ.submitted)"
+              >
+                Ingresa un valor ≥ 1.
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- 3: Internet -->
+          <ng-container *ngSwitchCase="3">
+            <div class="field col-3"><label>Servicio de Internet</label></div>
+            <div class="field col-3">
+              <label>Tipo <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="servicioForm.datos.tipo"
+                name="s_tipo_con"
+                required
+                #sTipoCon="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="
+                  sTipoCon.invalid && (sTipoCon.touched || fServ.submitted)
+                "
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+            <div class="field col-3">
+              <label>Proveedor <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="servicioForm.datos.proveedor"
+                name="s_proveedor"
+                required
+                #sProv="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="sProv.invalid && (sProv.touched || fServ.submitted)"
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- 4: Residuos -->
+          <ng-container *ngSwitchCase="4">
+            <div class="field col-3"><label>Servicio de Residuos</label></div>
+            <div class="field col-3">
+              <label>Tipo residuo <span class="req">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="servicioForm.datos.tipo"
+                name="s_tipo_e"
+                required
+                #sTipoRes="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="
+                  sTipoRes.invalid && (sTipoRes.touched || fServ.submitted)
+                "
+              >
+                Campo obligatorio.
+              </div>
+            </div>
+            <div class="field col-3">
+              <label>Cantidad recolectada <span class="req">*</span></label>
+              <input
+                type="number"
+                [(ngModel)]="servicioForm.datos.cantidad"
+                name="s_cantidad"
+                min="1"
+                required
+                #sCant="ngModel"
+              />
+              <div
+                class="error"
+                *ngIf="sCant.invalid && (sCant.touched || fServ.submitted)"
+              >
+                Ingresa un valor ≥ 1.
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">
+          {{ editingServicio ? "Actualizar" : "Agregar" }}
+        </button>
+        <button
+          class="btn ghost"
+          type="button"
+          (click)="cancelForm('servicio')"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
