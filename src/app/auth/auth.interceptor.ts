@@ -25,13 +25,25 @@ export class AuthInterceptor implements HttpInterceptor {
 
     const isPublic = PUBLIC_ENDPOINTS.some((p) => req.url.includes(p));
     const token = this.auth.getToken();
+    const isNgrokRequest = req.url.includes('.ngrok-free.dev');
 
     console.log('🌐 INTERCEPTOR - URL:', req.url);
     console.log('🔑 INTERCEPTOR - Token:', token ? 'EXISTS' : 'NOT FOUND');
     console.log('🛡️ INTERCEPTOR - Endpoint público:', isPublic ? 'YES' : 'NO');
+    console.log('🚇 INTERCEPTOR - Ngrok request:', isNgrokRequest ? 'YES' : 'NO');
+
+    let nextReq = req;
+
+    if (isNgrokRequest) {
+      nextReq = nextReq.clone({
+        setHeaders: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+    }
 
     if (!isPublic && token) {
-      const clone = req.clone({
+      const clone = nextReq.clone({
         setHeaders: { Authorization: `Bearer ${token}` },
       });
       console.log('✅ INTERCEPTOR - Token añadido a la request');
@@ -43,6 +55,6 @@ export class AuthInterceptor implements HttpInterceptor {
       console.log('🟢 INTERCEPTOR - Público: no adjunto Authorization');
     else console.log('❌ INTERCEPTOR - No token, request sin autorización');
 
-    return next.handle(req);
+    return next.handle(nextReq);
   }
 }
