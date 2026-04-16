@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://totem.aeye.com.ar/api'
+  apiUrl: 'https://goofball-fiddling-obstacle.ngrok-free.dev'
 };
