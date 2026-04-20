@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://ivy-earlobe-division.ngrok-free.dev',
+  apiUrl: 'https://goofball-fiddling-obstacle.ngrok-free.dev',
 };
