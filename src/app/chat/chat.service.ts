@@ -1,5 +1,5 @@
 // chat.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -15,7 +15,7 @@ export interface VoiceChatResponse {
     text: string;
     audio_base64?: string;
     transcript?: string;
-    db_results?: any[];
+    db_results?: unknown[];
     corrected_entity?: string;
   };
   error?: boolean;
@@ -24,9 +24,11 @@ export interface VoiceChatResponse {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
+  private http = inject(HttpClient);
+
   private readonly apiUrl: string;
 
-  constructor(private http: HttpClient) {
+  constructor() {
     const base = environment.apiUrl?.replace(/\/$/, '') || '';
     this.apiUrl = `${base}/api/voice/`;
   }

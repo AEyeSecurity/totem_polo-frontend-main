@@ -1,5 +1,5 @@
-﻿import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+﻿import { Component, OnInit, inject } from '@angular/core';
+
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import { AuthenticationService } from '../auth/auth.service';
@@ -18,7 +18,6 @@ import {
   ContactoCreate,
   EmpresaDetail,
   EmpresaSelfUpdate,
-  UserUpdateCompany,
   TipoVehiculo,
   TipoServicio,
   TipoContacto,
@@ -26,36 +25,47 @@ import {
 } from './admin-empresa.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
+import { FormError, HttpErrorLike } from '../shared/form-error.model';
+import {
+  buildFormErrorsFromHttpError,
+  getFieldErrors as getFieldErrorsUtil,
+  hasFieldError as hasFieldErrorUtil,
+  GENERIC_FIELD_ERROR_TRANSLATIONS,
+} from '../shared/form-errors.util';
+import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
+import {
+  formatActivityMoment as formatActivityMomentUtil,
+  getItemDateSource as getItemDateSourceUtil,
+  getItemTimestamp as getItemTimestampUtil,
+} from '../shared/activity-format.util';
 
-// Interfaces para manejo de errores
-interface FormError {
-  field: string;
-  message: string;
-  type: 'required' | 'invalid' | 'duplicate' | 'server' | 'validation';
-}
-
-interface ErrorResponse {
-  detail?: string;
-  message?: string;
-  errors?: { [key: string]: string[] };
-  status?: number;
-}
+const EMPRESA_DATE_FIELDS = [
+  'updated_at',
+  'created_at',
+  'fecha',
+  'fecha_registro',
+  'fecha_alta',
+  'fecha_actualizacion',
+  'fecha_creacion',
+];
 
 @Component({
   selector: 'app-empresa-me',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
     LogoutButtonComponent,
     NgxJsonViewerModule,
-    PasswordChangeModalComponent,
-  ],
+    PasswordChangeModalComponent
+],
   templateUrl: './admin-empresa.component.html',
   styleUrls: ['./admin-empresa.component.css'],
 })
 export class EmpresaMeComponent implements OnInit {
+  private adminEmpresaService = inject(AdminEmpresaService);
+  private authService = inject(AuthenticationService);
+
   // pestanas
   activeTab:
     | 'dashboard'
@@ -86,8 +96,7 @@ export class EmpresaMeComponent implements OnInit {
   editingContacto: Contacto | null = null;
 
   // PROPIEDADES PARA CONTROL DE CAMBIOS
-  private initialForms: { [key: string]: any } = {};
-  private hasUnsavedChanges: { [key: string]: boolean } = {};
+  private changes = new UnsavedChangesTracker();
 
   // Formularios
   passwordForm = {
@@ -131,7 +140,7 @@ export class EmpresaMeComponent implements OnInit {
   private expandedServicios = new Set<number>();
 
   // Sistema de errores mejorado
-  formErrors: { [key: string]: FormError[] } = {};
+  formErrors: Partial<Record<string, FormError[]>> = {};
   showErrorDetails = false;
 
   // Tipos desde la BD
@@ -141,10 +150,10 @@ export class EmpresaMeComponent implements OnInit {
   tiposServicioPolo: TipoServicioPolo[] = [];
 
   // PROPIEDADES PARA BUSQUEDA
-  vehiculoSearchTerm: string = '';
-  servicioSearchTerm: string = '';
-  contactoSearchTerm: string = '';
-  servicioPoloSearchTerm: string = '';
+  vehiculoSearchTerm = '';
+  servicioSearchTerm = '';
+  contactoSearchTerm = '';
+  servicioPoloSearchTerm = '';
 
   // Arrays filtrados
   filteredVehiculos: Vehiculo[] = [];
@@ -154,12 +163,7 @@ export class EmpresaMeComponent implements OnInit {
 
   // Expanded rows
   expandedRows = new Set<string>();
-
-  constructor(
-    private adminEmpresaService: AdminEmpresaService,
-    private authService: AuthenticationService
-  ) {}
-  public isDarkMode: boolean = false;
+  public isDarkMode = false;
 
   ngOnInit(): void {
     this.loadTipos();
@@ -348,32 +352,13 @@ export class EmpresaMeComponent implements OnInit {
     this.expandedServicios.clear();
 
     this.formErrors = {};
-    this.initialForms = {};
-    this.hasUnsavedChanges = {};
+    this.changes.clearAll();
   }
 
   // ===== Control de cambios =====
-  private saveInitialFormState(formName: string, formData: any): void {
-    this.initialForms[formName] = JSON.parse(JSON.stringify(formData));
-    this.hasUnsavedChanges[formName] = false;
-  }
-
-  private hasFormChanged(formName: string, currentFormData: any): boolean {
-    if (!this.initialForms[formName]) return false;
-    const initial = JSON.stringify(this.initialForms[formName]);
-    const current = JSON.stringify(currentFormData);
-    return initial !== current;
-  }
-
-  private checkUnsavedChanges(formName: string, currentFormData: any): boolean {
-    return this.hasFormChanged(formName, currentFormData);
-  }
-
   private restoreOriginalFormData(formName: string): void {
-    if (!this.initialForms[formName]) return;
-    const originalData = JSON.parse(
-      JSON.stringify(this.initialForms[formName])
-    );
+    const originalData = this.changes.getInitial(formName);
+    if (!originalData) return;
     switch (formName) {
       case 'vehiculo':
         this.vehiculoForm = {
@@ -432,23 +417,23 @@ export class EmpresaMeComponent implements OnInit {
     return this.formatMonthYear(this.empresaData?.fecha_ingreso);
   }
 
-  actividadReciente: Array<{
+  actividadReciente: {
     tipo: 'ok' | 'warn' | 'info';
     titulo: string;
     cuando: string; // HH:mm o "-" si no hay timestamp
-  }> = [];
-  private manualActivities: Array<{
+  }[] = [];
+  private manualActivities: {
     tipo: 'ok' | 'warn' | 'info';
     titulo: string;
     cuando: string;
     timestamp: number;
-  }> = [];
-  private lastBuiltActivities: Array<{
+  }[] = [];
+  private lastBuiltActivities: {
     tipo: 'ok' | 'warn' | 'info';
     titulo: string;
     cuando: string;
     timestamp: number;
-  }> = [];
+  }[] = [];
   private readonly MANUAL_ACTIVITY_TTL_MS = 5 * 60 * 1000;
 
   // ——— Helper para “actividad reciente”
@@ -487,12 +472,12 @@ export class EmpresaMeComponent implements OnInit {
 
   /** reconstruye actividad desde los datos existentes */
   private buildActividadRecienteFromData(): void {
-    const actividades: Array<{
+    const actividades: {
       tipo: 'ok' | 'warn' | 'info';
       titulo: string;
       cuando: string;
       timestamp: number;
-    }> = [];
+    }[] = [];
     const fallbackBase = new Date();
     let fallbackSteps = 0;
     const nextFallbackIso = () => {
@@ -557,7 +542,7 @@ export class EmpresaMeComponent implements OnInit {
     this.actividadReciente = actividades
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, this.MAX_ACTIVIDADES)
-      .map(({ timestamp, ...rest }) => ({
+      .map(({ timestamp: _timestamp, ...rest }) => ({
         ...rest,
         cuando: rest.cuando || '-',
       }));
@@ -566,70 +551,15 @@ export class EmpresaMeComponent implements OnInit {
   }
 
   private getItemDateSource(item: any): string | null {
-    if (!item) return null;
-    const candidates = [
-      item.updated_at,
-      item.created_at,
-      item.fecha,
-      item.fecha_registro,
-      item.fecha_alta,
-      item.fecha_actualizacion,
-      item.fecha_creacion,
-    ];
-    for (const candidate of candidates) {
-      if (
-        candidate !== null &&
-        candidate !== undefined &&
-        String(candidate).trim() !== ''
-      ) {
-        return String(candidate);
-      }
-    }
-    return null;
+    return getItemDateSourceUtil(item, EMPRESA_DATE_FIELDS);
   }
 
   private getItemTimestamp(item: any): number {
-    const raw = this.getItemDateSource(item);
-    if (!raw) return 0;
-    const date = new Date(raw);
-    const value = date.getTime();
-    return Number.isNaN(value) ? 0 : value;
+    return getItemTimestampUtil(item, EMPRESA_DATE_FIELDS);
   }
 
   private formatActivityMoment(raw?: string): string {
-    if (!raw) return '-';
-    try {
-      const date = new Date(raw);
-      if (Number.isNaN(date.getTime())) {
-        return '-';
-      }
-
-      const timeZone = 'America/Argentina/Buenos_Aires';
-      const dateFormatter = new Intl.DateTimeFormat('es-AR', {
-        timeZone,
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      const dateTimeFormatter = new Intl.DateTimeFormat('es-AR', {
-        timeZone,
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const trimmed = String(raw).trim();
-      const isDateOnly =
-        /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ||
-        /^\d{4}-\d{2}-\d{2}T00:00(?::00)?(?:\.000)?(?:Z)?$/.test(trimmed);
-
-      return isDateOnly
-        ? dateFormatter.format(date)
-        : dateTimeFormatter.format(date);
-    } catch {
-      return '-';
-    }
+    return formatActivityMomentUtil(raw);
   }
 
   private findVehiculoById(id: number): Vehiculo | undefined {
@@ -752,20 +682,20 @@ export class EmpresaMeComponent implements OnInit {
   }
 
   private combineActivities(
-    dataActivities: Array<{
+    dataActivities: {
       tipo: 'ok' | 'warn' | 'info';
       titulo: string;
       cuando: string;
       timestamp: number;
-    }>
+    }[]
   ): void {
     this.pruneManualActivities();
-    const final: Array<{
+    const final: {
       tipo: 'ok' | 'warn' | 'info';
       titulo: string;
       cuando: string;
       timestamp: number;
-    }> = [];
+    }[] = [];
 
     const seen = new Map<string, number>();
     const keyFor = (entry: { tipo: 'ok' | 'warn' | 'info'; titulo: string }) =>
@@ -839,7 +769,7 @@ export class EmpresaMeComponent implements OnInit {
       default:
         return;
     }
-    const hasChanges = this.checkUnsavedChanges(formName, currentFormData);
+    const hasChanges = this.changes.hasChanged(formName, currentFormData);
     if (hasChanges) {
       const shouldDiscard = confirm(
         '¿Deseas descartar los cambios?\n\nSe perderan todos los cambios no guardados.'
@@ -872,8 +802,7 @@ export class EmpresaMeComponent implements OnInit {
         break;
     }
     this.clearFormErrors(formName);
-    delete this.initialForms[formName];
-    delete this.hasUnsavedChanges[formName];
+    this.changes.clear(formName);
   }
 
   closeFormDirectly(formName: string): void {
@@ -1025,85 +954,26 @@ export class EmpresaMeComponent implements OnInit {
     this.formErrors[formName] = [];
   }
   getFieldErrors(formName: string, fieldName: string): FormError[] {
-    const errors = this.formErrors[formName] || [];
-    return errors.filter((error) => error.field === fieldName);
+    return getFieldErrorsUtil(this.formErrors, formName, fieldName);
   }
   hasFieldError(formName: string, fieldName: string): boolean {
-    return this.getFieldErrors(formName, fieldName).length > 0;
+    return hasFieldErrorUtil(this.formErrors, formName, fieldName);
   }
 
-  private handleError(error: any, formName: string, operation: string): void {
+  private handleError(
+    error: HttpErrorLike,
+    formName: string,
+    operation: string
+  ): void {
     console.error(`Error en ${operation}:`, error);
     this.clearFormErrors(formName);
-    let errorMessages: FormError[] = [];
 
-    if (error.status === 0) {
-      errorMessages.push({
-        field: 'general',
-        message: 'Error de conexion. Verifique su conexion a internet.',
-        type: 'server',
-      });
-    } else if (error.status === 401) {
-      errorMessages.push({
-        field: 'general',
-        message: 'Sesion expirada. Por favor, inicie sesion nuevamente.',
-        type: 'server',
-      });
-    } else if (error.status === 403) {
-      errorMessages.push({
-        field: 'general',
-        message: 'No tiene permisos para realizar esta accion.',
-        type: 'server',
-      });
-    } else if (error.status === 404) {
-      errorMessages.push({
-        field: 'general',
-        message: 'El recurso solicitado no fue encontrado.',
-        type: 'server',
-      });
-    } else if (error.status === 422) {
-      const errorResponse: ErrorResponse = error.error;
-      if (errorResponse.errors) {
-        Object.keys(errorResponse.errors).forEach((field) => {
-          const fieldErrors = errorResponse.errors![field];
-          fieldErrors.forEach((message) => {
-            errorMessages.push({
-              field: field,
-              message: this.translateFieldError(field, message, formName),
-              type: 'validation',
-            });
-          });
-        });
-      } else if (errorResponse.detail) {
-        errorMessages.push({
-          field: 'general',
-          message: this.translateGenericError(errorResponse.detail, formName),
-          type: 'validation',
-        });
-      }
-    } else if (error.status === 400) {
-      const errorDetail = error.error?.detail || 'Datos invalidos';
-      errorMessages.push({
-        field: 'general',
-        message: this.translateGenericError(errorDetail, formName),
-        type: 'validation',
-      });
-    } else if (error.status === 500) {
-      errorMessages.push({
-        field: 'general',
-        message: 'Error interno del servidor. Intente mas tarde.',
-        type: 'server',
-      });
-    } else {
-      const detail =
-        error.error?.detail || error.message || 'Error desconocido';
-      errorMessages.push({
-        field: 'general',
-        message: this.translateGenericError(detail, formName),
-        type: 'server',
-      });
-    }
-
+    const errorMessages = buildFormErrorsFromHttpError(
+      error,
+      formName,
+      (field, message, form) => this.translateFieldError(field, message, form),
+      (detail, form) => this.translateGenericError(detail, form)
+    );
     this.formErrors[formName] = errorMessages;
 
     const generalError = errorMessages.find((e) => e.field === 'general');
@@ -1122,7 +992,7 @@ export class EmpresaMeComponent implements OnInit {
     message: string,
     formName: string
   ): string {
-    const translations: { [key: string]: { [key: string]: string } } = {
+    const translations: Record<string, Record<string, string>> = {
       vehiculo: {
         id_tipo_vehiculo: 'El tipo de vehiculo es requerido',
         horarios: 'Los horarios son requeridos (formato: HH:MM - HH:MM)',
@@ -1172,21 +1042,11 @@ export class EmpresaMeComponent implements OnInit {
       return formTranslations[field];
     }
 
-    const genericTranslations: { [key: string]: string } = {
-      required: 'Este campo es requerido',
-      invalid: 'El formato de este campo es invalido',
-      min_length: 'Este campo es muy corto',
-      max_length: 'Este campo es muy largo',
-      email: 'El formato del email es invalido',
-      url: 'El formato de la URL es invalido',
-      number: 'Debe ser un numero valido',
-    };
-
-    return genericTranslations[message] || message;
+    return GENERIC_FIELD_ERROR_TRANSLATIONS[message] || message;
   }
 
-  private translateGenericError(detail: string, formName: string): string {
-    const translations: { [key: string]: string } = {
+  private translateGenericError(detail: string, _formName: string): string {
+    const translations: Record<string, string> = {
       'Ya existe un vehiculo con esa patente':
         'Ya existe un vehiculo registrado con esa patente',
       'Ya existe un contacto con ese nombre':
@@ -1292,8 +1152,7 @@ export class EmpresaMeComponent implements OnInit {
       id_servicio_polo: 1,
     };
 
-    this.initialForms = {};
-    this.hasUnsavedChanges = {};
+    this.changes.clearAll();
   }
 
   showMessage(message: string, type: 'success' | 'error'): void {
@@ -1322,7 +1181,7 @@ export class EmpresaMeComponent implements OnInit {
     this.clearFormErrors('empresa');
     this.showEmpresaEditForm = true;
     setTimeout(() => {
-      this.saveInitialFormState('empresa', this.empresaEditForm);
+      this.changes.save('empresa', this.empresaEditForm);
     }, 0);
   }
 
@@ -1373,7 +1232,7 @@ export class EmpresaMeComponent implements OnInit {
     this.onVehiculoTipoChange();
     this.showVehiculoForm = true;
     setTimeout(() => {
-      this.saveInitialFormState('vehiculo', this.vehiculoForm);
+      this.changes.save('vehiculo', this.vehiculoForm);
     }, 0);
   }
 
@@ -1470,7 +1329,7 @@ export class EmpresaMeComponent implements OnInit {
 
     this.showServicioForm = true;
     setTimeout(() => {
-      this.saveInitialFormState('servicio', this.servicioForm);
+      this.changes.save('servicio', this.servicioForm);
     }, 0);
   }
 
@@ -1619,7 +1478,7 @@ export class EmpresaMeComponent implements OnInit {
     this.showContactoForm = true;
     this.onTipoContactoChange();
     setTimeout(() => {
-      this.saveInitialFormState('contacto', this.contactoForm);
+      this.changes.save('contacto', this.contactoForm);
     }, 0);
   }
 
@@ -1767,7 +1626,7 @@ export class EmpresaMeComponent implements OnInit {
         month: '2-digit',
         year: 'numeric',
       });
-    } catch (error) {
+    } catch {
       return 'Fecha invalida';
     }
   }
@@ -1798,7 +1657,7 @@ export class EmpresaMeComponent implements OnInit {
     }
   }
 
-  formatDatos(datos: any, isExpanded: boolean = false): string {
+  formatDatos(datos: any, isExpanded = false): string {
     if (!datos || Object.keys(datos).length === 0) {
       return 'Sin datos adicionales';
     }
@@ -1904,7 +1763,7 @@ export class EmpresaMeComponent implements OnInit {
 
   getTotalErrors(): number {
     return Object.values(this.formErrors).reduce(
-      (total, errors) => total + errors.length,
+      (total, errors) => total + (errors?.length ?? 0),
       0
     );
   }
@@ -1912,74 +1771,9 @@ export class EmpresaMeComponent implements OnInit {
   getErrorsByType(type: FormError['type']): FormError[] {
     const allErrors: FormError[] = [];
     Object.values(this.formErrors).forEach((errors) => {
-      allErrors.push(...errors.filter((error) => error.type === type));
+      allErrors.push(...(errors ?? []).filter((error) => error.type === type));
     });
     return allErrors;
-  }
-
-  private handlePasswordError(errorResponse: any): void {
-    this.clearFormErrors('password');
-    let passwordErrors: FormError[] = [];
-
-    if (
-      errorResponse.wrong_current ||
-      errorResponse.error?.includes('contrasena actual') ||
-      errorResponse.detail?.includes('incorrecta')
-    ) {
-      passwordErrors.push({
-        field: 'currentPassword',
-        message: 'La contrasena actual es incorrecta',
-        type: 'validation',
-      });
-      this.showMessage('La contrasena actual es incorrecta', 'error');
-    } else if (
-      errorResponse.password_reused ||
-      errorResponse.error?.includes('utilizado anteriormente')
-    ) {
-      passwordErrors.push({
-        field: 'newPassword',
-        message:
-          'No puedes usar una contrasena que ya hayas utilizado anteriormente',
-        type: 'validation',
-      });
-      this.showMessage(
-        'No puedes usar una contrasena que ya hayas utilizado anteriormente',
-        'error'
-      );
-    } else if (
-      errorResponse.passwords_mismatch ||
-      errorResponse.error?.includes('no coinciden')
-    ) {
-      passwordErrors.push({
-        field: 'confirmPassword',
-        message: 'Las contrasenas no coinciden',
-        type: 'validation',
-      });
-      this.showMessage('Las contrasenas no coinciden', 'error');
-    } else if (errorResponse.detail) {
-      passwordErrors.push({
-        field: 'general',
-        message: errorResponse.detail,
-        type: 'server',
-      });
-      this.showMessage(errorResponse.detail, 'error');
-    } else if (errorResponse.error) {
-      passwordErrors.push({
-        field: 'general',
-        message: errorResponse.error,
-        type: 'server',
-      });
-      this.showMessage(errorResponse.error, 'error');
-    } else {
-      passwordErrors.push({
-        field: 'general',
-        message: 'Error al cambiar la contrasena. Intentalo nuevamente.',
-        type: 'server',
-      });
-      this.showMessage('Error al cambiar la contrasena', 'error');
-    }
-
-    this.formErrors['password'] = passwordErrors;
   }
 
   onVehiculoTipoChange(): void {

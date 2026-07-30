@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 
@@ -22,20 +22,15 @@ import {
 } from './admin-polo.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
-
-// Interfaces para manejo de errores
-interface FormError {
-  field: string;
-  message: string;
-  type: 'required' | 'invalid' | 'duplicate' | 'server' | 'validation';
-}
-
-interface ErrorResponse {
-  detail?: string;
-  message?: string;
-  errors?: { [key: string]: string[] };
-  status?: number;
-}
+import { FormError, HttpErrorLike } from '../shared/form-error.model';
+import {
+  buildFormErrorsFromHttpError,
+  getFieldErrors as getFieldErrorsUtil,
+  hasFieldError as hasFieldErrorUtil,
+  GENERIC_FIELD_ERROR_TRANSLATIONS,
+} from '../shared/form-errors.util';
+import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
+import { formatActivityMoment as formatActivityMomentUtil } from '../shared/activity-format.util';
 
 type AdminPoloTab =
   | 'dashboard'
@@ -60,17 +55,19 @@ type AdminPoloTab =
   styleUrls: ['./admin-polo.component.css'],
 })
 export class AdminPoloComponent implements OnInit {
+  private adminPoloService = inject(AdminPoloService);
+
   showPasswordModal = false;
 
   activeTab: AdminPoloTab = 'dashboard';
 
   private readonly MAX_ACTIVIDADES = 6;
   private dashboardDataLoaded = false;
-  actividadReciente: Array<{
+  actividadReciente: {
     tipo: 'ok' | 'warn' | 'info';
     titulo: string;
     cuando: string;
-  }> = [];
+  }[] = [];
 
   // PROPIEDADES PARA EL POLO
   poloData: PoloDetail | null = null;
@@ -89,13 +86,12 @@ export class AdminPoloComponent implements OnInit {
   };
 
   // PROPIEDADES PARA CONTROL DE CAMBIOS - MEJORADO
-  private initialForms: { [key: string]: any } = {};
-  private hasUnsavedChanges: { [key: string]: boolean } = {};
+  private changes = new UnsavedChangesTracker();
   private empresaNombrePorCuil: Record<number, string> = {};
   private servicioNombrePorId: Record<number, string> = {};
 
   // Sistema de errores mejorado
-  formErrors: { [key: string]: FormError[] } = {};
+  formErrors: Partial<Record<string, FormError[]>> = {};
 
   // Empresas
   empresas: Empresa[] = [];
@@ -168,7 +164,7 @@ export class AdminPoloComponent implements OnInit {
     id_tipo_servicio_polo: 1,
     cuil: 0,
   };
-  nombreServicioSeleccionado: string = '';
+  nombreServicioSeleccionado = '';
 
   // Lotes
   lotes: Lote[] = [];
@@ -186,10 +182,10 @@ export class AdminPoloComponent implements OnInit {
   messageType: 'success' | 'error' = 'success';
 
   // PROPIEDADES PARA BÚSQUEDA
-  empresaSearchTerm: string = '';
-  usuarioSearchTerm: string = '';
-  servicioSearchTerm: string = '';
-  loteSearchTerm: string = '';
+  empresaSearchTerm = '';
+  usuarioSearchTerm = '';
+  servicioSearchTerm = '';
+  loteSearchTerm = '';
 
   // Arrays filtrados
   filteredEmpresas: Empresa[] = [];
@@ -197,9 +193,7 @@ export class AdminPoloComponent implements OnInit {
   filteredServicios: ServicioPolo[] = [];
   filteredLotes: Lote[] = [];
 
-  constructor(private adminPoloService: AdminPoloService) {}
-
-  public isDarkMode: boolean = false;
+  public isDarkMode = false;
 
   ngOnInit(): void {
     this.loadRoles();
@@ -281,8 +275,7 @@ export class AdminPoloComponent implements OnInit {
     this.formErrors = {};
 
     // Limpiar estados de cambios
-    this.initialForms = {};
-    this.hasUnsavedChanges = {};
+    this.changes.clearAll();
   }
 
   // MÉTODOS PARA CONTROL DE CAMBIOS MEJORADO
@@ -360,45 +353,10 @@ export class AdminPoloComponent implements OnInit {
         ?.tipo_servicio_polo?.trim();
     return direct && direct.length > 0 ? direct : `Servicio #${id}`;
   }
-  // 1. MÉTODO PARA GUARDAR ESTADO INICIAL MEJORADO
-  private saveInitialFormState(formName: string, formData: any): void {
-    // Crear copia profunda inmediatamente
-    this.initialForms[formName] = JSON.parse(JSON.stringify(formData));
-    this.hasUnsavedChanges[formName] = false;
-
-    console.log(
-      `Estado inicial guardado para ${formName}:`,
-      this.initialForms[formName]
-    );
-  }
-
-  private hasFormChanged(formName: string, currentFormData: any): boolean {
-    if (!this.initialForms[formName]) return false;
-
-    const initial = JSON.stringify(this.initialForms[formName]);
-    const current = JSON.stringify(currentFormData);
-
-    return initial !== current;
-  }
-
-  private checkUnsavedChanges(formName: string, currentFormData: any): boolean {
-    return this.hasFormChanged(formName, currentFormData);
-  }
-
   // MÉTODO PARA RESTAURAR DATOS ORIGINALES
   private restoreOriginalFormData(formName: string): void {
-    console.log(`Restaurando datos para ${formName}`);
-
-    if (!this.initialForms[formName]) {
-      console.error('No hay datos iniciales guardados para', formName);
-      return;
-    }
-
-    // Crear copia profunda de los datos originales
-    const originalData = JSON.parse(
-      JSON.stringify(this.initialForms[formName])
-    );
-    console.log('Datos originales a restaurar:', originalData);
+    const originalData = this.changes.getInitial(formName);
+    if (!originalData) return;
 
     switch (formName) {
       case 'polo':
@@ -407,7 +365,6 @@ export class AdminPoloComponent implements OnInit {
           observaciones: originalData.observaciones,
           horario_trabajo: originalData.horario_trabajo,
         };
-        console.log('Polo restaurado:', this.poloEditForm);
         break;
 
       case 'empresa':
@@ -420,7 +377,6 @@ export class AdminPoloComponent implements OnInit {
           horario_trabajo: originalData.horario_trabajo,
           estado: originalData.estado,
         };
-        console.log('Empresa restaurada:', this.empresaForm);
         break;
 
       case 'usuario':
@@ -432,7 +388,6 @@ export class AdminPoloComponent implements OnInit {
           cuil: originalData.cuil,
           id_rol: originalData.id_rol,
         };
-        console.log('Usuario restaurado:', this.usuarioForm);
         break;
 
       case 'servicioPolo':
@@ -444,7 +399,6 @@ export class AdminPoloComponent implements OnInit {
           id_tipo_servicio_polo: originalData.id_tipo_servicio_polo,
           cuil: originalData.cuil,
         };
-        console.log('Servicio Polo restaurado:', this.servicioPoloForm);
         break;
 
       case 'lote':
@@ -454,7 +408,6 @@ export class AdminPoloComponent implements OnInit {
           manzana: originalData.manzana,
           id_servicio_polo: originalData.id_servicio_polo,
         };
-        console.log('Lote restaurado:', this.loteForm);
         break;
 
       case 'password':
@@ -462,7 +415,6 @@ export class AdminPoloComponent implements OnInit {
           password: originalData.password,
           confirmPassword: originalData.confirmPassword,
         };
-        console.log('Password restaurado:', this.passwordForm);
         break;
     }
   }
@@ -495,26 +447,13 @@ export class AdminPoloComponent implements OnInit {
         return;
     }
 
-    console.log(`Cancelando formulario ${formName}`);
-    console.log('Datos actuales:', currentFormData);
-    console.log('Datos iniciales guardados:', this.initialForms[formName]);
-
-    // Verificar si hay cambios sin guardar
-    const hasChanges = this.checkUnsavedChanges(formName, currentFormData);
-    console.log('¿Hay cambios?', hasChanges);
-
     if (this.isModalBusy(formName as any)) {
       alert('Hay una operación en curso. Por favor esperá a que finalice.');
       return;
     }
-    // dentro de cancelForm(formName)
-    if (hasChanges) {
-      const shouldDiscard = confirm(/* ... */);
-      if (!shouldDiscard) return;
 
-      this.restoreOriginalFormData(formName);
-      this.showMessage('Cambios descartados.', 'success'); // 👈 NUEVO (usamos success como “info”)
-    }
+    // Verificar si hay cambios sin guardar
+    const hasChanges = this.changes.hasChanged(formName, currentFormData);
 
     if (hasChanges) {
       const shouldDiscard = confirm(
@@ -523,14 +462,11 @@ export class AdminPoloComponent implements OnInit {
           'Presiona "Aceptar" para descartar o "Cancelar" para continuar editando.'
       );
 
-      console.log('Usuario eligió descartar:', shouldDiscard);
-
       if (!shouldDiscard) {
         return; // Usuario decide continuar editando
       }
 
       // Restaurar datos originales ANTES de cerrar
-      console.log('Restaurando datos originales...');
       this.restoreOriginalFormData(formName);
     }
 
@@ -567,8 +503,7 @@ export class AdminPoloComponent implements OnInit {
     this.clearFormErrors(formName);
 
     // Limpiar estado de cambios para este formulario
-    delete this.initialForms[formName];
-    delete this.hasUnsavedChanges[formName];
+    this.changes.clear(formName);
 
     // Limpiar estados específicos
     this.selectedEmpresa = null;
@@ -676,91 +611,29 @@ export class AdminPoloComponent implements OnInit {
 
   // Método para obtener errores de un campo específico
   getFieldErrors(formName: string, fieldName: string): FormError[] {
-    const errors = this.formErrors[formName] || [];
-    return errors.filter((error) => error.field === fieldName);
+    return getFieldErrorsUtil(this.formErrors, formName, fieldName);
   }
 
   // Método para verificar si un campo tiene errores
   hasFieldError(formName: string, fieldName: string): boolean {
-    return this.getFieldErrors(formName, fieldName).length > 0;
+    return hasFieldErrorUtil(this.formErrors, formName, fieldName);
   }
 
   // Procesador de errores HTTP mejorado
-  private handleError(error: any, formName: string, operation: string): void {
+  private handleError(
+    error: HttpErrorLike,
+    formName: string,
+    operation: string
+  ): void {
     console.error(`Error en ${operation}:`, error);
-
     this.clearFormErrors(formName);
-    let errorMessages: FormError[] = [];
 
-    if (error.status === 0) {
-      errorMessages.push({
-        field: 'general',
-        message: 'Error de conexión. Verifique su conexión a internet.',
-        type: 'server',
-      });
-    } else if (error.status === 401) {
-      errorMessages.push({
-        field: 'general',
-        message: 'Sesión expirada. Por favor, inicie sesión nuevamente.',
-        type: 'server',
-      });
-    } else if (error.status === 403) {
-      errorMessages.push({
-        field: 'general',
-        message: 'No tiene permisos para realizar esta acción.',
-        type: 'server',
-      });
-    } else if (error.status === 404) {
-      errorMessages.push({
-        field: 'general',
-        message: 'El recurso solicitado no fue encontrado.',
-        type: 'server',
-      });
-    } else if (error.status === 422) {
-      // Errores de validación específicos del backend
-      const errorResponse: ErrorResponse = error.error;
-
-      if (errorResponse.errors) {
-        Object.keys(errorResponse.errors).forEach((field) => {
-          const fieldErrors = errorResponse.errors![field];
-          fieldErrors.forEach((message) => {
-            errorMessages.push({
-              field: field,
-              message: this.translateFieldError(field, message, formName),
-              type: 'validation',
-            });
-          });
-        });
-      } else if (errorResponse.detail) {
-        errorMessages.push({
-          field: 'general',
-          message: this.translateGenericError(errorResponse.detail, formName),
-          type: 'validation',
-        });
-      }
-    } else if (error.status === 400) {
-      const errorDetail = error.error?.detail || 'Datos inválidos';
-      errorMessages.push({
-        field: 'general',
-        message: this.translateGenericError(errorDetail, formName),
-        type: 'validation',
-      });
-    } else if (error.status === 500) {
-      errorMessages.push({
-        field: 'general',
-        message: 'Error interno del servidor. Intente más tarde.',
-        type: 'server',
-      });
-    } else {
-      const detail =
-        error.error?.detail || error.message || 'Error desconocido';
-      errorMessages.push({
-        field: 'general',
-        message: this.translateGenericError(detail, formName),
-        type: 'server',
-      });
-    }
-
+    const errorMessages = buildFormErrorsFromHttpError(
+      error,
+      formName,
+      (field, message, form) => this.translateFieldError(field, message, form),
+      (detail, form) => this.translateGenericError(detail, form)
+    );
     this.formErrors[formName] = errorMessages;
 
     // Mostrar mensaje general
@@ -781,7 +654,7 @@ export class AdminPoloComponent implements OnInit {
     message: string,
     formName: string
   ): string {
-    const translations: { [key: string]: { [key: string]: string } } = {
+    const translations: Record<string, Record<string, string>> = {
       polo: {
         cant_empleados: 'La cantidad de empleados debe ser mayor a 0',
         horario_trabajo: 'El horario de trabajo es requerido',
@@ -827,22 +700,12 @@ export class AdminPoloComponent implements OnInit {
       return formTranslations[field];
     }
 
-    const genericTranslations: { [key: string]: string } = {
-      required: 'Este campo es requerido',
-      invalid: 'El formato de este campo es inválido',
-      min_length: 'Este campo es muy corto',
-      max_length: 'Este campo es muy largo',
-      email: 'El formato del email es inválido',
-      url: 'El formato de la URL es inválido',
-      number: 'Debe ser un número válido',
-    };
-
-    return genericTranslations[message] || message;
+    return GENERIC_FIELD_ERROR_TRANSLATIONS[message] || message;
   }
 
   // Traductor de errores genéricos
-  private translateGenericError(detail: string, formName: string): string {
-    const translations: { [key: string]: string } = {
+  private translateGenericError(detail: string, _formName: string): string {
+    const translations: Record<string, string> = {
       'Ya existe una empresa con ese CUIL':
         'Ya existe una empresa registrada con ese CUIL',
       'Ya existe un usuario con ese email':
@@ -965,12 +828,12 @@ export class AdminPoloComponent implements OnInit {
   }
 
   private buildDashboardActivity(): void {
-    const actividades: Array<{
+    const actividades: {
       tipo: 'ok' | 'warn' | 'info';
       titulo: string;
       cuando: string;
       timestamp: number;
-    }> = [];
+    }[] = [];
 
     const pushActividad = (
       tipo: 'ok' | 'warn' | 'info',
@@ -1038,7 +901,7 @@ export class AdminPoloComponent implements OnInit {
     this.actividadReciente = actividades
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, this.MAX_ACTIVIDADES)
-      .map(({ timestamp, ...rest }) => ({
+      .map(({ timestamp: _timestamp, ...rest }) => ({
         ...rest,
         cuando: rest.cuando || '-',
       }));
@@ -1070,39 +933,7 @@ export class AdminPoloComponent implements OnInit {
   }
 
   private formatActivityMoment(raw?: string): string {
-    if (!raw) return '-';
-    try {
-      const date = new Date(raw);
-      if (Number.isNaN(date.getTime())) {
-        return '-';
-      }
-
-      const timeZone = 'America/Argentina/Buenos_Aires';
-      const dateFormatter = new Intl.DateTimeFormat('es-AR', {
-        timeZone,
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      const dateTimeFormatter = new Intl.DateTimeFormat('es-AR', {
-        timeZone,
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const trimmed = String(raw).trim();
-      const isDateOnly =
-        /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ||
-        /^\d{4}-\d{2}-\d{2}T00:00(?::00)?(?:\.000)?(?:Z)?$/.test(trimmed);
-
-      return isDateOnly
-        ? dateFormatter.format(date)
-        : dateTimeFormatter.format(date);
-    } catch {
-      return '-';
-    }
+    return formatActivityMomentUtil(raw);
   }
 
   formatDate(dateString?: string): string {
@@ -1258,8 +1089,7 @@ export class AdminPoloComponent implements OnInit {
     };
 
     // Limpiar estados de cambios
-    this.initialForms = {};
-    this.hasUnsavedChanges = {};
+    this.changes.clearAll();
   }
 
   showMessage(message: string, type: 'success' | 'error'): void {
@@ -1283,7 +1113,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar el estado inicial DESPUÉS de mostrar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('polo', this.poloEditForm);
+      this.changes.save('polo', this.poloEditForm);
     }, 0);
   }
   activarEmpresa(cuil: number): void {
@@ -1361,7 +1191,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar estado después de configurar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('empresa', this.empresaForm);
+      this.changes.save('empresa', this.empresaForm);
     }, 0);
   }
 
@@ -1456,7 +1286,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar estado después de configurar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('usuario', this.usuarioForm);
+      this.changes.save('usuario', this.usuarioForm);
     }, 0);
   }
 
@@ -1563,7 +1393,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar estado después de configurar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('servicioPolo', this.servicioPoloForm);
+      this.changes.save('servicioPolo', this.servicioPoloForm);
     }, 0);
   }
 
@@ -1627,8 +1457,6 @@ export class AdminPoloComponent implements OnInit {
   }
 
   onTipoServicioChange(): void {
-    const tipo = this.servicioPoloForm.id_tipo_servicio_polo;
-
     if (!this.servicioPoloForm.datos) {
       this.servicioPoloForm.datos = {};
     }
@@ -1695,7 +1523,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar estado después de configurar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('lote', this.loteForm);
+      this.changes.save('lote', this.loteForm);
     }, 0);
   }
 
@@ -1801,7 +1629,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar estado después de configurar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('usuario', this.usuarioForm);
+      this.changes.save('usuario', this.usuarioForm);
     }, 0);
   }
 
@@ -1825,7 +1653,7 @@ export class AdminPoloComponent implements OnInit {
 
     // IMPORTANTE: Guardar estado después de configurar el formulario
     setTimeout(() => {
-      this.saveInitialFormState('servicioPolo', this.servicioPoloForm);
+      this.changes.save('servicioPolo', this.servicioPoloForm);
     }, 0);
   }
 

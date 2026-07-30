@@ -1,5 +1,5 @@
 // src/app/auth.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
@@ -37,12 +37,13 @@ interface TokenVerificationResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
   private loginUrl = `${environment.apiUrl}/login`;
   private registerUrl = `${environment.apiUrl}/register`;
   private logoutUrl = `${environment.apiUrl}/logout`;
   private sessionKey = 'sessionToken';
-
-  constructor(private http: HttpClient, private router: Router) {}
 
   // -------------------- LOGIN --------------------
   login(
@@ -76,11 +77,6 @@ export class AuthenticationService {
           volatile.removeItem(this.sessionKey);
           volatile.removeItem('rol');
           volatile.removeItem('remember');
-
-          console.log(
-            '✅ TOKEN GUARDADO en',
-            keepLoggedIn ? 'localStorage' : 'sessionStorage'
-          );
         }),
         map(() => true),
         catchError((err) => {
@@ -137,8 +133,6 @@ export class AuthenticationService {
     sessionStorage.removeItem('remember');
     localStorage.removeItem('access_token');
     localStorage.removeItem('tipo_rol');
-
-    console.log('🧹 Sesión completamente limpiada');
   }
 
   // -------------------- LECTURAS --------------------
@@ -147,20 +141,13 @@ export class AuthenticationService {
     const localToken = localStorage.getItem(this.sessionKey);
     const sessionToken = sessionStorage.getItem(this.sessionKey);
     if (localToken || sessionToken) {
-      const t = localToken || sessionToken!;
-      console.log('🔍 Token (tradicional):', t.substring(0, 20) + '...');
-      return t;
+      return localToken || sessionToken!;
     }
     // 2) Google OAuth (si aplica)
     const googleToken = localStorage.getItem('access_token');
     if (googleToken) {
-      console.log(
-        '🔍 Token (Google OAuth):',
-        googleToken.substring(0, 20) + '...'
-      );
       return googleToken;
     }
-    console.log('❌ No se encontró ningún token');
     return null;
   }
 
@@ -169,24 +156,19 @@ export class AuthenticationService {
     const localRole = localStorage.getItem('rol');
     const sessionRole = sessionStorage.getItem('rol');
     if (localRole || sessionRole) {
-      const r = localRole || sessionRole!;
-      console.log('👤 Rol (tradicional):', r);
-      return r;
+      return localRole || sessionRole!;
     }
     // 2) Rol Google OAuth
     const googleRole = localStorage.getItem('tipo_rol');
     if (googleRole) {
-      console.log('👤 Rol (Google OAuth):', googleRole);
       return googleRole;
     }
-    console.log('❌ No se encontró ningún rol');
     return null;
   }
 
   isLoggedIn(): boolean {
     const token = this.getToken();
     if (!token) {
-      console.log('🔍 isLoggedIn: No hay token');
       return false;
     }
 
@@ -194,21 +176,17 @@ export class AuthenticationService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isExpired = Date.now() >= payload.exp * 1000;
       if (isExpired) {
-        console.log('⏰ isLoggedIn: Token expirado');
-        // 🔸 Antes: this.logoutLocal();  // <- esto te limpia todo y navega
-        // 🔹 Ahora: limpiamos solo el token tradicional, sin tocar Google ni navegar
+        // Limpiamos solo el token tradicional, sin tocar Google ni navegar
         localStorage.removeItem(this.sessionKey);
         sessionStorage.removeItem(this.sessionKey);
         localStorage.removeItem('rol');
         sessionStorage.removeItem('rol');
         return false;
       }
-      console.log('✅ isLoggedIn: Usuario autenticado');
       return true;
     } catch (error) {
-      console.error('❌ isLoggedIn: Error al verificar token:', error);
-      // 🔸 Antes: this.logoutLocal();
-      // 🔹 Ahora: limpieza mínima sin navegar
+      console.error('Error al verificar el token:', error);
+      // Limpieza mínima sin navegar
       localStorage.removeItem(this.sessionKey);
       sessionStorage.removeItem(this.sessionKey);
       localStorage.removeItem('rol');
@@ -234,8 +212,6 @@ export class AuthenticationService {
   // 🆕 NUEVO MÉTODO - Verificar token de reset sin hacer cambios
   // 2. Corregir el método verifyResetToken para usar el cuerpo en lugar de params
   verifyResetToken(token: string): Observable<TokenVerificationResponse> {
-    console.log('🔍 Verificando token:', token.substring(0, 20) + '...');
-
     return this.http
       .post<TokenVerificationResponse>(
         `${
@@ -244,11 +220,8 @@ export class AuthenticationService {
         {} // 👈 body vacío porque el back no lo espera en JSON
       )
       .pipe(
-        tap((response) => {
-          console.log('✅ Verificación de token:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error verificando token:', err);
+          console.error('Error verificando token de reset:', err);
 
           const errorResponse: TokenVerificationResponse = {
             valid: false,
@@ -284,11 +257,8 @@ export class AuthenticationService {
         { headers }
       )
       .pipe(
-        tap((response) => {
-          console.log('🧹 Cache de tokens limpiado:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error limpiando cache:', err);
+          console.error('Error limpiando cache de tokens:', err);
           return throwError(() => err);
         })
       );
@@ -305,11 +275,8 @@ export class AuthenticationService {
     return this.http
       .get(`${environment.apiUrl}/password-reset/cache-status`, { headers })
       .pipe(
-        tap((response) => {
-          console.log('📊 Estado del cache:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error obteniendo estado del cache:', err);
+          console.error('Error obteniendo estado del cache:', err);
           return throwError(() => err);
         })
       );
@@ -322,22 +289,14 @@ export class AuthenticationService {
   ): Observable<PasswordResetResponse> {
     const body = { token, new_password: newPassword };
 
-    console.log('🔄 Enviando reset password:', {
-      token: token.substring(0, 20) + '...',
-      newPassword: '***',
-    });
-
     return this.http
       .post<PasswordResetResponse>(
         `${environment.apiUrl}/password-reset/confirm`,
         body
       )
       .pipe(
-        tap((response) => {
-          console.log('✅ Reset password exitoso:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error en reset password:', err);
+          console.error('Error en reset password:', err);
           // Re-lanzar el error para que el componente pueda manejarlo
           return throwError(() => err);
         })
@@ -368,41 +327,11 @@ export class AuthenticationService {
 
   setToken(token: string): void {
     localStorage.setItem('access_token', token);
-    console.log(
-      '💾 Token de Google OAuth guardado:',
-      token.substring(0, 20) + '...'
-    );
   }
 
-  // ✅ MÉTODO MEJORADO - Guardar rol para Google OAuth
+  // Guardar rol para Google OAuth
   setUserRole(role: string): void {
     localStorage.setItem('tipo_rol', role);
-    console.log('👤 Rol de Google OAuth guardado:', role);
-  }
-
-  debugAuthState(): void {
-    console.log('🔍 === DEBUG AUTH STATE ===');
-    console.log(
-      'Google OAuth Token:',
-      localStorage.getItem('access_token') ? 'EXISTS' : 'NOT_FOUND'
-    );
-    console.log('Google OAuth Role:', localStorage.getItem('tipo_rol'));
-    console.log(
-      'Traditional Token (localStorage):',
-      localStorage.getItem(this.sessionKey) ? 'EXISTS' : 'NOT_FOUND'
-    );
-    console.log(
-      'Traditional Token (sessionStorage):',
-      sessionStorage.getItem(this.sessionKey) ? 'EXISTS' : 'NOT_FOUND'
-    );
-    console.log(
-      'Traditional Role:',
-      localStorage.getItem('rol') || sessionStorage.getItem('rol')
-    );
-    console.log('Current getToken():', this.getToken() ? 'FOUND' : 'NOT_FOUND');
-    console.log('Current getUserRole():', this.getUserRole());
-    console.log('Current isLoggedIn():', this.isLoggedIn());
-    console.log('=========================');
   }
 
   /**
@@ -418,11 +347,8 @@ export class AuthenticationService {
     return this.http
       .post(`${environment.apiUrl}/password-reset/validate`, data)
       .pipe(
-        tap((response) => {
-          console.log('🔍 Validación de contraseña:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error validando contraseña:', err);
+          console.error('Error validando contraseña:', err);
           return throwError(() => err);
         })
       );
@@ -446,20 +372,11 @@ export class AuthenticationService {
       'Content-Type': 'application/json',
     });
 
-    console.log('🔐 Enviando cambio de contraseña directo:', {
-      current_password: '***',
-      new_password: '***',
-      confirm_password: '***',
-    });
-
     return this.http
       .post(`${environment.apiUrl}/change-password-direct`, data, { headers })
       .pipe(
-        tap((response) => {
-          console.log('✅ Cambio de contraseña directo exitoso:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error en cambio de contraseña directo:', err);
+          console.error('Error en cambio de contraseña directo:', err);
           return throwError(() => err);
         })
       );
@@ -479,32 +396,12 @@ export class AuthenticationService {
   }): Observable<any> {
     const isLoggedUser = !!data.current_password;
 
-    console.log(
-      `🔒 Enviando reset password ${
-        isLoggedUser ? '(usuario logueado)' : '(usuario público)'
-      }:`,
-      {
-        token: data.token.substring(0, 20) + '...',
-        current_password: data.current_password ? '***' : 'N/A',
-        new_password: '***',
-        confirm_password: '***',
-      }
-    );
-
     return this.http
       .post(`${environment.apiUrl}/password-reset/confirm-secure`, data)
       .pipe(
-        tap((response) => {
-          console.log(
-            `✅ Reset password ${
-              isLoggedUser ? 'logueado' : 'público'
-            } exitoso:`,
-            response
-          );
-        }),
         catchError((err) => {
           console.error(
-            `❌ Error en reset password ${
+            `Error en reset password ${
               isLoggedUser ? 'logueado' : 'público'
             }:`,
             err
@@ -521,11 +418,8 @@ export class AuthenticationService {
     return this.http
       .post(`${environment.apiUrl}/forgot-password`, { email })
       .pipe(
-        tap((response) => {
-          console.log('📧 Solicitud de reset enviada:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error enviando solicitud de reset:', err);
+          console.error('Error enviando solicitud de reset:', err);
           return throwError(() => err);
         })
       );
@@ -542,20 +436,11 @@ export class AuthenticationService {
     new_password: string;
     confirm_password: string;
   }): Observable<any> {
-    console.log('🔓 Enviando reset password (usuario NO logueado):', {
-      token: data.token.substring(0, 20) + '...',
-      new_password: '***',
-      confirm_password: '***',
-    });
-
     return this.http
       .post(`${environment.apiUrl}/forgot-password/confirm`, data)
       .pipe(
-        tap((response) => {
-          console.log('✅ Reset password (NO logueado) exitoso:', response);
-        }),
         catchError((err) => {
-          console.error('❌ Error en reset password (NO logueado):', err);
+          console.error('Error en reset password (usuario no logueado):', err);
           return throwError(() => err);
         })
       );
@@ -576,29 +461,13 @@ export class AuthenticationService {
       'Content-Type': 'application/json',
     });
 
-    console.log('🔒 Enviando reset password (usuario logueado con token):', {
-      token: data.token.substring(0, 20) + '...',
-      current_password: '***',
-      new_password: '***',
-      confirm_password: '***',
-    });
-
     return this.http
       .post(`${environment.apiUrl}/password-reset/confirm-secure`, data, {
         headers,
       })
       .pipe(
-        tap((response) => {
-          console.log(
-            '✅ Reset password (logueado con token) exitoso:',
-            response
-          );
-        }),
         catchError((err) => {
-          console.error(
-            '❌ Error en reset password (logueado con token):',
-            err
-          );
+          console.error('Error en reset password (logueado con token):', err);
           return throwError(() => err);
         })
       );

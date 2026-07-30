@@ -21,19 +21,17 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-  {
-    "glob": "**/*",
-    "input": "public"
-  },
-  "src/assets"
-],
-
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets"
+            ],
             "styles": [
-               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
-               "src/styles.css"
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "src/styles.css"
             ],
             "scripts": []
-            
           },
           "configurations": {
             "production": {
@@ -83,23 +81,34 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
-                  {
-                    "glob": "**/*",
-                    "input": "public"
-                  },
-                  "src/assets"
-                ],
-
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets"
+            ],
             "styles": [
               "src/styles.css"
             ],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }
     }
   },
   "cli": {
-    "analytics": "83ab0963-19cf-4c2f-83a8-fd2486cb3ebb"
+    "analytics": "83ab0963-19cf-4c2f-83a8-fd2486cb3ebb",
+    "schematicCollections": [
+      "angular-eslint"
+    ]
   }
 }

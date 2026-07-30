@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -96,10 +96,6 @@ export interface EmpresaDetail {
   servicios_polo: ServicioPolo[];
 }
 
-export interface UserUpdateCompany {
-  password: string;
-}
-
 // Interfaces para los tipos
 export interface TipoVehiculo {
   id_tipo_vehiculo: number;
@@ -125,9 +121,9 @@ export interface TipoServicioPolo {
   providedIn: 'root',
 })
 export class AdminEmpresaService {
-  private apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = environment.apiUrl;
 
   // Obtener tipos desde la BD
   getTiposVehiculo(): Observable<TipoVehiculo[]> {
@@ -209,5 +205,3 @@ export class AdminEmpresaService {
     );
   }
 }
-
-// Solicitar cambio de contraseña por email

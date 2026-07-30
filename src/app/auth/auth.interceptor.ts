@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpEvent,
   HttpInterceptor,
@@ -10,7 +10,8 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private auth: AuthenticationService) {}
+  private auth = inject(AuthenticationService);
+
 
   intercept(
     req: HttpRequest<any>,
@@ -27,11 +28,6 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = this.auth.getToken();
     const isNgrokRequest = req.url.includes('.ngrok-free.dev');
 
-    console.log('🌐 INTERCEPTOR - URL:', req.url);
-    console.log('🔑 INTERCEPTOR - Token:', token ? 'EXISTS' : 'NOT FOUND');
-    console.log('🛡️ INTERCEPTOR - Endpoint público:', isPublic ? 'YES' : 'NO');
-    console.log('🚇 INTERCEPTOR - Ngrok request:', isNgrokRequest ? 'YES' : 'NO');
-
     let nextReq = req;
 
     if (isNgrokRequest) {
@@ -46,15 +42,10 @@ export class AuthInterceptor implements HttpInterceptor {
       const clone = nextReq.clone({
         setHeaders: { Authorization: `Bearer ${token}` },
       });
-      console.log('✅ INTERCEPTOR - Token añadido a la request');
       return next.handle(clone);
     }
 
     // Requests públicas o sin token → pasan sin Authorization
-    if (isPublic)
-      console.log('🟢 INTERCEPTOR - Público: no adjunto Authorization');
-    else console.log('❌ INTERCEPTOR - No token, request sin autorización');
-
     return next.handle(nextReq);
   }
 }

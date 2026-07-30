@@ -3,7 +3,6 @@ import { AuthGuard } from './auth.guard';
 import { ChatbotComponent } from './chat/chat.component';
 import { LoginComponent } from './auth/login/login.component';
 import { PasswordResetComponent } from './shared/password-reset/password-reset.component';
-import { AuthSuccessComponent } from './auth/auth-success.component';
 import { AuthPendingComponent } from './auth/auth-pending.component';
 import { AuthErrorComponent } from './auth/auth-error.component';
 

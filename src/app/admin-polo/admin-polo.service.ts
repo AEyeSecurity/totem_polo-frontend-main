@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -122,9 +122,9 @@ export interface PoloSelfUpdate {
   providedIn: 'root',
 })
 export class AdminPoloService {
-  private apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = environment.apiUrl;
 
   // 🔥 NUEVOS MÉTODOS PARA EL PERFIL DEL POLO
   getPoloDetails(): Observable<PoloDetail> {

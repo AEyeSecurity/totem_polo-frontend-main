@@ -1,9 +1,15 @@
 // shared/password-reset/password-reset.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthenticationService } from '../../auth/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import {
+  validatePassword,
+  getPasswordRequirements,
+  doPasswordsMatch,
+  PasswordValidationResult,
+} from '../password-validation';
 
 @Component({
   selector: 'app-password-reset',
@@ -13,6 +19,10 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./password-reset.component.css'],
 })
 export class PasswordResetComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private authService = inject(AuthenticationService);
+  private router = inject(Router);
+
   token = '';
   // SIN currentPassword - usuarios no logueados NO necesitan contraseña actual
   newPassword = '';
@@ -37,19 +47,8 @@ export class PasswordResetComponent implements OnInit {
   successMessage = '';
   resetCompleted = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private authService: AuthenticationService,
-    private router: Router
-  ) {}
-
   ngOnInit() {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
-
-    console.log(
-      '🔍 Token de recuperación recibido:',
-      this.token ? this.token.substring(0, 20) + '...' : 'NO TOKEN'
-    );
 
     if (!this.token) {
       this.error =
@@ -68,20 +67,18 @@ export class PasswordResetComponent implements OnInit {
     this.authService.verifyResetToken(this.token).subscribe({
       next: (response) => {
         this.verifyingToken = false;
-        console.log('✅ Respuesta de verificación de token:', response);
 
         if (response.valid) {
           this.tokenValid = true;
           this.userEmail = response.email || '';
           this.userName = response.user_name || '';
-          console.log('Token válido para usuario:', this.userName);
         } else {
           this.handleTokenError(response);
         }
       },
       error: (err) => {
         this.verifyingToken = false;
-        console.error('❌ Error verificando token:', err);
+        console.error('Error verificando token:', err);
         this.error = 'Error al verificar el enlace de recuperación.';
       },
     });
@@ -108,24 +105,16 @@ export class PasswordResetComponent implements OnInit {
     this.error = '';
     this.passwordsMismatch = false;
     // NO resetear tokenExpired o tokenUsed ya que esos son estados del token, no de la validación
-    console.log(
-      '🔄 Usuario cambió contraseña - Limpiando errores de validación'
-    );
   }
 
   onConfirmPasswordChange() {
     this.passwordsMismatch = false;
     this.error = '';
     // Solo limpiar error de confirmación, mantener otros estados
-    console.log(
-      '🔄 Usuario cambió confirmación - Limpiando error de coincidencia'
-    );
   }
 
   // MÉTODO PRINCIPAL - Reset para usuarios NO logueados (usando endpoint forgot-password/confirm)
   onResetPassword(form: NgForm) {
-    console.log('🚀 Iniciando reset de contraseña para usuario NO logueado...');
-
     // IMPORTANTE: Limpiar SOLO errores de validación, NO estados del token
     this.error = '';
     this.message = '';
@@ -160,12 +149,6 @@ export class PasswordResetComponent implements OnInit {
 
     // Verificar que el token sigue siendo válido antes de intentar
     if (!this.tokenValid || this.tokenExpired || this.tokenUsed) {
-      console.log('❌ Token no válido, expirado o usado. Estados:', {
-        tokenValid: this.tokenValid,
-        tokenExpired: this.tokenExpired,
-        tokenUsed: this.tokenUsed,
-      });
-
       if (this.tokenExpired) {
         this.error =
           'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.';
@@ -180,7 +163,6 @@ export class PasswordResetComponent implements OnInit {
     }
 
     this.loading = true;
-    console.log('📤 Enviando solicitud de reset con token válido...');
 
     // DTO para usuarios NO logueados - SIN current_password
     const resetData = {
@@ -192,7 +174,6 @@ export class PasswordResetComponent implements OnInit {
     // Usar el endpoint correcto para contraseñas olvidadas
     this.authService.resetPasswordForgotten(resetData).subscribe({
       next: (response) => {
-        console.log('✅ Respuesta del reset de contraseña:', response);
         this.loading = false;
 
         // CORRECCIÓN: Verificar éxito por múltiples criterios, no solo success: true
@@ -205,14 +186,6 @@ export class PasswordResetComponent implements OnInit {
           response.message?.includes('changed') ||
           response.error?.includes('exitosamente') || // A veces el "éxito" viene en el campo error
           (response.status_code && response.status_code === 200);
-
-        console.log('🔍 Analizando si el reset fue exitoso:', {
-          success: response.success,
-          message: response.message,
-          error: response.error,
-          status_code: response.status_code,
-          resetWasSuccessful,
-        });
 
         if (resetWasSuccessful) {
           // ÉXITO: Reset fue exitoso
@@ -229,8 +202,6 @@ export class PasswordResetComponent implements OnInit {
           this.newPassword = '';
           this.confirmPassword = '';
 
-          console.log('🎉 Reset exitoso detectado - Token marcado como usado');
-
           // Redirección automática después de 5 segundos
           setTimeout(() => {
             this.router.navigate(['/login'], {
@@ -239,12 +210,11 @@ export class PasswordResetComponent implements OnInit {
           }, 5000);
         } else {
           // ERROR: Reset falló realmente
-          console.log('❌ Reset falló - Analizando error');
           this.handleResetError(response);
         }
       },
       error: (err) => {
-        console.error('❌ Error HTTP en reset de contraseña:', err);
+        console.error('Error HTTP en reset de contraseña:', err);
         this.loading = false;
 
         // Verificar si el error HTTP realmente contiene un éxito disfrazado
@@ -256,9 +226,6 @@ export class PasswordResetComponent implements OnInit {
           errorResponse?.error?.includes('exitosamente');
 
         if (hiddenSuccess) {
-          console.log(
-            '🎉 Éxito encontrado en error HTTP - Backend mal configurado'
-          );
           this.tokenUsed = true;
           this.tokenValid = false;
           this.resetCompleted = true;
@@ -279,7 +246,6 @@ export class PasswordResetComponent implements OnInit {
             });
           }, 5000);
         } else {
-          console.log('❌ Error HTTP real - Token sigue válido para reintento');
           this.handleResetError(errorResponse);
         }
       },
@@ -288,12 +254,6 @@ export class PasswordResetComponent implements OnInit {
 
   // CORREGIDO: Manejar errores específicos del reset según tu backend
   handleResetError(errorResponse: any) {
-    console.log('🔍 Analizando error de reset:', errorResponse);
-    console.log(
-      '🔍 Contenido completo del error:',
-      JSON.stringify(errorResponse, null, 2)
-    );
-
     // Resetear estados antes de evaluar
     this.tokenExpired = false;
     this.tokenUsed = false;
@@ -304,9 +264,6 @@ export class PasswordResetComponent implements OnInit {
     // ignoramos el used=true porque es un error del backend - el token no debería marcarse como usado
     // por un error de contraseña reutilizada
     if (errorResponse.password_reused === true) {
-      console.log(
-        '🚫 Backend erróneamente marcó token como usado por contraseña reutilizada - IGNORANDO used=true'
-      );
       this.passwordReused = true;
       this.error =
         'No puedes usar una contraseña que ya hayas utilizado anteriormente. Elige una diferente.';
@@ -325,9 +282,6 @@ export class PasswordResetComponent implements OnInit {
       errorResponse.detail?.includes('contraseña ya fue utilizada') ||
       errorResponse.message?.includes('contraseña ya fue utilizada')
     ) {
-      console.log(
-        '🚫 Detectado error de contraseña reutilizada en mensaje - IGNORANDO used=true si existe'
-      );
       this.passwordReused = true;
       this.error =
         'No puedes usar una contraseña que ya hayas utilizado anteriormente. Elige una diferente.';
@@ -342,9 +296,6 @@ export class PasswordResetComponent implements OnInit {
       errorResponse.error?.includes('passwords do not match') ||
       errorResponse.error?.includes('mismatch')
     ) {
-      console.log(
-        '🚫 Error de contraseñas no coinciden - IGNORANDO used=true si existe'
-      );
       this.passwordsMismatch = true;
       this.error =
         'Las contraseñas no coinciden. Verifica e intenta nuevamente.';
@@ -360,9 +311,6 @@ export class PasswordResetComponent implements OnInit {
       errorResponse.error?.includes('password requirements') ||
       errorResponse.error?.includes('invalid password format')
     ) {
-      console.log(
-        '🚫 Error de formato de contraseña - IGNORANDO used=true si existe'
-      );
       this.error =
         errorResponse.error ||
         errorResponse.detail ||
@@ -376,7 +324,6 @@ export class PasswordResetComponent implements OnInit {
       this.tokenValid = false;
       this.error =
         'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.';
-      console.log('❌ Token expirado - Marcando como inválido');
       return;
     }
 
@@ -388,10 +335,6 @@ export class PasswordResetComponent implements OnInit {
       errorResponse.error?.includes('utilizado') &&
       !errorResponse.error?.includes('contraseña')
     ) {
-      console.log(
-        '🤔 Token marcado como usado - Posiblemente exitoso en intento anterior'
-      );
-
       // Si el mensaje dice "enlace ya utilizado", es probable que un intento anterior SÍ haya funcionado
       // pero el backend respondió mal. Tratarlo como éxito tardío.
       if (
@@ -400,10 +343,6 @@ export class PasswordResetComponent implements OnInit {
         ) ||
         errorResponse.error?.includes('enlace ya fue utilizado')
       ) {
-        console.log(
-          '🎉 Detectando éxito tardío - El reset anterior probablemente funcionó'
-        );
-
         // Mostrar mensaje de éxito tardío pero no redirigir automáticamente
         this.resetCompleted = true;
         this.successMessage =
@@ -424,7 +363,6 @@ export class PasswordResetComponent implements OnInit {
       this.tokenValid = false;
       this.error =
         'Este enlace de recuperación ya fue utilizado. Si no cambiaste tu contraseña exitosamente, solicita un nuevo enlace.';
-      console.log('❌ Token usado - Estado incierto');
       return;
     }
 
@@ -438,20 +376,10 @@ export class PasswordResetComponent implements OnInit {
       this.tokenValid = false;
       this.error =
         'El enlace de recuperación no es válido. Por favor, solicita uno nuevo.';
-      console.log('❌ Token inválido');
       return;
     }
 
     // Error genérico - mantener el token válido para reintentos
-    console.log(
-      '⚠️ Error no categorizado - Manteniendo token válido para reintentos'
-    );
-    console.log(
-      '🔧 Backend response usado flag:',
-      errorResponse.used,
-      'pero tratando como error recuperable'
-    );
-
     if (errorResponse.detail) {
       this.error = errorResponse.detail;
     } else if (errorResponse.error) {
@@ -461,10 +389,6 @@ export class PasswordResetComponent implements OnInit {
     } else {
       this.error = 'Error al restablecer la contraseña. Inténtalo nuevamente.';
     }
-
-    console.log(
-      '📝 Token permanece válido para permitir reintentos a pesar de used=true del backend'
-    );
   }
 
   // Navegación
@@ -477,70 +401,20 @@ export class PasswordResetComponent implements OnInit {
   }
 
   // Validaciones de contraseña iguales al backend
-  validatePassword(password: string): { isValid: boolean; message: string } {
-    if (!password) {
-      return { isValid: false, message: 'La contraseña es requerida.' };
-    }
-
-    if (password.length < 8) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos 8 caracteres.',
-      };
-    }
-
-    if (password.length > 128) {
-      return {
-        isValid: false,
-        message: 'La contraseña no puede tener más de 128 caracteres.',
-      };
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos una letra mayúscula.',
-      };
-    }
-
-    if (!/[a-z]/.test(password)) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos una letra minúscula.',
-      };
-    }
-
-    if (!/[0-9]/.test(password)) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos un número.',
-      };
-    }
-
-    return { isValid: true, message: '' };
+  validatePassword(password: string): PasswordValidationResult {
+    return validatePassword(password);
   }
 
   isPasswordValid(): boolean {
-    return this.validatePassword(this.newPassword).isValid;
+    return validatePassword(this.newPassword).isValid;
   }
 
   doPasswordsMatch(): boolean {
-    return (
-      this.newPassword === this.confirmPassword &&
-      this.confirmPassword.length > 0
-    );
+    return doPasswordsMatch(this.newPassword, this.confirmPassword);
   }
 
   getPasswordRequirements() {
-    const password = this.newPassword;
-    return {
-      minLength: password.length >= 8,
-      maxLength: password.length <= 128,
-      hasUppercase: /[A-Z]/.test(password),
-      hasLowercase: /[a-z]/.test(password),
-      hasNumber: /[0-9]/.test(password),
-      notReused: !this.passwordReused,
-    };
+    return getPasswordRequirements(this.newPassword, this.passwordReused);
   }
 
   // Validación completa del formulario para usuarios NO logueados

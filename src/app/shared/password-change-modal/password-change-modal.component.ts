@@ -1,8 +1,14 @@
 // shared/password-change-modal/password-change-modal.component.ts
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../auth/auth.service';
+import {
+  validatePassword,
+  getPasswordRequirements,
+  doPasswordsMatch,
+  PasswordValidationResult,
+} from '../password-validation';
 
 @Component({
   selector: 'app-password-change-modal',
@@ -11,13 +17,15 @@ import { AuthenticationService } from '../../auth/auth.service';
   templateUrl: './password-change-modal.component.html',
   styleUrls: ['./password-change-modal.component.css'],
 })
-export class PasswordChangeModalComponent implements OnInit {
+export class PasswordChangeModalComponent {
+  private authService = inject(AuthenticationService);
+
   // Campos del formulario - INCLUYE contraseña actual (usuario logueado)
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
 
-  @Input() showModal: boolean = false;
+  @Input() showModal = false;
   @Output() modalClosed = new EventEmitter<void>();
   @Output() passwordChanged = new EventEmitter<boolean>();
 
@@ -35,14 +43,6 @@ export class PasswordChangeModalComponent implements OnInit {
   // Propiedades para mostrar errores específicos
   wrongCurrentPassword = false;
   passwordsMismatch = false;
-
-  constructor(private authService: AuthenticationService) {}
-
-  ngOnInit() {
-    console.log(
-      '🔐 Componente de cambio de contraseña para usuario logueado iniciado'
-    );
-  }
 
   openModal() {
     this.showModal = true;
@@ -88,8 +88,6 @@ export class PasswordChangeModalComponent implements OnInit {
 
   // MÉTODO PRINCIPAL - Cambio de contraseña para usuarios LOGUEADOS
   onChangePassword(form: NgForm) {
-    console.log('🚀 Iniciando cambio de contraseña para usuario logueado...');
-
     this.clearMessages();
 
     // Validaciones del formulario
@@ -137,7 +135,6 @@ export class PasswordChangeModalComponent implements OnInit {
     // Llamada al endpoint para usuarios logueados
     this.authService.changePasswordDirect(changeData).subscribe({
       next: (response) => {
-        console.log('✅ Respuesta del cambio de contraseña:', response);
         this.loading = false;
 
         if (response.success) {
@@ -156,7 +153,7 @@ export class PasswordChangeModalComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('❌ Error en cambio de contraseña:', err);
+        console.error('Error en cambio de contraseña:', err);
         this.loading = false;
         this.handleChangeError(err.error || err);
       },
@@ -165,8 +162,6 @@ export class PasswordChangeModalComponent implements OnInit {
 
   // Manejar errores específicos basados en tu backend
   handleChangeError(errorResponse: any) {
-    console.log('🔍 Analizando error:', errorResponse);
-
     // Contraseña actual incorrecta
     if (
       errorResponse.wrong_current ||
@@ -221,70 +216,20 @@ export class PasswordChangeModalComponent implements OnInit {
   }
 
   // Validaciones de contraseña según tu backend
-  validatePassword(password: string): { isValid: boolean; message: string } {
-    if (!password) {
-      return { isValid: false, message: 'La contraseña es requerida.' };
-    }
-
-    if (password.length < 8) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos 8 caracteres.',
-      };
-    }
-
-    if (password.length > 128) {
-      return {
-        isValid: false,
-        message: 'La contraseña no puede tener más de 128 caracteres.',
-      };
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos una letra mayúscula.',
-      };
-    }
-
-    if (!/[a-z]/.test(password)) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos una letra minúscula.',
-      };
-    }
-
-    if (!/[0-9]/.test(password)) {
-      return {
-        isValid: false,
-        message: 'La contraseña debe tener al menos un número.',
-      };
-    }
-
-    return { isValid: true, message: '' };
+  validatePassword(password: string): PasswordValidationResult {
+    return validatePassword(password);
   }
 
   isPasswordValid(): boolean {
-    return this.validatePassword(this.newPassword).isValid;
+    return validatePassword(this.newPassword).isValid;
   }
 
   doPasswordsMatch(): boolean {
-    return (
-      this.newPassword === this.confirmPassword &&
-      this.confirmPassword.length > 0
-    );
+    return doPasswordsMatch(this.newPassword, this.confirmPassword);
   }
 
   getPasswordRequirements() {
-    const password = this.newPassword;
-    return {
-      minLength: password.length >= 8,
-      maxLength: password.length <= 128,
-      hasUppercase: /[A-Z]/.test(password),
-      hasLowercase: /[a-z]/.test(password),
-      hasNumber: /[0-9]/.test(password),
-      notReused: !this.passwordReused,
-    };
+    return getPasswordRequirements(this.newPassword, this.passwordReused);
   }
 
   isFormValid(): boolean {

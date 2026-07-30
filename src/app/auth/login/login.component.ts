@@ -1,5 +1,5 @@
 // src/app/auth/login.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AuthenticationService } from '../auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,9 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
+  private authService = inject(AuthenticationService);
+  private router = inject(Router);
+
   username = '';
   password = '';
   keepLoggedIn = false; // <- se pisa en ngOnInit con el flag guardado
@@ -44,11 +47,6 @@ export class LoginComponent implements OnInit {
   maxAttempts = 5;
   isBlocked = false;
   blockTimeRemaining = 0;
-
-  constructor(
-    private authService: AuthenticationService,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     // Restaurar el estado del check

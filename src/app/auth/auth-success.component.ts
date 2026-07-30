@@ -1,63 +1,28 @@
 // src/app/auth/auth-success/auth-success.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthenticationService } from './auth.service';
 
 @Component({
   selector: 'app-auth-success',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="loading-container">
       <div class="spinner"></div>
       <p>Iniciando sesión...</p>
     </div>
   `,
-  styles: [`
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color:rgb(238, 236, 236);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #e0e0e0;
-      border-top: 4px solid #007bff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    p {
-      margin: 0;
-      color: #666;
-      font-size: 16px;
-    }
-  `]
+  styleUrl: './auth-success.component.css',
 })
 export class AuthSuccessComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private authService = inject(AuthenticationService);
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthenticationService
-  ) {}
 
   ngOnInit(): void {
-    console.log('🔄 Procesando autenticación...');
-    
     this.route.queryParams.subscribe(params => {
       const token = params['token'];
       const tipoRol = params['tipo_rol'];
@@ -82,9 +47,7 @@ export class AuthSuccessComponent implements OnInit {
       // Backup en localStorage
       localStorage.setItem('access_token', token);
       localStorage.setItem('tipo_rol', role);
-      
-      console.log('✅ Autenticación exitosa, rol:', role);
-      
+
       // Verificar que se guardó correctamente
       if (this.authService.isLoggedIn()) {
         // Pequeño delay para mostrar el spinner brevemente
@@ -121,8 +84,7 @@ export class AuthSuccessComponent implements OnInit {
         destination = '/dashboard';
         break;
     }
-    
-    console.log('🎯 Redirigiendo a:', destination);
+
     this.router.navigate([destination]);
   }
 }
