@@ -1159,7 +1159,6 @@ export class EmpresaMeComponent implements OnInit {
       empresa: {
         cant_empleados: 'La cantidad de empleados debe ser mayor a 0',
         horario_trabajo: 'El horario de trabajo es requerido',
-        observaciones: 'Las observaciones no pueden exceder 500 caracteres',
       },
       password: {
         password: 'La contrasena debe tener al menos 6 caracteres',

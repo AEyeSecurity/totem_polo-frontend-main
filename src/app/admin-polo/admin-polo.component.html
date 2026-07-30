@@ -229,11 +229,11 @@
             />
           </div>
           <div class="field col-3">
-            <label>Observaciones</label>
+            <label>Sobre la empresa</label>
             <textarea
               class="readout"
               rows="3"
-              [value]="poloData?.observaciones || '—'"
+              [value]="poloData?.observaciones || 'Todavía no se cargó una descripción.'"
               disabled
             ></textarea>
           </div>
@@ -734,9 +734,10 @@
         </div>
 
         <div class="field col-3">
-          <label>Descripcion</label>
+          <label>Sobre la empresa</label>
           <textarea
             rows="4"
+            placeholder="Contanos de qué se trata la empresa: a qué se dedica, cómo y cuándo se creó, etc."
             [(ngModel)]="poloEditForm.observaciones"
             name="p_obs"
           ></textarea>
@@ -919,9 +920,10 @@
         </div>
 
         <div class="field col-3">
-          <label>Observaciones</label>
+          <label>Sobre la empresa</label>
           <textarea
             rows="3"
+            placeholder="Contanos de qué se trata la empresa: a qué se dedica, cómo y cuándo se creó, etc."
             [(ngModel)]="empresaForm.observaciones"
             name="e_obs"
           ></textarea>
