@@ -237,12 +237,12 @@
                       />
                     </div>
                     <div class="field col-3">
-                      <label for="ro-polo-obs">Observaciones</label>
+                      <label for="ro-polo-obs">Sobre la empresa</label>
                       <textarea
                         id="ro-polo-obs"
                         class="readout"
                         rows="3"
-                        [value]="poloData?.observaciones || '—'"
+                        [value]="poloData?.observaciones || 'Todavía no se cargó una descripción.'"
                         disabled
                       ></textarea>
                     </div>
@@ -741,10 +741,11 @@
                                   }
                                 </div>
                                 <div class="field col-3">
-                                  <label for="p_obs">Descripcion</label>
+                                  <label for="p_obs">Sobre la empresa</label>
                                   <textarea
                                     id="p_obs"
                                     rows="4"
+                                    placeholder="Contanos de qué se trata la empresa: a qué se dedica, cómo y cuándo se creó, etc."
                                     [(ngModel)]="poloEditForm.observaciones"
                                     name="p_obs"
                                   ></textarea>
@@ -944,10 +945,11 @@
                                             }
                                           </div>
                                           <div class="field col-3">
-                                            <label for="e_obs">Observaciones</label>
+                                            <label for="e_obs">Sobre la empresa</label>
                                             <textarea
                                               id="e_obs"
                                               rows="3"
+                                              placeholder="Contanos de qué se trata la empresa: a qué se dedica, cómo y cuándo se creó, etc."
                                               [(ngModel)]="empresaForm.observaciones"
                                               name="e_obs"
                                             ></textarea>

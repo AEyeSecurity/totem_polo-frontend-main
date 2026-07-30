@@ -275,13 +275,13 @@
                                 />
                               </div>
                               <div class="field col-2">
-                                <label for="ro-descripcion">Descripcion</label>
+                                <label for="ro-descripcion">Sobre la empresa</label>
                                 <textarea
                                   id="ro-descripcion"
                                   class="readout multiline"
                                   readonly
                 [value]="
-                  empresaData.observaciones || 'Sin observaciones registradas.'
+                  empresaData.observaciones || 'Todavía no se cargó una descripción.'
                 "
                                 ></textarea>
                               </div>
@@ -884,10 +884,11 @@
                                             />
                                           </div>
                                           <div class="field col-3">
-                                            <label for="empresa_observaciones">Observaciones</label>
+                                            <label for="empresa_observaciones">Sobre la empresa</label>
                                             <textarea
                                               id="empresa_observaciones"
                                               rows="4"
+                                              placeholder="Contanos de qué se trata tu empresa: a qué se dedica, qué hace, cómo y cuándo se fundó, etc."
                                               [(ngModel)]="empresaEditForm.observaciones"
                                               name="observaciones"
                                             ></textarea>
