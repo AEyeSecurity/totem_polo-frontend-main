@@ -745,7 +745,7 @@
                 <div>{{ sp.horario || "-" }}</div>
                 <div>{{ sp.propietario || "-" }}</div>
                 <div>
-                  @if (sp.lotes?.length) {
+                  @if (sp.lotes.length) {
                     @for (l of sp.lotes; track l) {
                       <span> M{{ l.manzana }}-L{{ l.lote }}&nbsp; </span>
                     }
