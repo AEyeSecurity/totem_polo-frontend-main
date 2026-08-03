@@ -266,13 +266,22 @@ interface Message {
                     }}
                   </p>
                 </div>
-                <div class="robot-figure">
+                <div class="robot-figure" [class.thinking]="isBotThinking">
+                  @if (isBotThinking) {
+                    <div class="thinking-indicator" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </div>
+                  }
                   <div class="robot-antenna-set">
                     <span class="antenna antenna-left"></span>
                     <span class="antenna antenna-center"></span>
                     <span class="antenna antenna-right"></span>
                   </div>
-                  <div class="robot-head" [class.talking]="isBotSpeaking">
+                  <div
+                    class="robot-head"
+                    [class.talking]="isBotSpeaking"
+                    [class.thinking]="isBotThinking"
+                    >
                     <span class="head-screw screw-top-left"></span>
                     <span class="head-screw screw-top-right"></span>
                     <span class="head-screw screw-bottom-left"></span>
@@ -354,9 +363,7 @@ interface Message {
                     <span>Escuchando tu consulta...</span>
                   }
                   @if (!isRecording && isProcessingVoice) {
-                    <span
-                      >Generando respuesta...</span
-                      >
+                    <span>POLO esta pensando...</span>
                   }
                 </div>
                 @if (voiceError) {
@@ -398,6 +405,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   voiceUserTyping = false;
   voiceBotTyping = false;
   isBotSpeaking = false;
+
+  get isBotThinking(): boolean {
+    return this.isProcessingVoice && !this.isBotSpeaking;
+  }
   private readonly defaultQuickQuestions = [
     'Disponibilidad de lotes',
     'Empresas instaladas en el parque',
@@ -459,7 +470,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     if (this.isProcessingVoice) {
-      return 'Generando la respuesta con IA...';
+      return 'POLO esta pensando tu respuesta...';
     }
 
     return 'Toca el microfono para hablar con POLO Bot.';
