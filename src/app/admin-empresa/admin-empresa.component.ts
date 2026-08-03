@@ -25,6 +25,7 @@ import {
 } from './admin-empresa.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
+import { UpdateReminderModalComponent } from '../shared/update-reminder-modal/update-reminder-modal.component';
 import { FormError, HttpErrorLike } from '../shared/form-error.model';
 import {
   buildFormErrorsFromHttpError,
@@ -57,7 +58,8 @@ const EMPRESA_DATE_FIELDS = [
     RouterModule,
     LogoutButtonComponent,
     NgxJsonViewerModule,
-    PasswordChangeModalComponent
+    PasswordChangeModalComponent,
+    UpdateReminderModalComponent
 ],
   templateUrl: './admin-empresa.component.html',
   styleUrls: ['./admin-empresa.component.css'],
@@ -89,6 +91,7 @@ export class EmpresaMeComponent implements OnInit {
   showContactoForm = false;
   showEmpresaEditForm = false;
   showPasswordModal = false; // ← requerido por la plantilla
+  showReminderModal = false;
 
   // Estados de edicion
   editingVehiculo: Vehiculo | null = null;
@@ -1090,12 +1093,54 @@ export class EmpresaMeComponent implements OnInit {
 
         this.buildActividadRecienteFromData();
         this.loading = false;
+        this.checkUpdateReminder(data.cuil);
       },
       error: (error) => {
         this.handleError(error, 'general', 'cargar datos de la empresa');
         this.loading = false;
       },
     });
+  }
+
+  // ===== Recordatorio de actualización de datos (cada 6 meses) =====
+  private checkUpdateReminder(cuil: number): void {
+    const key = `empresaUpdateReminderShown_${cuil}`;
+    const lastShownRaw = localStorage.getItem(key);
+    const now = new Date();
+
+    if (!lastShownRaw) {
+      // Primera vez que vemos a esta empresa: arrancamos el conteo sin
+      // mostrar el aviso todavía (recién cargaron sus datos).
+      localStorage.setItem(key, now.getTime().toString());
+      return;
+    }
+
+    const lastShown = new Date(Number(lastShownRaw));
+    const nextReminder = new Date(lastShown);
+    nextReminder.setMonth(nextReminder.getMonth() + 6);
+
+    if (now >= nextReminder) {
+      this.showReminderModal = true;
+    }
+  }
+
+  private markReminderShown(): void {
+    if (!this.empresaData) return;
+    localStorage.setItem(
+      `empresaUpdateReminderShown_${this.empresaData.cuil}`,
+      Date.now().toString()
+    );
+  }
+
+  onReminderClosed(): void {
+    this.showReminderModal = false;
+    this.markReminderShown();
+  }
+
+  onReminderGoToUpdate(): void {
+    this.showReminderModal = false;
+    this.markReminderShown();
+    this.openEmpresaEditForm();
   }
 
   // accesos rapidos

@@ -5,6 +5,11 @@
 />
 
 <div class="admin-layout" [class.dark-mode]="isDarkMode">
+  <app-update-reminder-modal
+    [showModal]="showReminderModal"
+    (closed)="onReminderClosed()"
+    (goToUpdate)="onReminderGoToUpdate()"
+  ></app-update-reminder-modal>
   <!-- NAVBAR SUPERIOR -->
   <!-- TOP NAV -->
   <nav class="topbar">
