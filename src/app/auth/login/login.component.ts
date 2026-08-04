@@ -54,6 +54,15 @@ export class LoginComponent implements OnInit {
 
     if (this.authService.isLoggedIn()) {
       this.redirectByRole();
+    } else {
+      // Si no hay token local válido (ej: se cerró el navegador), probamos
+      // si hay una sesión "recordada" (cookie remember_token) para no
+      // mostrar el login de nuevo innecesariamente.
+      this.authService.tryRestoreSessionFromRememberCookie().subscribe((restored) => {
+        if (restored) {
+          this.redirectByRole();
+        }
+      });
     }
     this.checkBlockStatus();
   }
