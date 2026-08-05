@@ -7,10 +7,12 @@ import {
   AfterViewChecked,
   OnDestroy,
   ChangeDetectorRef,
+  NgZone,
   inject,
 } from '@angular/core';
 import { ChatService, VoiceChatResponse } from './chat.service';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 
@@ -290,9 +292,12 @@ interface Message {
                 type="button"
                 class="mic-button"
                 [class.is-recording]="isRecording"
+                [class.is-starting]="isStartingRecording"
                 (click)="toggleRecording()"
                 [disabled]="
-                  !supportsVoice || (isProcessingVoice && !isRecording)
+                  !supportsVoice ||
+                  isStartingRecording ||
+                  (isProcessingVoice && !isRecording)
                 "
                 [attr.aria-pressed]="isRecording"
               >
@@ -324,6 +329,7 @@ interface Message {
 export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private chatService = inject(ChatService);
   private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
@@ -334,6 +340,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   quickQuestions: string[] = [];
   chatMode: 'text' | 'voice' = 'voice';
   isRecording = false;
+  isStartingRecording = false;
   isProcessingVoice = false;
   supportsVoice =
     typeof window !== 'undefined' &&
@@ -375,6 +382,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private audioContext?: AudioContext;
   private analyserNode?: AnalyserNode;
   private silenceRafId?: number;
+  private activeVoiceRequest?: Subscription;
 
   constructor() {
     if (!this.supportsVoice) {
@@ -402,6 +410,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.stopRecording(true);
     this.stopSilenceDetection();
     this.cleanupMediaStream();
+    this.activeVoiceRequest?.unsubscribe();
     if (this.speakingFallbackTimeout) {
       clearTimeout(this.speakingFallbackTimeout);
     }
@@ -410,6 +419,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   get voiceHelperText(): string {
     if (!this.supportsVoice) {
       return 'Tu navegador no soporta la experiencia de voz.';
+    }
+
+    if (this.isStartingRecording) {
+      return 'Activando el microfono...';
     }
 
     if (this.isRecording) {
@@ -453,7 +466,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     if (this.isRecording) {
       this.stopRecording();
-    } else if (!this.isProcessingVoice) {
+    } else if (!this.isProcessingVoice && !this.isStartingRecording) {
       this.startRecording();
     }
   }
@@ -819,6 +832,14 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private async startRecording() {
+    if (this.isStartingRecording || this.isRecording) return;
+    this.isStartingRecording = true;
+
+    // Si habia una respuesta anterior en camino, la cancelamos: no debe
+    // poder llegar tarde y pisar la respuesta de esta consulta nueva.
+    this.activeVoiceRequest?.unsubscribe();
+    this.activeVoiceRequest = undefined;
+
     this.voiceError = null;
     this.voiceUserText = '';
     this.voiceBotText = '';
@@ -878,6 +899,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
       recorder.start();
       this.isRecording = true;
+      this.isStartingRecording = false;
       this.startSpeechRecognition();
       this.startSilenceDetection(stream);
     } catch (error) {
@@ -887,6 +909,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.stopBubbleTyping('user');
       this.cleanupMediaStream();
       this.isRecording = false;
+      this.isStartingRecording = false;
     }
   }
 
@@ -936,38 +959,45 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
       let hasSpeech = false;
       let silenceStart: number | null = null;
 
-      const tick = () => {
-        if (!this.isRecording || !this.analyserNode) return;
+      // El analisis corre en cada frame (~60/seg): lo hacemos fuera de la
+      // zona de Angular para no disparar deteccion de cambios 60 veces por
+      // segundo, que era lo que trababa la pagina mientras se escuchaba.
+      this.ngZone.runOutsideAngular(() => {
+        const tick = () => {
+          if (!this.isRecording || !this.analyserNode) return;
 
-        this.analyserNode.getByteTimeDomainData(dataArray);
-        let sumSquares = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          const normalized = (dataArray[i] - 128) / 128;
-          sumSquares += normalized * normalized;
-        }
-        const rms = Math.sqrt(sumSquares / dataArray.length);
+          this.analyserNode.getByteTimeDomainData(dataArray);
+          let sumSquares = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            const normalized = (dataArray[i] - 128) / 128;
+            sumSquares += normalized * normalized;
+          }
+          const rms = Math.sqrt(sumSquares / dataArray.length);
 
-        if (rms > SPEECH_RMS_THRESHOLD) {
-          hasSpeech = true;
-          silenceStart = null;
-        } else if (hasSpeech) {
-          if (silenceStart === null) {
-            silenceStart = Date.now();
-          } else if (Date.now() - silenceStart >= SILENCE_DURATION_MS) {
-            this.stopRecording();
+          if (rms > SPEECH_RMS_THRESHOLD) {
+            hasSpeech = true;
+            silenceStart = null;
+          } else if (hasSpeech) {
+            if (silenceStart === null) {
+              silenceStart = Date.now();
+            } else if (Date.now() - silenceStart >= SILENCE_DURATION_MS) {
+              this.ngZone.run(() => this.stopRecording());
+              return;
+            }
+          } else if (Date.now() - recordingStart >= NO_SPEECH_TIMEOUT_MS) {
+            this.ngZone.run(() => {
+              this.voiceError =
+                'No te escuche. Toca el microfono e intenta de nuevo.';
+              this.stopRecording(true);
+            });
             return;
           }
-        } else if (Date.now() - recordingStart >= NO_SPEECH_TIMEOUT_MS) {
-          this.voiceError =
-            'No te escuche. Toca el microfono e intenta de nuevo.';
-          this.stopRecording(true);
-          return;
-        }
+
+          this.silenceRafId = requestAnimationFrame(tick);
+        };
 
         this.silenceRafId = requestAnimationFrame(tick);
-      };
-
-      this.silenceRafId = requestAnimationFrame(tick);
+      });
     } catch (error) {
       console.error('No se pudo iniciar la deteccion de silencio', error);
     }
@@ -1034,7 +1064,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.voiceBotText = '';
     this.startBubbleTyping('bot', 'Generando respuesta con IA...');
 
-    this.chatService.sendAudio(formData).subscribe({
+    this.activeVoiceRequest?.unsubscribe();
+    this.activeVoiceRequest = this.chatService.sendAudio(formData).subscribe({
       next: (resp: VoiceChatResponse) => {
         this.isProcessingVoice = false;
 
