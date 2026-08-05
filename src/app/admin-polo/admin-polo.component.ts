@@ -193,39 +193,10 @@ export class AdminPoloComponent implements OnInit {
   filteredServicios: ServicioPolo[] = [];
   filteredLotes: Lote[] = [];
 
-  public isDarkMode = false;
-
   ngOnInit(): void {
     this.loadRoles();
     this.loadPoloData();
     this.loadData();
-    const savedTheme = localStorage.getItem('theme');
-    this.isDarkMode = savedTheme === 'dark';
-    this.applyThemeClass();
-  }
-
-  toggleDarkMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-    this.applyThemeClass();
-  }
-
-  private applyThemeClass(): void {
-    const body = document.body;
-    const html = document.documentElement;
-    body.classList.toggle('dark-theme', this.isDarkMode);
-    html.classList.toggle('dark-theme', this.isDarkMode);
-    if (this.isDarkMode) {
-      body.style.background = '#1a223b';
-      body.style.margin = '0';
-      body.style.padding = '0';
-      html.style.background = '#1a223b';
-    } else {
-      body.style.background = '#f8f9fa';
-      html.style.background = '#ffffff';
-      body.style.margin = '';
-      body.style.padding = '';
-    }
   }
 
   setActiveTab(tab: AdminPoloTab): void {

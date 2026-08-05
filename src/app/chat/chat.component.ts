@@ -1,5 +1,14 @@
 ﻿// chat.component.ts
-import { Component, OnInit, ElementRef, ViewChild, AfterViewChecked, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ElementRef,
+  ViewChild,
+  AfterViewChecked,
+  OnDestroy,
+  ChangeDetectorRef,
+  inject,
+} from '@angular/core';
 import { ChatService, VoiceChatResponse } from './chat.service';
 import { FormsModule } from '@angular/forms';
 
@@ -17,7 +26,7 @@ interface Message {
   standalone: true,
   imports: [FormsModule, LogoutButtonComponent],
   template: `
-    <div class="chat-wrapper" [class.dark-mode]="isDarkMode">
+    <div class="chat-wrapper">
       <div class="chat-header">
         <div class="header-content">
           <div class="bot-avatar">
@@ -32,57 +41,10 @@ interface Message {
           </div>
         </div>
         <div class="header-actions">
-          <button
-            (click)="toggleTheme()"
-            aria-label="Cambiar modo claro/oscuro"
-            class="mode-toggle-btn"
-            >
-            @if (isDarkMode) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="feather feather-sun"
-                viewBox="0 0 24 24"
-                >
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-            }
-    
-            @if (!isDarkMode) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="feather feather-moon"
-                viewBox="0 0 24 24"
-                >
-                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-              </svg>
-            }
-          </button>
           <app-logout-button></app-logout-button>
         </div>
       </div>
-    
+
       <div class="chat-mode-switch">
         <button
           type="button"
@@ -90,7 +52,7 @@ interface Message {
           [class.active]="chatMode === 'voice'"
           (click)="setChatMode('voice')"
           [attr.aria-pressed]="chatMode === 'voice'"
-          >
+        >
           <span class="material-symbols-outlined">volume_up</span>
           Voz IA
         </button>
@@ -100,12 +62,12 @@ interface Message {
           [class.active]="chatMode === 'text'"
           (click)="setChatMode('text')"
           [attr.aria-pressed]="chatMode === 'text'"
-          >
+        >
           <span class="material-symbols-outlined">chat</span>
           Texto
         </button>
       </div>
-    
+
       @if (chatMode === 'text') {
         <div class="chat-container">
           <div class="chat-panel">
@@ -120,18 +82,23 @@ interface Message {
                 </div>
               </div>
               <div class="chat-messages" #messagesContainer>
-                @for (message of messages; track trackByMessageId($index, message)) {
+                @for (
+                  message of messages;
+                  track trackByMessageId($index, message)
+                ) {
                   <div
                     class="message-wrapper"
                     [class.user-wrapper]="message.sender === 'user'"
                     [class.bot-wrapper]="message.sender === 'bot'"
-                    >
+                  >
                     <div
                       class="message-content"
-                  [class]="
-                    message.sender === 'user' ? 'user-message' : 'bot-message'
-                  "
-                      >
+                      [class]="
+                        message.sender === 'user'
+                          ? 'user-message'
+                          : 'bot-message'
+                      "
+                    >
                       <div
                         class="message-text"
                         [innerHTML]="formatMessage(message.content)"
@@ -143,9 +110,7 @@ interface Message {
                   </div>
                 }
                 @if (isTyping) {
-                  <div
-                    class="message-wrapper bot-wrapper typing-indicator"
-                    >
+                  <div class="message-wrapper bot-wrapper typing-indicator">
                     <div class="bot-message typing-message">
                       <div class="typing-dots">
                         <span></span>
@@ -166,136 +131,123 @@ interface Message {
                   (keyup.enter)="sendMessage()"
                   [disabled]="isTyping"
                   class="message-input"
-                  />
-                  <button
-                    type="button"
-                    (click)="sendMessage()"
-                    [disabled]="!userMessage.trim() || isTyping"
-                    class="send-button"
-                    >
-                    @if (!isTyping) {
-                      <span class="material-symbols-outlined">
-                        send
-                      </span>
-                    }
-                    @if (isTyping) {
-                      <span class="loading-text">...</span>
-                    }
-                  </button>
-                </div>
-                <div class="input-footer">
-                  Presion&aacute; Enter o el bot&oacute;n para enviar tu consulta
-                </div>
+                />
+                <button
+                  type="button"
+                  (click)="sendMessage()"
+                  [disabled]="!userMessage.trim() || isTyping"
+                  class="send-button"
+                >
+                  @if (!isTyping) {
+                    <span class="material-symbols-outlined"> send </span>
+                  }
+                  @if (isTyping) {
+                    <span class="loading-text">...</span>
+                  }
+                </button>
+              </div>
+              <div class="input-footer">
+                Presion&aacute; Enter o el bot&oacute;n para enviar tu consulta
               </div>
             </div>
-            <aside class="sidebar">
-              <div class="sidebar-card quick-queries-card">
-                <div class="card-header">
-                  <span class="material-symbols-outlined">bolt</span>
-                  <div>
-                    <h3>Consultas R&aacute;pidas</h3>
-                    <p>Las preguntas que m&aacute;s recibimos</p>
-                  </div>
-                </div>
-                @for (question of quickQuestions; track question) {
-                  <button
-                    type="button"
-                    class="quick-question"
-                    (click)="handleQuickQuestion(question)"
-                    [disabled]="isTyping"
-                    >
-                    <span>{{ question }}</span>
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                  </button>
-                }
-              </div>
-              <div class="sidebar-card contact-card">
-                <div class="card-header">
-                  <span class="material-symbols-outlined">support_agent</span>
-                  <div>
-                    <h3>Conexi&oacute;n Directa</h3>
-                    <p>Equipo POLO 52</p>
-                  </div>
-                </div>
-                <ul class="contact-list">
-                  <li>
-                    <span class="material-symbols-outlined">call</span>
-                    <div>
-                      <strong>+54 351 123-4567</strong>
-                      <small>Atenci&oacute;n comercial</small>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="material-symbols-outlined">mail</span>
-                    <div>
-                      <strong>info&#64;polo52.com</strong>
-                      <small>Contacto general</small>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="material-symbols-outlined">schedule</span>
-                    <div>
-                      <strong>24/7 Disponible</strong>
-                      <small>Siempre listos para ayudarte</small>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </aside>
           </div>
-        } @else {
-          <section class="voice-experience">
-            <div class="voice-hero">
-              <div class="voice-hero-header">
+          <aside class="sidebar">
+            <div class="sidebar-card quick-queries-card">
+              <div class="card-header">
+                <span class="material-symbols-outlined">bolt</span>
                 <div>
-                  <p class="tag-label">POLO BOT</p>
-                  <h3>Habla con nuestro asistente por voz</h3>
+                  <h3>Consultas R&aacute;pidas</h3>
+                  <p>Las preguntas que m&aacute;s recibimos</p>
                 </div>
               </div>
-              <div class="voice-stage">
-                <div
-                  class="speech-bubble user-bubble"
-                  [class.filled]="voiceUserText"
-                  [class.typing]="voiceUserTyping"
-                  >
-                  <span class="bubble-label">Tu consulta</span>
-                  <p aria-live="polite">
-                    {{
-                    voiceUserText ||
-                    'Toca el microfono y hablame de lo que necesitas'
-                    }}
-                  </p>
+              @for (question of quickQuestions; track question) {
+                <button
+                  type="button"
+                  class="quick-question"
+                  (click)="handleQuickQuestion(question)"
+                  [disabled]="isTyping"
+                >
+                  <span>{{ question }}</span>
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              }
+            </div>
+            <div class="sidebar-card contact-card">
+              <div class="card-header">
+                <span class="material-symbols-outlined">support_agent</span>
+                <div>
+                  <h3>Conexi&oacute;n Directa</h3>
+                  <p>Equipo POLO 52</p>
                 </div>
-                <div class="robot-figure" [class.thinking]="isBotThinking">
-                  @if (isBotThinking) {
-                    <div class="thinking-indicator" aria-hidden="true">
-                      <span></span><span></span><span></span>
-                    </div>
-                  }
-                  <div class="robot-antenna-set">
-                    <span class="antenna antenna-left"></span>
-                    <span class="antenna antenna-center"></span>
-                    <span class="antenna antenna-right"></span>
+              </div>
+              <ul class="contact-list">
+                <li>
+                  <span class="material-symbols-outlined">call</span>
+                  <div>
+                    <strong>+54 351 123-4567</strong>
+                    <small>Atenci&oacute;n comercial</small>
                   </div>
-                  <div
-                    class="robot-head"
-                    [class.talking]="isBotSpeaking"
-                    [class.thinking]="isBotThinking"
-                    >
-                    <span class="head-screw screw-top-left"></span>
-                    <span class="head-screw screw-top-right"></span>
-                    <span class="head-screw screw-bottom-left"></span>
-                    <span class="head-screw screw-bottom-right"></span>
-                    <div class="head-ear ear-left"></div>
-                    <div class="head-ear ear-right"></div>
+                </li>
+                <li>
+                  <span class="material-symbols-outlined">mail</span>
+                  <div>
+                    <strong>info&#64;polo52.com</strong>
+                    <small>Contacto general</small>
+                  </div>
+                </li>
+                <li>
+                  <span class="material-symbols-outlined">schedule</span>
+                  <div>
+                    <strong>24/7 Disponible</strong>
+                    <small>Siempre listos para ayudarte</small>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      } @else {
+        <section class="voice-experience">
+          <div class="voice-hero">
+            <div class="voice-hero-header">
+              <div>
+                <p class="tag-label">POLO BOT</p>
+              </div>
+            </div>
+            <div class="voice-stage">
+              <div
+                class="speech-bubble user-bubble"
+                [class.filled]="voiceUserText"
+                [class.typing]="voiceUserTyping"
+              >
+                <span class="bubble-label">Tu consulta</span>
+                <p aria-live="polite">
+                  {{
+                    voiceUserText ||
+                      'Toca el microfono y hablame de lo que necesitas'
+                  }}
+                </p>
+              </div>
+              <div class="robot-figure" [class.thinking]="isBotThinking">
+                @if (isBotThinking) {
+                  <div class="thinking-indicator" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                  </div>
+                }
+                <div
+                  class="robot-head"
+                  [class.talking]="isBotSpeaking"
+                  [class.thinking]="isBotThinking"
+                >
+                  <div class="head-ear ear-left"></div>
+                  <div class="head-ear ear-right"></div>
+                  <div class="robot-face">
                     <div class="robot-eyes">
                       <div class="eye eye-left">
                         <span class="pupil"></span>
-                        <span class="shine"></span>
                       </div>
                       <div class="eye eye-right">
                         <span class="pupil"></span>
-                        <span class="shine"></span>
                       </div>
                     </div>
                     <div
@@ -303,79 +255,69 @@ interface Message {
                       [class.talking]="isBotSpeaking"
                     ></div>
                   </div>
-                  <div class="robot-neck"></div>
-                  <div class="robot-body">
-                    <div class="body-plate">
-                      <div class="logo-box" aria-label="Logo Polo 52"></div>
-                    </div>
-                    <div class="robot-arm arm-left">
-                      <span class="arm-joint"></span>
-                      <span class="hand"></span>
-                    </div>
-                    <div class="robot-arm arm-right">
-                      <span class="arm-joint"></span>
-                      <span class="hand"></span>
-                    </div>
-                  </div>
-                  <div class="robot-legs">
-                    <div class="leg leg-left">
-                      <span class="leg-knee"></span>
-                      <span class="foot"></span>
-                    </div>
-                    <div class="leg leg-right">
-                      <span class="leg-knee"></span>
-                      <span class="foot"></span>
-                    </div>
-                  </div>
                 </div>
-                <div
-                  class="speech-bubble bot-bubble"
-                  [class.filled]="voiceBotText"
-                  [class.typing]="voiceBotTyping"
-                  >
-                  <span class="bubble-label">Respuesta del bot</span>
-                  <p aria-live="polite">
-                    {{
-                    voiceBotText ||
-                    'Aca aparecera mi respuesta automatica para que la leas mientras la escuchas.'
-                    }}
-                  </p>
+                <div class="robot-neck"></div>
+                <div class="robot-body">
+                  <div class="robot-arm arm-left">
+                    <span class="arm-joint"></span>
+                    <span class="hand"></span>
+                  </div>
+                  <div class="robot-arm arm-right">
+                    <span class="arm-joint"></span>
+                    <span class="hand"></span>
+                  </div>
+                  <div class="body-plate">
+                    <div class="logo-box" aria-label="Logo Polo 52"></div>
+                  </div>
                 </div>
               </div>
-              <div class="voice-controls">
-                <button
-                  type="button"
-                  class="mic-button"
-                  [class.is-recording]="isRecording"
-                  (click)="toggleRecording()"
+              <div
+                class="speech-bubble bot-bubble"
+                [class.filled]="voiceBotText"
+                [class.typing]="voiceBotTyping"
+              >
+                <span class="bubble-label">Respuesta del bot</span>
+                <p aria-live="polite">
+                  {{
+                    voiceBotText ||
+                      'Aca aparecera mi respuesta automatica para que la leas mientras la escuchas.'
+                  }}
+                </p>
+              </div>
+            </div>
+            <div class="voice-controls">
+              <button
+                type="button"
+                class="mic-button"
+                [class.is-recording]="isRecording"
+                (click)="toggleRecording()"
                 [disabled]="
                   !supportsVoice || (isProcessingVoice && !isRecording)
                 "
-                  [attr.aria-pressed]="isRecording"
-                  >
-                  <span class="material-symbols-outlined">
-                    {{ isRecording ? 'stop_circle' : 'mic' }}
-                  </span>
-                </button>
-                <p class="mic-helper">{{ voiceHelperText }}</p>
-                <div class="voice-status">
-                  @if (isRecording) {
-                    <span>Escuchando tu consulta...</span>
-                  }
-                  @if (!isRecording && isProcessingVoice) {
-                    <span>POLO esta pensando...</span>
-                  }
-                </div>
-                @if (voiceError) {
-                  <p class="voice-error">{{ voiceError }}</p>
+                [attr.aria-pressed]="isRecording"
+              >
+                <span class="material-symbols-outlined">
+                  {{ isRecording ? 'stop_circle' : 'mic' }}
+                </span>
+              </button>
+              <p class="mic-helper">{{ voiceHelperText }}</p>
+              <div class="voice-status">
+                @if (isRecording) {
+                  <span>Escuchando tu consulta...</span>
+                }
+                @if (!isRecording && isProcessingVoice) {
+                  <span>POLO esta pensando...</span>
                 }
               </div>
+              @if (voiceError) {
+                <p class="voice-error">{{ voiceError }}</p>
+              }
             </div>
-          </section>
-        }
-    
-      </div>
-    `,
+          </div>
+        </section>
+      }
+    </div>
+  `,
 
   styleUrl: './chat.component.css',
 })
@@ -389,9 +331,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   messages: Message[] = [];
   userMessage = '';
   isTyping = false;
-  isDarkMode = false;
   quickQuestions: string[] = [];
-  chatMode: 'text' | 'voice' = 'text';
+  chatMode: 'text' | 'voice' = 'voice';
   isRecording = false;
   isProcessingVoice = false;
   supportsVoice =
@@ -430,6 +371,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private botBubbleTypingTimeout?: number;
   private speechRecognition: any = null;
   private botStreamController?: AbortController;
+  private speakingFallbackTimeout?: number;
+  private audioContext?: AudioContext;
+  private analyserNode?: AnalyserNode;
+  private silenceRafId?: number;
 
   constructor() {
     if (!this.supportsVoice) {
@@ -438,11 +383,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnInit() {
-    const savedTheme = localStorage.getItem('chatTheme');
-    this.isDarkMode = savedTheme === 'dark';
     this.loadPopularQuestions();
     this.addBotMessage(
-      'Bienvenido al Parque Industrial POLO 52.\n\nMi nombre es POLO y estoy aqu\u00ed para ayudarte con consultas sobre las empresas y servicios disponibles en el parque. \u00bfEn qu\u00e9 puedo asistirte?'
+      'Bienvenido al Parque Industrial POLO 52.\n\nMi nombre es POLO y estoy aqu\u00ed para ayudarte con consultas sobre el parque. \u00bfEn qu\u00e9 puedo asistirte?',
     );
   }
 
@@ -457,7 +400,11 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.stopBubbleTyping('user');
     this.stopBubbleTyping('bot');
     this.stopRecording(true);
+    this.stopSilenceDetection();
     this.cleanupMediaStream();
+    if (this.speakingFallbackTimeout) {
+      clearTimeout(this.speakingFallbackTimeout);
+    }
   }
 
   get voiceHelperText(): string {
@@ -466,7 +413,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     if (this.isRecording) {
-      return 'Estamos escuchando tu consulta...';
+      return 'Te escucho... hace silencio cuando termines y te respondo.';
     }
 
     if (this.isProcessingVoice) {
@@ -493,17 +440,12 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('chatTheme', this.isDarkMode ? 'dark' : 'light');
-  }
-
   toggleRecording() {
     if (!this.supportsVoice) {
       this.voiceError = 'Tu dispositivo no permite usar el microfono.';
       this.typeFinalBubbleText(
         'user',
-        'Tu dispositivo no permite usar el microfono.'
+        'Tu dispositivo no permite usar el microfono.',
       );
       this.stopBubbleTyping('bot');
       return;
@@ -604,7 +546,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     try {
       localStorage.setItem(
         this.popularQuestionsKey,
-        JSON.stringify(this.questionStats)
+        JSON.stringify(this.questionStats),
       );
     } catch (error) {
       console.warn('No se pudieron guardar las consultas populares:', error);
@@ -620,7 +562,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     if (top.length < 4) {
       const remainingDefaults = this.defaultQuickQuestions.filter(
-        (question) => !top.includes(question)
+        (question) => !top.includes(question),
       );
       this.quickQuestions = [...top, ...remainingDefaults].slice(0, 4);
     } else {
@@ -673,8 +615,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
             error.status === 0
               ? 'No se pudo conectar con el servidor. Verifique la conexion.'
               : error.status >= 500
-              ? 'El servidor esta experimentando problemas. Intente mas tarde.'
-              : 'Lo siento, hubo un problema tecnico. Por favor, intente nuevamente.';
+                ? 'El servidor esta experimentando problemas. Intente mas tarde.'
+                : 'Lo siento, hubo un problema tecnico. Por favor, intente nuevamente.';
           this.simulateTyping(msg);
         },
       });
@@ -882,6 +824,11 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.voiceBotText = '';
     this.cancelBotStream();
     this.stopBubbleTyping('bot');
+    if (this.speakingFallbackTimeout) {
+      clearTimeout(this.speakingFallbackTimeout);
+      this.speakingFallbackTimeout = undefined;
+    }
+    this.isBotSpeaking = false;
     this.startBubbleTyping('user', 'Escuchando tu consulta...');
 
     try {
@@ -932,6 +879,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
       recorder.start();
       this.isRecording = true;
       this.startSpeechRecognition();
+      this.startSilenceDetection(stream);
     } catch (error) {
       console.error('No se pudo iniciar la grabacion', error);
       this.voiceError =
@@ -952,6 +900,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     this.isRecording = false;
     this.stopSpeechRecognition();
+    this.stopSilenceDetection();
     this.cancelBotStream();
 
     if (discard) {
@@ -960,11 +909,105 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  /**
+   * Analiza el volumen del microfono en vivo: apenas detecta un tramo de
+   * silencio despues de que la persona hablo, corta la grabacion sola y
+   * dispara el envio de la consulta (no hace falta volver a tocar el mic).
+   */
+  private startSilenceDetection(stream: MediaStream) {
+    const SPEECH_RMS_THRESHOLD = 0.025;
+    const SILENCE_DURATION_MS = 1400;
+    const NO_SPEECH_TIMEOUT_MS = 8000;
+
+    try {
+      const AudioContextClass: typeof AudioContext =
+        (window as any).AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      this.audioContext = audioContext;
+      this.analyserNode = analyser;
+
+      const dataArray = new Uint8Array(analyser.fftSize);
+      const recordingStart = Date.now();
+      let hasSpeech = false;
+      let silenceStart: number | null = null;
+
+      const tick = () => {
+        if (!this.isRecording || !this.analyserNode) return;
+
+        this.analyserNode.getByteTimeDomainData(dataArray);
+        let sumSquares = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          const normalized = (dataArray[i] - 128) / 128;
+          sumSquares += normalized * normalized;
+        }
+        const rms = Math.sqrt(sumSquares / dataArray.length);
+
+        if (rms > SPEECH_RMS_THRESHOLD) {
+          hasSpeech = true;
+          silenceStart = null;
+        } else if (hasSpeech) {
+          if (silenceStart === null) {
+            silenceStart = Date.now();
+          } else if (Date.now() - silenceStart >= SILENCE_DURATION_MS) {
+            this.stopRecording();
+            return;
+          }
+        } else if (Date.now() - recordingStart >= NO_SPEECH_TIMEOUT_MS) {
+          this.voiceError =
+            'No te escuche. Toca el microfono e intenta de nuevo.';
+          this.stopRecording(true);
+          return;
+        }
+
+        this.silenceRafId = requestAnimationFrame(tick);
+      };
+
+      this.silenceRafId = requestAnimationFrame(tick);
+    } catch (error) {
+      console.error('No se pudo iniciar la deteccion de silencio', error);
+    }
+  }
+
+  private stopSilenceDetection() {
+    if (this.silenceRafId) {
+      cancelAnimationFrame(this.silenceRafId);
+      this.silenceRafId = undefined;
+    }
+    this.analyserNode = undefined;
+    if (this.audioContext) {
+      this.audioContext.close().catch(() => {});
+      this.audioContext = undefined;
+    }
+  }
+
   private cleanupMediaStream() {
     if (this.activeStream) {
       this.activeStream.getTracks().forEach((track) => track.stop());
       this.activeStream = undefined;
     }
+  }
+
+  private speakOutFallback(text: string) {
+    if (this.speakingFallbackTimeout) {
+      clearTimeout(this.speakingFallbackTimeout);
+      this.speakingFallbackTimeout = undefined;
+    }
+    if (!text) {
+      this.isBotSpeaking = false;
+      return;
+    }
+    this.isBotSpeaking = true;
+    const duration = Math.min(6000, Math.max(1200, text.length * 60));
+    this.speakingFallbackTimeout = setTimeout(() => {
+      this.isBotSpeaking = false;
+      this.speakingFallbackTimeout = undefined;
+      this.cdr.detectChanges();
+    }, duration) as unknown as number;
   }
 
   private getPreferredMimeType(): string | undefined {
@@ -994,53 +1037,61 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.chatService.sendAudio(formData).subscribe({
       next: (resp: VoiceChatResponse) => {
         this.isProcessingVoice = false;
-        const transcript = resp?.data?.transcript?.trim();
-        const botTextRaw = resp?.data?.text;
-        const botText = typeof botTextRaw === 'string' ? botTextRaw.trim() : '';
 
-        if (transcript) {
-          this.addUserMessage(transcript);
-        } else {
-          this.syncVoiceBubble('user', 'Consulta enviada con exito.');
-        }
+        try {
+          const transcript = String(resp?.data?.transcript ?? '').trim();
+          const botText = String(resp?.data?.text ?? '').trim();
 
-        // Fijar siempre texto en burbuja del bot (aunque el audio salga bien)
-        this.stopBubbleTyping('bot');
-        this.voiceBotTyping = false;
-        this.voiceBotText =
-          botText ||
-          'No pude mostrar el texto, pero ya se reprodujo la respuesta.';
-        this.setBubbleText('bot', this.voiceBotText);
-        this.cdr.detectChanges();
-        if (botText) {
-          this.addBotMessage(botText);
-        }
-
-        const b64 = resp?.data?.audio_base64;
-        if (b64) {
-          try {
-            const audio = new Audio(`data:audio/mpeg;base64,${b64}`);
-            this.isBotSpeaking = true;
-            audio.onended = () => {
-              this.isBotSpeaking = false;
-              this.cdr.detectChanges();
-            };
-            audio.onerror = () => {
-              this.isBotSpeaking = false;
-              this.cdr.detectChanges();
-            };
-            this.isBotSpeaking = true;
-            this.cdr.detectChanges();
-            audio.play().catch(() => {
-              this.isBotSpeaking = false;
-              this.cdr.detectChanges();
-            });
-          } catch {
-            this.isBotSpeaking = false;
+          if (transcript) {
+            this.addUserMessage(transcript);
+          } else {
+            this.syncVoiceBubble('user', 'Consulta enviada con exito.');
           }
-        } else {
+
+          // Fijar siempre texto en burbuja del bot (aunque el audio salga bien)
+          this.stopBubbleTyping('bot');
+          this.voiceBotTyping = false;
+          this.voiceBotText =
+            botText ||
+            'No pude mostrar el texto, pero ya se reprodujo la respuesta.';
+          this.setBubbleText('bot', this.voiceBotText);
+          if (botText) {
+            this.addBotMessage(botText);
+          }
+
+          const b64 = resp?.data?.audio_base64;
+          if (b64) {
+            try {
+              const audio = new Audio(`data:audio/mpeg;base64,${b64}`);
+              this.isBotSpeaking = true;
+              audio.onended = () => {
+                this.isBotSpeaking = false;
+                this.cdr.detectChanges();
+              };
+              audio.onerror = () => {
+                this.speakOutFallback(botText);
+              };
+              audio.play().catch(() => {
+                // El navegador bloqueo el autoplay: igual animamos la boca
+                this.speakOutFallback(botText);
+              });
+            } catch {
+              this.speakOutFallback(botText);
+            }
+          } else {
+            this.speakOutFallback(botText);
+          }
+        } catch (err) {
+          console.error('Error al procesar la respuesta de voz', err);
+          this.stopBubbleTyping('bot');
+          this.voiceBotTyping = false;
+          this.voiceBotText =
+            'No pude mostrar el texto, pero ya se reprodujo la respuesta.';
+          this.setBubbleText('bot', this.voiceBotText);
           this.isBotSpeaking = false;
         }
+
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error al enviar audio', error);
@@ -1049,14 +1100,11 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
           error.status === 0
             ? 'No se pudo conectar con el servidor. Verifica tu conexion.'
             : 'No se pudo procesar el audio. Proba nuevamente en unos segundos.';
-        this.cdr.detectChanges();
         this.stopBubbleTyping('bot');
         this.voiceBotTyping = false;
         this.voiceBotText =
           'No pude procesar el audio. Proba nuevamente en unos segundos.';
-        this.cdr.detectChanges();
-        this.stopBubbleTyping('bot');
-        this.voiceBotTyping = false;
+        this.setBubbleText('bot', this.voiceBotText);
         this.syncVoiceBubble('user', 'No pudimos recibir tu consulta.');
         this.isBotSpeaking = false;
         this.cdr.detectChanges();
@@ -1064,4 +1112,3 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
 }
-

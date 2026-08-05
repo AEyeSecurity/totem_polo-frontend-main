@@ -166,42 +166,9 @@ export class EmpresaMeComponent implements OnInit {
 
   // Expanded rows
   expandedRows = new Set<string>();
-  public isDarkMode = false;
-
   ngOnInit(): void {
     this.loadTipos();
     this.loadEmpresaData();
-
-    const savedTheme = localStorage.getItem('theme');
-    this.isDarkMode = savedTheme === 'dark';
-    this.syncDarkModeWithDocument();
-  }
-
-  toggleDarkMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-
-    this.syncDarkModeWithDocument();
-  }
-
-  private syncDarkModeWithDocument(): void {
-    const body = document.body;
-    const html = document.documentElement;
-
-    body.classList.toggle('dark-theme', this.isDarkMode);
-    html.classList.toggle('dark-theme', this.isDarkMode);
-
-    if (this.isDarkMode) {
-      body.style.background = '#1a223b';
-      body.style.margin = '0';
-      body.style.padding = '0';
-      html.style.background = '#1a223b';
-    } else {
-      body.style.background = '#f8f9fa';
-      html.style.background = '#ffffff';
-      body.style.margin = '';
-      body.style.padding = '';
-    }
   }
 
   isVehiculoExpanded(id: number | null | undefined): boolean {

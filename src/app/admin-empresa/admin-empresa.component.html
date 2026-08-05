@@ -4,7 +4,7 @@
   rel="stylesheet"
 />
 
-<div class="admin-layout" [class.dark-mode]="isDarkMode">
+<div class="admin-layout">
   <app-update-reminder-modal
     [showModal]="showReminderModal"
     (closed)="onReminderClosed()"
@@ -792,28 +792,6 @@
             (passwordChanged)="onPasswordChanged($event)"
           >
           </app-password-change-modal>
-        </div>
-        <!-- Tema -->
-        <div class="card setting-card">
-          <div class="setting-header">
-            <span class="material-symbols-outlined setting-icon"
-              >dark_mode</span
-            >
-            <div>
-              <h2>Modo oscuro</h2>
-              <p class="muted">Modifica el esquema de colores de la app</p>
-            </div>
-          </div>
-          <button
-            class="btn outline-primary"
-            type="button"
-            (click)="toggleDarkMode()"
-          >
-            <span class="material-symbols-outlined">
-              {{ isDarkMode ? "light_mode" : "dark_mode" }}
-            </span>
-            <span>{{ isDarkMode ? "Modo claro" : "Modo oscuro" }}</span>
-          </button>
         </div>
         <!-- Sesion -->
         <div class="card setting-card">

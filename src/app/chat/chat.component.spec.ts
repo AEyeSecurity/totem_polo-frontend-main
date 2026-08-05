@@ -44,26 +44,12 @@ describe('ChatbotComponent', () => {
     expect(component.messages[0].sender).toBe('bot');
   });
 
-  it('should default to light mode when there is no saved theme', () => {
-    expect(component.isDarkMode).toBeFalse();
-  });
-
-  it('toggleTheme should flip isDarkMode and persist it', () => {
-    component.toggleTheme();
-    expect(component.isDarkMode).toBeTrue();
-    expect(localStorage.getItem('chatTheme')).toBe('dark');
-
-    component.toggleTheme();
-    expect(component.isDarkMode).toBeFalse();
-    expect(localStorage.getItem('chatTheme')).toBe('light');
-  });
-
   it('setChatMode should switch between text and voice', () => {
-    expect(component.chatMode).toBe('text');
-    component.setChatMode('voice');
     expect(component.chatMode).toBe('voice');
     component.setChatMode('text');
     expect(component.chatMode).toBe('text');
+    component.setChatMode('voice');
+    expect(component.chatMode).toBe('voice');
   });
 
   it('should ignore empty messages', () => {
