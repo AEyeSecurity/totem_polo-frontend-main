@@ -12,6 +12,12 @@ interface LoginResponse {
   token_type: string;
   tipo_rol: string;
 }
+interface CheckRememberResponse {
+  logged_in: boolean;
+  user?: { nombre: string; email: string; tipo_rol: string };
+  access_token?: string;
+  token_type?: string;
+}
 interface RegisterResponse {
   message: string;
 }
@@ -54,14 +60,21 @@ export class AuthenticationService {
     const body = new HttpParams()
       .set('grant_type', 'password')
       .set('username', username)
-      .set('password', password);
+      .set('password', password)
+      .set('remember_me', keepLoggedIn ? 'true' : 'false');
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded',
     });
 
     return this.http
-      .post<LoginResponse>(this.loginUrl, body.toString(), { headers })
+      .post<LoginResponse>(this.loginUrl, body.toString(), {
+        headers,
+        // Necesario para que el navegador acepte y guarde la cookie
+        // "remember_token" (httpOnly) que devuelve el backend cuando
+        // remember_me=true; sin esto la cookie se descarta igual.
+        withCredentials: true,
+      })
       .pipe(
         tap((res) => {
           // Elegir storage: persistente (local) o de sesión
@@ -86,6 +99,35 @@ export class AuthenticationService {
       );
   }
 
+  // -------------------- RESTAURAR SESIÓN ("recordarme") --------------------
+  /**
+   * Si el usuario tildó "Recordarme", el backend dejó una cookie httpOnly
+   * (remember_token, 30 días) que este método intenta canjear por un
+   * access_token nuevo. Se usa cuando no hay token válido en storage (por
+   * ejemplo, tras cerrar y reabrir el navegador) para evitar mandar al
+   * usuario al login si su sesión "recordada" todavía es válida.
+   */
+  tryRestoreSessionFromRememberCookie(): Observable<boolean> {
+    return this.http
+      .get<CheckRememberResponse>(`${environment.apiUrl}/check-remember`, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((res) => {
+          if (res.logged_in && res.access_token && res.user) {
+            localStorage.setItem(this.sessionKey, res.access_token);
+            localStorage.setItem('rol', res.user.tipo_rol);
+            localStorage.setItem('remember', '1');
+          }
+        }),
+        map((res) => !!(res.logged_in && res.access_token)),
+        catchError((err) => {
+          console.error('No se pudo restaurar sesión desde remember_token', err);
+          return of(false);
+        })
+      );
+  }
+
   // -------------------- LOGOUT --------------------
   logout(): Observable<boolean> {
     const token = this.getToken();
@@ -101,19 +143,27 @@ export class AuthenticationService {
       'Content-Type': 'application/json',
     });
 
-    return this.http.post<LogoutResponse>(this.logoutUrl, {}, { headers }).pipe(
-      tap(() => {
-        this.clearSession();
-        this.router.navigate(['/login']);
-      }),
-      map(() => true),
-      catchError((err) => {
-        console.error('Error en logout:', err);
-        this.clearSession();
-        this.router.navigate(['/login']);
-        return of(false);
-      })
-    );
+    return this.http
+      .post<LogoutResponse>(
+        this.logoutUrl,
+        {},
+        // withCredentials para que el navegador aplique el borrado de la
+        // cookie remember_token que devuelve el backend en la respuesta.
+        { headers, withCredentials: true }
+      )
+      .pipe(
+        tap(() => {
+          this.clearSession();
+          this.router.navigate(['/login']);
+        }),
+        map(() => true),
+        catchError((err) => {
+          console.error('Error en logout:', err);
+          this.clearSession();
+          this.router.navigate(['/login']);
+          return of(false);
+        })
+      );
   }
 
   logoutLocal(): void {
