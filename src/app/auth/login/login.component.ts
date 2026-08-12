@@ -21,7 +21,6 @@ export class LoginComponent implements OnInit {
 
   username = '';
   password = '';
-  keepLoggedIn = false; // <- se pisa en ngOnInit con el flag guardado
 
   // Validación
   usernameError = false;
@@ -49,20 +48,8 @@ export class LoginComponent implements OnInit {
   blockTimeRemaining = 0;
 
   ngOnInit(): void {
-    // Restaurar el estado del check
-    this.keepLoggedIn = localStorage.getItem('remember') === '1';
-
     if (this.authService.isLoggedIn()) {
       this.redirectByRole();
-    } else {
-      // Si no hay token local válido (ej: se cerró el navegador), probamos
-      // si hay una sesión "recordada" (cookie remember_token) para no
-      // mostrar el login de nuevo innecesariamente.
-      this.authService.tryRestoreSessionFromRememberCookie().subscribe((restored) => {
-        if (restored) {
-          this.redirectByRole();
-        }
-      });
     }
     this.checkBlockStatus();
   }
@@ -125,14 +112,11 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     this.authService
-      .login(this.username.trim(), this.password, this.keepLoggedIn)
+      .login(this.username.trim(), this.password)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (ok) => {
           if (ok) {
-            // ✅ Guardar la preferencia para próximos inicios
-            localStorage.setItem('remember', this.keepLoggedIn ? '1' : '0');
-
             this.successMessage = '¡Inicio de sesión exitoso! Redirigiendo...';
             this.loginAttempts = 0;
             setTimeout(() => this.redirectByRole(), 1200);
@@ -298,8 +282,6 @@ export class LoginComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
-    // Si querés, podés forzar recordar para Google:
-    localStorage.setItem('remember', '1');
     const baseApi = environment.apiUrl.replace(/\/$/, '');
     window.location.href = `${baseApi}/auth/google/login`;
   }

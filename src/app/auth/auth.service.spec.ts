@@ -52,10 +52,10 @@ describe('AuthenticationService', () => {
   });
 
   describe('login', () => {
-    it('should POST form-encoded credentials and store the token in localStorage when keepLoggedIn is true', () => {
+    it('should POST form-encoded credentials and store the token in localStorage', () => {
       let result: boolean | undefined;
 
-      service.login('juan', 'secret', true).subscribe((ok) => (result = ok));
+      service.login('juan', 'secret').subscribe((ok) => (result = ok));
 
       const req = httpMock.expectOne(`${environment.apiUrl}/login`);
       expect(req.request.method).toBe('POST');
@@ -75,28 +75,12 @@ describe('AuthenticationService', () => {
       expect(result).toBeTrue();
       expect(localStorage.getItem('sessionToken')).toBe('abc123');
       expect(localStorage.getItem('rol')).toBe('admin_polo');
-      expect(localStorage.getItem('remember')).toBe('1');
-      expect(sessionStorage.getItem('sessionToken')).toBeNull();
-    });
-
-    it('should store the token in sessionStorage when keepLoggedIn is false', () => {
-      service.login('juan', 'secret', false).subscribe();
-
-      const req = httpMock.expectOne(`${environment.apiUrl}/login`);
-      req.flush({
-        access_token: 'xyz789',
-        token_type: 'bearer',
-        tipo_rol: 'publico',
-      });
-
-      expect(sessionStorage.getItem('sessionToken')).toBe('xyz789');
-      expect(localStorage.getItem('sessionToken')).toBeNull();
     });
 
     it('should resolve to false and swallow the error when the request fails', () => {
       let result: boolean | undefined;
 
-      service.login('juan', 'bad', false).subscribe((ok) => (result = ok));
+      service.login('juan', 'bad').subscribe((ok) => (result = ok));
 
       const req = httpMock.expectOne(`${environment.apiUrl}/login`);
       req.flush(

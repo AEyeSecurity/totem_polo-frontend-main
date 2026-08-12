@@ -298,65 +298,11 @@
   display: block;
 }
 
-/* Sección Recordarme */
-.remember-section {
+.login-extra-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin: 10px 0;
-}
-
-.remember-checkbox {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  font-size: 0.8rem;
-  color: #4a5568;
-  position: relative;
-}
-
-.remember-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.checkmark {
-  height: 14px;
-  width: 14px;
-  background-color: #f7fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 3px;
-  margin-right: 5px;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.remember-checkbox:hover input ~ .checkmark {
-  border-color: #B22222;
-}
-
-.remember-checkbox input:checked ~ .checkmark {
-  background-color: #B22222;
-  border-color: #B22222;
-}
-
-.checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
-  left: 3px;
-  top: 1px;
-  width: 3px;
-  height: 6px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.remember-checkbox input:checked ~ .checkmark:after {
-  display: block;
 }
 
 .forgot-password a {
@@ -956,7 +902,7 @@
     font-size: 20px;
   }
 
-  .remember-section {
+  .login-extra-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
@@ -1106,8 +1052,7 @@
 .login-button:focus,
 .google-button:focus,
 .reset-button:focus,
-.back-button:focus,
-.remember-checkbox:focus-within .checkmark {
+.back-button:focus {
   outline: 2px solid #B22222;
   outline-offset: 2px;
 }

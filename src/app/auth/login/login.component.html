@@ -110,24 +110,13 @@
               }
             </div>
 
-            <!-- Checkbox Recordarme -->
-            <div class="remember-section">
-              <label class="remember-checkbox">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="keepLoggedIn"
-                  name="keepLoggedIn"
-                  />
-                  <span class="checkmark"></span>
-                  Recordarme
-                </label>
-
-                <div class="forgot-password">
-                  <a href="#" (click)="openResetModal(); $event.preventDefault()"
-                    >¿Olvidaste tu contraseña?</a
-                    >
-                  </div>
+            <div class="login-extra-row">
+              <div class="forgot-password">
+                <a href="#" (click)="openResetModal(); $event.preventDefault()"
+                  >¿Olvidaste tu contraseña?</a
+                  >
                 </div>
+              </div>
 
                 <button
                   type="submit"

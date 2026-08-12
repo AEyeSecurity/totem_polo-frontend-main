@@ -12,12 +12,6 @@ interface LoginResponse {
   token_type: string;
   tipo_rol: string;
 }
-interface CheckRememberResponse {
-  logged_in: boolean;
-  user?: { nombre: string; email: string; tipo_rol: string };
-  access_token?: string;
-  token_type?: string;
-}
 interface RegisterResponse {
   message: string;
 }
@@ -52,77 +46,26 @@ export class AuthenticationService {
   private sessionKey = 'sessionToken';
 
   // -------------------- LOGIN --------------------
-  login(
-    username: string,
-    password: string,
-    keepLoggedIn: boolean
-  ): Observable<boolean> {
+  login(username: string, password: string): Observable<boolean> {
     const body = new HttpParams()
       .set('grant_type', 'password')
       .set('username', username)
-      .set('password', password)
-      .set('remember_me', keepLoggedIn ? 'true' : 'false');
+      .set('password', password);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded',
     });
 
     return this.http
-      .post<LoginResponse>(this.loginUrl, body.toString(), {
-        headers,
-        // Necesario para que el navegador acepte y guarde la cookie
-        // "remember_token" (httpOnly) que devuelve el backend cuando
-        // remember_me=true; sin esto la cookie se descarta igual.
-        withCredentials: true,
-      })
+      .post<LoginResponse>(this.loginUrl, body.toString(), { headers })
       .pipe(
         tap((res) => {
-          // Elegir storage: persistente (local) o de sesión
-          const persistent = keepLoggedIn ? localStorage : sessionStorage;
-          const volatile = keepLoggedIn ? sessionStorage : localStorage;
-
-          // Guardar en el storage elegido
-          persistent.setItem(this.sessionKey, res.access_token);
-          persistent.setItem('rol', res.tipo_rol);
-          persistent.setItem('remember', keepLoggedIn ? '1' : '0');
-
-          // Asegurar que NO queden restos en el otro (evita lecturas ambiguas)
-          volatile.removeItem(this.sessionKey);
-          volatile.removeItem('rol');
-          volatile.removeItem('remember');
+          localStorage.setItem(this.sessionKey, res.access_token);
+          localStorage.setItem('rol', res.tipo_rol);
         }),
         map(() => true),
         catchError((err) => {
           console.error('Login fallido', err);
-          return of(false);
-        })
-      );
-  }
-
-  // -------------------- RESTAURAR SESIÓN ("recordarme") --------------------
-  /**
-   * Si el usuario tildó "Recordarme", el backend dejó una cookie httpOnly
-   * (remember_token, 30 días) que este método intenta canjear por un
-   * access_token nuevo. Se usa cuando no hay token válido en storage (por
-   * ejemplo, tras cerrar y reabrir el navegador) para evitar mandar al
-   * usuario al login si su sesión "recordada" todavía es válida.
-   */
-  tryRestoreSessionFromRememberCookie(): Observable<boolean> {
-    return this.http
-      .get<CheckRememberResponse>(`${environment.apiUrl}/check-remember`, {
-        withCredentials: true,
-      })
-      .pipe(
-        tap((res) => {
-          if (res.logged_in && res.access_token && res.user) {
-            localStorage.setItem(this.sessionKey, res.access_token);
-            localStorage.setItem('rol', res.user.tipo_rol);
-            localStorage.setItem('remember', '1');
-          }
-        }),
-        map((res) => !!(res.logged_in && res.access_token)),
-        catchError((err) => {
-          console.error('No se pudo restaurar sesión desde remember_token', err);
           return of(false);
         })
       );
@@ -144,13 +87,7 @@ export class AuthenticationService {
     });
 
     return this.http
-      .post<LogoutResponse>(
-        this.logoutUrl,
-        {},
-        // withCredentials para que el navegador aplique el borrado de la
-        // cookie remember_token que devuelve el backend en la respuesta.
-        { headers, withCredentials: true }
-      )
+      .post<LogoutResponse>(this.logoutUrl, {}, { headers })
       .pipe(
         tap(() => {
           this.clearSession();
@@ -175,12 +112,8 @@ export class AuthenticationService {
     // Tradicional
     localStorage.removeItem(this.sessionKey);
     localStorage.removeItem('rol');
-    sessionStorage.removeItem(this.sessionKey);
-    sessionStorage.removeItem('rol');
 
-    // Flags y Google OAuth (si lo usaste)
-    localStorage.removeItem('remember');
-    sessionStorage.removeItem('remember');
+    // Google OAuth (si lo usaste)
     localStorage.removeItem('access_token');
     localStorage.removeItem('tipo_rol');
   }
@@ -189,9 +122,8 @@ export class AuthenticationService {
   getToken(): string | null {
     // 1) Token tradicional (prioridad)
     const localToken = localStorage.getItem(this.sessionKey);
-    const sessionToken = sessionStorage.getItem(this.sessionKey);
-    if (localToken || sessionToken) {
-      return localToken || sessionToken!;
+    if (localToken) {
+      return localToken;
     }
     // 2) Google OAuth (si aplica)
     const googleToken = localStorage.getItem('access_token');
@@ -204,9 +136,8 @@ export class AuthenticationService {
   getUserRole(): string | null {
     // 1) Rol tradicional (prioridad)
     const localRole = localStorage.getItem('rol');
-    const sessionRole = sessionStorage.getItem('rol');
-    if (localRole || sessionRole) {
-      return localRole || sessionRole!;
+    if (localRole) {
+      return localRole;
     }
     // 2) Rol Google OAuth
     const googleRole = localStorage.getItem('tipo_rol');
@@ -228,9 +159,7 @@ export class AuthenticationService {
       if (isExpired) {
         // Limpiamos solo el token tradicional, sin tocar Google ni navegar
         localStorage.removeItem(this.sessionKey);
-        sessionStorage.removeItem(this.sessionKey);
         localStorage.removeItem('rol');
-        sessionStorage.removeItem('rol');
         return false;
       }
       return true;
@@ -238,9 +167,7 @@ export class AuthenticationService {
       console.error('Error al verificar el token:', error);
       // Limpieza mínima sin navegar
       localStorage.removeItem(this.sessionKey);
-      sessionStorage.removeItem(this.sessionKey);
       localStorage.removeItem('rol');
-      sessionStorage.removeItem('rol');
       return false;
     }
   }
