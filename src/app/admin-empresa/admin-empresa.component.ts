@@ -81,8 +81,9 @@ export class EmpresaMeComponent implements OnInit {
     | 'perfil'
     | 'config' = 'dashboard';
 
-  // limite de items en “Actividad Reciente”
-  private readonly MAX_ACTIVIDADES = 6;
+  // Sin tope real: se quiere ver el listado completo, la lista es
+  // scrolleable en el html.
+  private readonly MAX_ACTIVIDADES = 2000;
 
   // Datos de la empresa
   empresaData: EmpresaDetail | null = null;
@@ -511,7 +512,6 @@ export class EmpresaMeComponent implements OnInit {
 
     [...(this.empresaData?.vehiculos ?? [])]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 3)
       .forEach((vehiculo) =>
         pushActividad(
           'ok',
@@ -524,7 +524,6 @@ export class EmpresaMeComponent implements OnInit {
 
     [...(this.empresaData?.servicios ?? [])]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 3)
       .forEach((servicio) =>
         pushActividad(
           'info',
@@ -537,7 +536,6 @@ export class EmpresaMeComponent implements OnInit {
 
     [...(this.empresaData?.contactos ?? [])]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 3)
       .forEach((contacto) =>
         pushActividad('ok', `Contacto ${contacto.nombre} actualizado`, contacto)
       );

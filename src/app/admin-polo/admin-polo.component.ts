@@ -61,7 +61,9 @@ export class AdminPoloComponent implements OnInit {
 
   activeTab: AdminPoloTab = 'dashboard';
 
-  private readonly MAX_ACTIVIDADES = 6;
+  // Sin tope real: se quiere ver el listado completo (una fila por
+  // empresa/usuario/servicio/lote), la lista es scrolleable en el html.
+  private readonly MAX_ACTIVIDADES = 2000;
   private dashboardDataLoaded = false;
   actividadReciente: {
     tipo: 'ok' | 'warn' | 'info';
@@ -819,7 +821,6 @@ export class AdminPoloComponent implements OnInit {
 
     [...this.empresas]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 3)
       .forEach((empresa) => {
         const estadoLabel = empresa.estado ? 'activa' : 'inactiva';
         const tipo = empresa.estado ? 'ok' : 'warn';
@@ -832,7 +833,6 @@ export class AdminPoloComponent implements OnInit {
 
     [...this.usuarios]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 3)
       .forEach((usuario) => {
         const estadoLabel = usuario.estado ? 'habilitado' : 'inhabilitado';
         const tipo = usuario.estado ? 'ok' : 'warn';
@@ -845,7 +845,6 @@ export class AdminPoloComponent implements OnInit {
 
     [...this.serviciosPolo]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 2)
       .forEach((servicio) => {
         pushActividad(
           'info',
@@ -858,7 +857,6 @@ export class AdminPoloComponent implements OnInit {
 
     [...this.lotes]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .slice(0, 2)
       .forEach((lote) => {
         pushActividad(
           'info',

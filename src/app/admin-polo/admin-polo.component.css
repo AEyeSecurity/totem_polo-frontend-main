@@ -198,7 +198,10 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 }
 .kpi .kpi-sub{font-size:.85rem; color:#8a94ab; margin-top:.15rem;}
 
-.activity-list{list-style:none; padding:0; margin:0;}
+.activity-list{
+  list-style:none; padding:0; margin:0;
+  max-height:440px; overflow-y:auto; padding-right:.4rem;
+}
 .activity-list li{
   display:flex;
   align-items:flex-start;
