@@ -110,43 +110,44 @@
         @if (activeTab === 'dashboard') {
           <section class="resume-grid">
             <div class="kpi card">
-              <div class="kpi-head">
-                <div class="kpi-title">Empresas activas</div>
+              <div class="kpi-icon kpi-icon--red">
                 <span class="material-symbols-outlined">apartment</span>
-                @for (err of getFieldErrors('usuario', 'id_rol'); track err) {
-                  <div
-                    class="error"
-                    >
-                    {{ err.message }}
-                  </div>
-                }
               </div>
-              <div class="kpi-number">{{ empresasActivas }}</div>
-              <div class="kpi-sub">de {{ totalEmpresas }} registradas</div>
+              <div class="kpi-body">
+                <div class="kpi-title">Empresas activas</div>
+                <div class="kpi-number">{{ empresasActivas }}</div>
+                <div class="kpi-sub">de {{ totalEmpresas }} registradas</div>
+              </div>
             </div>
             <div class="kpi card">
-              <div class="kpi-head">
-                <div class="kpi-title">Usuarios habilitados</div>
+              <div class="kpi-icon kpi-icon--blue">
                 <span class="material-symbols-outlined">group</span>
               </div>
-              <div class="kpi-number">{{ usuariosActivos }}</div>
-              <div class="kpi-sub">de {{ totalUsuarios }} usuarios</div>
+              <div class="kpi-body">
+                <div class="kpi-title">Usuarios habilitados</div>
+                <div class="kpi-number">{{ usuariosActivos }}</div>
+                <div class="kpi-sub">de {{ totalUsuarios }} usuarios</div>
+              </div>
             </div>
             <div class="kpi card">
-              <div class="kpi-head">
-                <div class="kpi-title">Servicios del polo</div>
+              <div class="kpi-icon kpi-icon--purple">
                 <span class="material-symbols-outlined">room_service</span>
               </div>
-              <div class="kpi-number">{{ totalServiciosPolo }}</div>
-              <div class="kpi-sub">servicios disponibles</div>
+              <div class="kpi-body">
+                <div class="kpi-title">Servicios del polo</div>
+                <div class="kpi-number">{{ totalServiciosPolo }}</div>
+                <div class="kpi-sub">servicios disponibles</div>
+              </div>
             </div>
             <div class="kpi card">
-              <div class="kpi-head">
-                <div class="kpi-title">Lotes registrados</div>
+              <div class="kpi-icon kpi-icon--amber">
                 <span class="material-symbols-outlined">grid_view</span>
               </div>
-              <div class="kpi-number">{{ totalLotes }}</div>
-              <div class="kpi-sub">lotes asociados</div>
+              <div class="kpi-body">
+                <div class="kpi-title">Lotes registrados</div>
+                <div class="kpi-number">{{ totalLotes }}</div>
+                <div class="kpi-sub">lotes asociados</div>
+              </div>
             </div>
             <div class="card activity">
               <h2>Actividad reciente</h2>
@@ -178,11 +179,11 @@
               <div class="quick-list">
                 <button class="quick-btn" type="button" (click)="quickAddEmpresa()">
                   <span class="material-symbols-outlined">add</span>
-                  Nueva empresa
+                  <span class="quick-btn-label">Nueva empresa</span>
                 </button>
                 <button class="quick-btn" type="button" (click)="quickAddUsuario()">
                   <span class="material-symbols-outlined">add</span>
-                  Nuevo usuario
+                  <span class="quick-btn-label">Nuevo usuario</span>
                 </button>
                 <button
                   class="quick-btn"
@@ -190,11 +191,11 @@
                   (click)="quickAddServicioPolo()"
                   >
                   <span class="material-symbols-outlined">add</span>
-                  Servicio del polo
+                  <span class="quick-btn-label">Servicio del polo</span>
                 </button>
                 <button class="quick-btn" type="button" (click)="quickAddLote()">
                   <span class="material-symbols-outlined">add</span>
-                  Registrar lote
+                  <span class="quick-btn-label">Registrar lote</span>
                 </button>
               </div>
             </div>

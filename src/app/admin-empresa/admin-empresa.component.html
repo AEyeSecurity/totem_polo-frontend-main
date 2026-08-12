@@ -119,42 +119,50 @@
       <section class="resume-grid">
         <!-- Metricas -->
         <div class="kpi card">
-          <div class="kpi-head">
-            <div class="kpi-title">Vehiculos Activos</div>
+          <div class="kpi-icon kpi-icon--blue">
             <span class="material-symbols-outlined">local_shipping</span>
           </div>
-          <div class="kpi-number">{{ vehiculosActivos }}</div>
-          <div class="kpi-sub">de {{ vehiculosActivos }} total</div>
+          <div class="kpi-body">
+            <div class="kpi-title">Vehiculos Activos</div>
+            <div class="kpi-number">{{ vehiculosActivos }}</div>
+            <div class="kpi-sub">de {{ vehiculosActivos }} total</div>
+          </div>
         </div>
         <div class="kpi card">
-          <div class="kpi-head">
-            <div class="kpi-title">Servicios</div>
+          <div class="kpi-icon kpi-icon--purple">
             <span class="material-symbols-outlined">stacked_bar_chart</span>
           </div>
-          <div class="kpi-number">{{ totalServicios }}</div>
-          <div class="kpi-sub">servicios disponibles</div>
+          <div class="kpi-body">
+            <div class="kpi-title">Servicios</div>
+            <div class="kpi-number">{{ totalServicios }}</div>
+            <div class="kpi-sub">servicios disponibles</div>
+          </div>
         </div>
         <div class="kpi card">
-          <div class="kpi-head">
-            <div class="kpi-title">Contactos</div>
+          <div class="kpi-icon kpi-icon--green">
             <span class="material-symbols-outlined">group</span>
           </div>
-          <div class="kpi-number">{{ totalContactos }}</div>
-          <div class="kpi-sub">contacto/s</div>
+          <div class="kpi-body">
+            <div class="kpi-title">Contactos</div>
+            <div class="kpi-number">{{ totalContactos }}</div>
+            <div class="kpi-sub">contacto/s</div>
+          </div>
         </div>
         <div class="kpi card">
-          <div class="kpi-head">
-            <div class="kpi-title">Estado</div>
+          <div class="kpi-icon kpi-icon--red">
             <span class="material-symbols-outlined">schedule</span>
           </div>
-          <div
-            class="status"
-            [class.active]="estaActiva"
-            [class.inactive]="!estaActiva"
-          >
-            {{ estaActiva ? "Activo" : "Inactivo" }}
+          <div class="kpi-body">
+            <div class="kpi-title">Estado</div>
+            <span
+              class="status-badge"
+              [class.active]="estaActiva"
+              [class.inactive]="!estaActiva"
+            >
+              {{ estaActiva ? "Activo" : "Inactivo" }}
+            </span>
+            <div class="kpi-sub">desde {{ desdeIngreso }}</div>
           </div>
-          <div class="kpi-sub">desde {{ desdeIngreso }}</div>
         </div>
         <!-- Actividad reciente -->
         <div class="card activity">
@@ -185,15 +193,16 @@
           <h2>Accesos Rapidos</h2>
           <div class="quick-list">
             <button class="quick-btn" (click)="quickAddVehiculo()">
-              <span class="material-symbols-outlined">add</span> Agregar
-              Vehiculo
+              <span class="material-symbols-outlined">add</span>
+              <span class="quick-btn-label">Agregar Vehiculo</span>
             </button>
             <button class="quick-btn" (click)="quickAddServicio()">
-              <span class="material-symbols-outlined">add</span> Nuevo Servicio
+              <span class="material-symbols-outlined">add</span>
+              <span class="quick-btn-label">Nuevo Servicio</span>
             </button>
             <button class="quick-btn" (click)="quickAddContacto()">
-              <span class="material-symbols-outlined">add</span> Agregar
-              Contacto
+              <span class="material-symbols-outlined">add</span>
+              <span class="quick-btn-label">Agregar Contacto</span>
             </button>
           </div>
         </div>
