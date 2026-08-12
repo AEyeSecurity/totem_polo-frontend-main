@@ -7,7 +7,14 @@
   <div class="admin-layout">
     <!-- Topbar -->
     <nav class="topbar">
-      <div class="topbar-left">
+      <div
+        class="topbar-left"
+        role="button"
+        tabindex="0"
+        (click)="setActiveTab('dashboard')"
+        (keyup.enter)="setActiveTab('dashboard')"
+        aria-label="Ir al dashboard"
+        >
         <img
           class="brand-logo"
           src="../../assets/images/polologo-blanco.png"

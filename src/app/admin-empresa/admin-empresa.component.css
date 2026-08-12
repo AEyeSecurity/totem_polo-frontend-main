@@ -7,9 +7,15 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   position: sticky; top:0; z-index:10;
   display:flex; align-items:center; justify-content:space-between;
   gap:1rem; padding:0.75rem 1rem; background:#fff; border-bottom:1px solid #eee;
+  transition: padding 0.25s ease, box-shadow 0.25s ease;
 }
-.topbar-left { display:flex; align-items:center; gap:.75rem; }
-.brand-logo { width:64px; height:64px; object-fit:contain; display:block; }
+.topbar:hover {
+  padding: 1.15rem 1.5rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+.topbar-left { display:flex; align-items:center; gap:.75rem; cursor:pointer; }
+.brand-logo { width:64px; height:64px; object-fit:contain; display:block; transition: width 0.25s ease, height 0.25s ease; }
+.topbar:hover .brand-logo { width:76px; height:76px; }
 .topbar-title .app-title { font-weight:900; font-size:30px;  font-family: 'Inter', sans-serif;}
 .topbar-title .app-sub { font-size:.85rem; color:#777; margin-top:-2px; }
 

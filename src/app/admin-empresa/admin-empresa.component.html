@@ -13,7 +13,14 @@
   <!-- NAVBAR SUPERIOR -->
   <!-- TOP NAV -->
   <nav class="topbar">
-    <div class="topbar-left">
+    <div
+      class="topbar-left"
+      role="button"
+      tabindex="0"
+      (click)="goTo('dashboard')"
+      (keyup.enter)="goTo('dashboard')"
+      aria-label="Ir al dashboard"
+    >
       <img
         class="brand-logo"
         src="../../assets/images/polologo-blanco.png"
