@@ -965,6 +965,28 @@ html, body {
 /* ---------- INFORMACION COMERCIAL (wizard de carga) ---------- */
 .comercial-card .company-info-head {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.comercial-contacto-mirror {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #eee;
+}
+
+.comercial-contacto-mirror h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.comercial-contacto-mirror a {
+  color: #a20000;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .comercial-chat-progress {

@@ -309,9 +309,19 @@
               <p class="muted">
                 Completa este cuestionario para que el asistente del Polo
                 pueda responder consultas comerciales sobre tu empresa
-                (productos, precios, modalidad de venta, contacto, etc.).
+                (productos, precios, modalidad de venta, etc.).
               </p>
             </div>
+            @if (comercialDone && comercialInfo) {
+              <button
+                class="btn outline-primary"
+                type="button"
+                (click)="openComercialEditForm()"
+              >
+                <span class="material-symbols-outlined">edit</span>
+                <span>Editar</span>
+              </button>
+            }
           </div>
 
           @if (formErrors['comercial']?.length) {
@@ -387,36 +397,6 @@
                   />
                 </div>
                 <div class="field">
-                  <label for="co-web">Sitio web</label>
-                  <input
-                    id="co-web"
-                    class="readout"
-                    type="text"
-                    [value]="comercialInfo.sitio_web || '-'"
-                    readonly
-                  />
-                </div>
-                <div class="field">
-                  <label for="co-redes">Redes sociales</label>
-                  <input
-                    id="co-redes"
-                    class="readout"
-                    type="text"
-                    [value]="comercialInfo.redes_sociales || '-'"
-                    readonly
-                  />
-                </div>
-                <div class="field">
-                  <label for="co-contacto">Contacto comercial</label>
-                  <input
-                    id="co-contacto"
-                    class="readout"
-                    type="text"
-                    [value]="comercialInfo.contacto_comercial || '-'"
-                    readonly
-                  />
-                </div>
-                <div class="field">
                   <label for="co-marcas">Marcas representadas</label>
                   <input
                     id="co-marcas"
@@ -445,6 +425,80 @@
                     [value]="comercialInfo.observaciones_comerciales || '-'"
                   ></textarea>
                 </div>
+              </div>
+
+              <div class="comercial-contacto-mirror">
+                <h3>Contacto comercial</h3>
+                @if (comercialContactos.length) {
+                  <p class="muted">
+                    Se muestra el contacto de tipo "comercial" cargado en la
+                    pestaña Contactos.
+                  </p>
+                  @for (c of comercialContactos; track c.id_contacto) {
+                    <div class="grid-2 nice-form profile-readout-grid">
+                      <div class="field">
+                        <label>Nombre</label>
+                        <input
+                          class="readout"
+                          type="text"
+                          [value]="c.nombre || '-'"
+                          readonly
+                        />
+                      </div>
+                      <div class="field">
+                        <label>Telefono</label>
+                        <input
+                          class="readout"
+                          type="text"
+                          [value]="c.telefono || '-'"
+                          readonly
+                        />
+                      </div>
+                      <div class="field">
+                        <label>Direccion</label>
+                        <input
+                          class="readout"
+                          type="text"
+                          [value]="c.direccion || '-'"
+                          readonly
+                        />
+                      </div>
+                      <div class="field">
+                        <label>Sitio web</label>
+                        <input
+                          class="readout"
+                          type="text"
+                          [value]="c.datos?.pagina_web || '-'"
+                          readonly
+                        />
+                      </div>
+                      <div class="field">
+                        <label>Correo</label>
+                        <input
+                          class="readout"
+                          type="text"
+                          [value]="c.datos?.correo || '-'"
+                          readonly
+                        />
+                      </div>
+                      <div class="field">
+                        <label>Redes sociales</label>
+                        <input
+                          class="readout"
+                          type="text"
+                          [value]="c.datos?.redes_sociales || '-'"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                  }
+                } @else {
+                  <p class="muted">
+                    Todavia no cargaste un contacto de tipo "comercial".
+                    Podes agregarlo desde la pestaña
+                    <a (click)="goTo('contactos')">Contactos</a>.
+                  </p>
+                }
               </div>
             } @else if (!comercialChatStarted) {
               <button
@@ -1090,6 +1144,144 @@
             class="btn ghost"
             type="button"
             (click)="cancelForm('empresa')"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Informacion comercial: editar -->
+@if (showComercialEditForm) {
+  <div class="overlay">
+    <div class="modal modal--md">
+      <div class="modal-header">
+        <h3>Editar informacion comercial</h3>
+        <button
+          type="button"
+          class="icon-btn"
+          (click)="cancelComercialEditForm()"
+          aria-label="Cerrar"
+        >
+          ✕
+        </button>
+      </div>
+      <form (ngSubmit)="submitComercialEdit()" class="nice-form" novalidate>
+        @if (formErrors["comercial"]?.length) {
+          <div class="alert alert--error">
+            @for (err of formErrors["comercial"]; track err.message) {
+              <div>{{ err.message }}</div>
+            }
+          </div>
+        }
+        <div class="modal-body grid-2">
+          <div class="field col-2">
+            <label for="ce-productos">Productos / servicios</label>
+            <textarea
+              id="ce-productos"
+              rows="3"
+              [(ngModel)]="comercialEditForm.productos_servicios"
+              name="productos_servicios"
+            ></textarea>
+          </div>
+          <div class="field">
+            <label for="ce-publico">Publico objetivo</label>
+            <select
+              id="ce-publico"
+              [(ngModel)]="comercialEditForm.publico_objetivo"
+              name="publico_objetivo"
+            >
+              @for (op of comercialPublicoOpciones; track op) {
+                <option [value]="op">{{ op }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="ce-atiende">Atiende al publico</label>
+            <select
+              id="ce-atiende"
+              [(ngModel)]="comercialEditForm.atiende_publico"
+              name="atiende_publico"
+            >
+              <option [ngValue]="true">Si</option>
+              <option [ngValue]="false">No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ce-horario">Horario de atencion comercial</label>
+            <input
+              id="ce-horario"
+              type="text"
+              [(ngModel)]="comercialEditForm.horario_atencion_comercial"
+              name="horario_atencion_comercial"
+            />
+          </div>
+          <div class="field">
+            <label for="ce-precios">Rango de precios</label>
+            <select
+              id="ce-precios"
+              [(ngModel)]="comercialEditForm.rango_precios"
+              name="rango_precios"
+            >
+              @for (op of comercialRangoPreciosOpciones; track op) {
+                <option [value]="op">{{ op }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="ce-modalidad">Modalidad de venta</label>
+            <select
+              id="ce-modalidad"
+              [(ngModel)]="comercialEditForm.modalidad_venta"
+              name="modalidad_venta"
+            >
+              @for (op of comercialModalidadVentaOpciones; track op) {
+                <option [value]="op">{{ op }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="ce-marcas">Marcas representadas</label>
+            <input
+              id="ce-marcas"
+              type="text"
+              [(ngModel)]="comercialEditForm.marcas_representadas"
+              name="marcas_representadas"
+            />
+          </div>
+          <div class="field">
+            <label for="ce-certif">Certificaciones</label>
+            <input
+              id="ce-certif"
+              type="text"
+              [(ngModel)]="comercialEditForm.certificaciones"
+              name="certificaciones"
+            />
+          </div>
+          <div class="field col-2">
+            <label for="ce-obs">Observaciones</label>
+            <textarea
+              id="ce-obs"
+              rows="3"
+              [(ngModel)]="comercialEditForm.observaciones_comerciales"
+              name="observaciones_comerciales"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="btn primary"
+            type="submit"
+            [disabled]="comercialChatLoading"
+          >
+            Guardar cambios
+          </button>
+          <button
+            class="btn ghost"
+            type="button"
+            (click)="cancelComercialEditForm()"
           >
             Cancelar
           </button>

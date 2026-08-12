@@ -23,6 +23,7 @@ import {
   TipoContacto,
   TipoServicioPolo,
   InfoComercial,
+  InfoComercialUpdate,
   ComercialChatResponse,
 } from './admin-empresa.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
@@ -180,6 +181,22 @@ export class EmpresaMeComponent implements OnInit {
   comercialProgresoTotal = 0;
   comercialInput = '';
   comercialMessages: { from: 'bot' | 'user'; text: string }[] = [];
+
+  showComercialEditForm = false;
+  comercialEditForm: InfoComercialUpdate = {};
+  readonly comercialPublicoOpciones = ['B2B', 'B2C', 'Ambos'];
+  readonly comercialRangoPreciosOpciones = ['Económico', 'Medio', 'Premium'];
+  readonly comercialModalidadVentaOpciones = ['Presencial', 'Online', 'Ambas'];
+
+  get comercialContactos(): Contacto[] {
+    const tipoComercial = this.tiposContacto.find(
+      (t) => t.tipo?.toLowerCase() === 'comercial'
+    );
+    if (!tipoComercial || !this.empresaData) return [];
+    return this.empresaData.contactos.filter(
+      (c) => c.id_tipo_contacto === tipoComercial.id_tipo_contacto
+    );
+  }
 
   ngOnInit(): void {
     this.loadTipos();
@@ -1137,6 +1154,52 @@ export class EmpresaMeComponent implements OnInit {
         this.comercialChatLoading = false;
       },
     });
+  }
+
+  openComercialEditForm(): void {
+    if (!this.comercialInfo) return;
+    this.clearFormErrors('comercial');
+    this.comercialEditForm = {
+      productos_servicios: this.comercialInfo.productos_servicios || '',
+      publico_objetivo: this.comercialInfo.publico_objetivo || '',
+      atiende_publico: this.comercialInfo.atiende_publico ?? null,
+      horario_atencion_comercial:
+        this.comercialInfo.horario_atencion_comercial || '',
+      rango_precios: this.comercialInfo.rango_precios || '',
+      modalidad_venta: this.comercialInfo.modalidad_venta || '',
+      marcas_representadas: this.comercialInfo.marcas_representadas || '',
+      certificaciones: this.comercialInfo.certificaciones || '',
+      observaciones_comerciales:
+        this.comercialInfo.observaciones_comerciales || '',
+    };
+    this.showComercialEditForm = true;
+  }
+
+  cancelComercialEditForm(): void {
+    this.showComercialEditForm = false;
+    this.clearFormErrors('comercial');
+  }
+
+  submitComercialEdit(): void {
+    this.comercialChatLoading = true;
+    this.adminEmpresaService
+      .updateComercialInfo(this.comercialEditForm)
+      .subscribe({
+        next: (data) => {
+          this.comercialInfo = data;
+          this.comercialDone = data.completado;
+          this.showComercialEditForm = false;
+          this.comercialChatLoading = false;
+          this.showMessage(
+            'Informacion comercial actualizada exitosamente',
+            'success'
+          );
+        },
+        error: (error) => {
+          this.handleError(error, 'comercial', 'actualizar informacion comercial');
+          this.comercialChatLoading = false;
+        },
+      });
   }
 
   // ===== Recordatorio de actualización de datos (cada 6 meses) =====

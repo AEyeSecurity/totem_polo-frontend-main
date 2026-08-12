@@ -125,13 +125,22 @@ export interface InfoComercial {
   horario_atencion_comercial?: string | null;
   rango_precios?: string | null;
   modalidad_venta?: string | null;
-  sitio_web?: string | null;
-  redes_sociales?: string | null;
-  contacto_comercial?: string | null;
   marcas_representadas?: string | null;
   certificaciones?: string | null;
   observaciones_comerciales?: string | null;
   completado: boolean;
+}
+
+export interface InfoComercialUpdate {
+  productos_servicios?: string | null;
+  publico_objetivo?: string | null;
+  atiende_publico?: boolean | null;
+  horario_atencion_comercial?: string | null;
+  rango_precios?: string | null;
+  modalidad_venta?: string | null;
+  marcas_representadas?: string | null;
+  certificaciones?: string | null;
+  observaciones_comerciales?: string | null;
 }
 
 export interface ComercialChatResponse {
@@ -243,6 +252,13 @@ export class AdminEmpresaService {
     return this.http.post<ComercialChatResponse>(
       `${this.apiUrl}/companies/me/comercial/chat`,
       { message: message ?? null }
+    );
+  }
+
+  updateComercialInfo(data: InfoComercialUpdate): Observable<InfoComercial> {
+    return this.http.put<InfoComercial>(
+      `${this.apiUrl}/companies/me/comercial`,
+      data
     );
   }
 }
