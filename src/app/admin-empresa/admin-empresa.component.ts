@@ -22,6 +22,8 @@ import {
   TipoServicio,
   TipoContacto,
   TipoServicioPolo,
+  InfoComercial,
+  ComercialChatResponse,
 } from './admin-empresa.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
@@ -166,9 +168,23 @@ export class EmpresaMeComponent implements OnInit {
 
   // Expanded rows
   expandedRows = new Set<string>();
+
+  // Informacion comercial (bot de carga guiado en la pestana de perfil)
+  comercialInfo: InfoComercial | null = null;
+  comercialLoadingInfo = false;
+  comercialChatStarted = false;
+  comercialChatLoading = false;
+  comercialDone = false;
+  comercialCampoActual: string | null = null;
+  comercialProgresoActual = 0;
+  comercialProgresoTotal = 0;
+  comercialInput = '';
+  comercialMessages: { from: 'bot' | 'user'; text: string }[] = [];
+
   ngOnInit(): void {
     this.loadTipos();
     this.loadEmpresaData();
+    this.loadComercialInfo();
   }
 
   isVehiculoExpanded(id: number | null | undefined): boolean {
@@ -1065,6 +1081,60 @@ export class EmpresaMeComponent implements OnInit {
       error: (error) => {
         this.handleError(error, 'general', 'cargar datos de la empresa');
         this.loading = false;
+      },
+    });
+  }
+
+  // ===== Informacion comercial (bot de carga guiado) =====
+  loadComercialInfo(): void {
+    this.comercialLoadingInfo = true;
+    this.adminEmpresaService.getComercialInfo().subscribe({
+      next: (data) => {
+        this.comercialInfo = data;
+        this.comercialDone = data.completado;
+        this.comercialLoadingInfo = false;
+      },
+      error: () => {
+        // 404 = todavia no se cargo nada: es un estado valido, no un error.
+        this.comercialInfo = null;
+        this.comercialDone = false;
+        this.comercialLoadingInfo = false;
+      },
+    });
+  }
+
+  startComercialChat(): void {
+    if (this.comercialChatStarted) return;
+    this.comercialChatStarted = true;
+    this.comercialMessages = [];
+    this.runComercialChatStep(undefined);
+  }
+
+  sendComercialAnswer(): void {
+    const text = this.comercialInput.trim();
+    if (!text || this.comercialChatLoading) return;
+    this.comercialMessages.push({ from: 'user', text });
+    this.comercialInput = '';
+    this.runComercialChatStep(text);
+  }
+
+  private runComercialChatStep(message?: string): void {
+    this.comercialChatLoading = true;
+    this.adminEmpresaService.sendComercialChatMessage(message).subscribe({
+      next: (res: ComercialChatResponse) => {
+        this.comercialMessages.push({ from: 'bot', text: res.reply });
+        this.comercialDone = res.done;
+        this.comercialCampoActual = res.campo_actual ?? null;
+        this.comercialProgresoActual = res.progreso_actual;
+        this.comercialProgresoTotal = res.progreso_total;
+        this.comercialChatLoading = false;
+        if (res.done) {
+          this.loadComercialInfo();
+        }
+      },
+      error: (error) => {
+        this.handleError(error, 'comercial', 'procesar tu respuesta');
+        this.comercialChatLoading = false;
       },
     });
   }

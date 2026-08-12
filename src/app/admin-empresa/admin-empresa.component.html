@@ -300,6 +300,209 @@
             </div>
           }
         </div>
+
+        <!-- INFORMACION COMERCIAL (bot de carga guiado) -->
+        <div class="card comercial-card">
+          <div class="company-info-head">
+            <div>
+              <h2>Informacion comercial</h2>
+              <p class="muted">
+                Completa este cuestionario para que el asistente del Polo
+                pueda responder consultas comerciales sobre tu empresa
+                (productos, precios, modalidad de venta, contacto, etc.).
+              </p>
+            </div>
+          </div>
+
+          @if (formErrors['comercial']?.length) {
+            <div class="alert alert--error">
+              @for (err of formErrors['comercial']; track err.message) {
+                <div>{{ err.message }}</div>
+              }
+            </div>
+          }
+
+          @if (comercialLoadingInfo) {
+            <div class="muted">Cargando informacion comercial...</div>
+          } @else {
+            @if (comercialDone && comercialInfo) {
+              <div class="grid-2 nice-form profile-readout-grid">
+                <div class="field col-2">
+                  <label for="co-productos">Productos / servicios</label>
+                  <textarea
+                    id="co-productos"
+                    class="readout multiline"
+                    readonly
+                    [value]="comercialInfo.productos_servicios || '-'"
+                  ></textarea>
+                </div>
+                <div class="field">
+                  <label for="co-publico">Publico objetivo</label>
+                  <input
+                    id="co-publico"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.publico_objetivo || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-atiende">Atiende al publico</label>
+                  <input
+                    id="co-atiende"
+                    class="readout"
+                    type="text"
+                    [value]="formatBoolean(comercialInfo.atiende_publico)"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-horario">Horario de atencion comercial</label>
+                  <input
+                    id="co-horario"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.horario_atencion_comercial || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-precios">Rango de precios</label>
+                  <input
+                    id="co-precios"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.rango_precios || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-modalidad">Modalidad de venta</label>
+                  <input
+                    id="co-modalidad"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.modalidad_venta || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-web">Sitio web</label>
+                  <input
+                    id="co-web"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.sitio_web || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-redes">Redes sociales</label>
+                  <input
+                    id="co-redes"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.redes_sociales || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-contacto">Contacto comercial</label>
+                  <input
+                    id="co-contacto"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.contacto_comercial || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-marcas">Marcas representadas</label>
+                  <input
+                    id="co-marcas"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.marcas_representadas || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field">
+                  <label for="co-certif">Certificaciones</label>
+                  <input
+                    id="co-certif"
+                    class="readout"
+                    type="text"
+                    [value]="comercialInfo.certificaciones || '-'"
+                    readonly
+                  />
+                </div>
+                <div class="field col-2">
+                  <label for="co-obs">Observaciones</label>
+                  <textarea
+                    id="co-obs"
+                    class="readout multiline"
+                    readonly
+                    [value]="comercialInfo.observaciones_comerciales || '-'"
+                  ></textarea>
+                </div>
+              </div>
+            } @else if (!comercialChatStarted) {
+              <button
+                class="btn primary"
+                type="button"
+                (click)="startComercialChat()"
+              >
+                <span class="material-symbols-outlined">chat</span>
+                <span>Completar informacion comercial</span>
+              </button>
+            } @else {
+              <div class="comercial-chat">
+                @if (comercialProgresoTotal) {
+                  <div class="comercial-chat-progress">
+                    Pregunta {{ comercialProgresoActual + 1 }} de
+                    {{ comercialProgresoTotal }}
+                  </div>
+                }
+                <div class="comercial-chat-messages">
+                  @for (m of comercialMessages; track $index) {
+                    <div
+                      class="comercial-chat-msg"
+                      [class.bot]="m.from === 'bot'"
+                      [class.user]="m.from === 'user'"
+                    >
+                      {{ m.text }}
+                    </div>
+                  }
+                  @if (comercialChatLoading) {
+                    <div class="comercial-chat-msg bot muted">
+                      Escribiendo...
+                    </div>
+                  }
+                </div>
+                <form
+                  class="comercial-chat-input"
+                  (ngSubmit)="sendComercialAnswer()"
+                >
+                  <input
+                    type="text"
+                    name="comercialInput"
+                    [(ngModel)]="comercialInput"
+                    placeholder="Escribi tu respuesta..."
+                    [disabled]="comercialChatLoading"
+                    autocomplete="off"
+                  />
+                  <button
+                    class="btn primary"
+                    type="submit"
+                    [disabled]="comercialChatLoading || !comercialInput.trim()"
+                  >
+                    Enviar
+                  </button>
+                </form>
+              </div>
+            }
+          }
+        </div>
       </section>
     }
 

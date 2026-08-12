@@ -117,6 +117,31 @@ export interface TipoServicioPolo {
   tipo: string;
 }
 
+// Informacion comercial (bot de carga guiado, solo admin_empresa)
+export interface InfoComercial {
+  productos_servicios?: string | null;
+  publico_objetivo?: string | null;
+  atiende_publico?: boolean | null;
+  horario_atencion_comercial?: string | null;
+  rango_precios?: string | null;
+  modalidad_venta?: string | null;
+  sitio_web?: string | null;
+  redes_sociales?: string | null;
+  contacto_comercial?: string | null;
+  marcas_representadas?: string | null;
+  certificaciones?: string | null;
+  observaciones_comerciales?: string | null;
+  completado: boolean;
+}
+
+export interface ComercialChatResponse {
+  reply: string;
+  done: boolean;
+  campo_actual?: string | null;
+  progreso_actual: number;
+  progreso_total: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -202,6 +227,22 @@ export class AdminEmpresaService {
     return this.http.post(
       `${this.apiUrl}/password-reset/request-logged-user`,
       {}
+    );
+  }
+
+  // Informacion comercial (bot de carga guiado)
+  getComercialInfo(): Observable<InfoComercial> {
+    return this.http.get<InfoComercial>(
+      `${this.apiUrl}/companies/me/comercial`
+    );
+  }
+
+  sendComercialChatMessage(
+    message?: string
+  ): Observable<ComercialChatResponse> {
+    return this.http.post<ComercialChatResponse>(
+      `${this.apiUrl}/companies/me/comercial/chat`,
+      { message: message ?? null }
     );
   }
 }
