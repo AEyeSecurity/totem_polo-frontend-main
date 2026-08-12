@@ -323,9 +323,8 @@
             <div>
               <h2>Informacion comercial</h2>
               <p class="muted">
-                Completa este cuestionario para que el asistente del Polo
-                pueda responder consultas comerciales sobre tu empresa
-                (productos, precios, modalidad de venta, etc.).
+                Completa este cuestionario para que el asistente del Polo pueda
+                responder consultas comerciales sobre tu empresa.
               </p>
             </div>
             @if (comercialDone && comercialInfo) {
@@ -335,14 +334,14 @@
                 (click)="openComercialEditForm()"
               >
                 <span class="material-symbols-outlined">edit</span>
-                <span>Editar</span>
+                <span>Editar datos</span>
               </button>
             }
           </div>
 
-          @if (formErrors['comercial']?.length) {
+          @if (formErrors["comercial"]?.length) {
             <div class="alert alert--error">
-              @for (err of formErrors['comercial']; track err.message) {
+              @for (err of formErrors["comercial"]; track err.message) {
                 <div>{{ err.message }}</div>
               }
             </div>
@@ -446,10 +445,6 @@
               <div class="comercial-contacto-mirror">
                 <h3>Contacto comercial</h3>
                 @if (comercialContactos.length) {
-                  <p class="muted">
-                    Se muestra el contacto de tipo "comercial" cargado en la
-                    pestaña Contactos.
-                  </p>
                   @for (c of comercialContactos; track c.id_contacto) {
                     <div class="grid-2 nice-form profile-readout-grid">
                       <div class="field">
@@ -510,8 +505,8 @@
                   }
                 } @else {
                   <p class="muted">
-                    Todavia no cargaste un contacto de tipo "comercial".
-                    Podes agregarlo desde la pestaña
+                    Todavia no cargaste un contacto de tipo "comercial". Podes
+                    agregarlo desde la pestaña
                     <a (click)="goTo('contactos')">Contactos</a>.
                   </p>
                 }
