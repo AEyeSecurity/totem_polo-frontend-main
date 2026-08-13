@@ -798,85 +798,209 @@ export class AdminPoloComponent implements OnInit {
     });
   }
 
-  private buildDashboardActivity(): void {
-    const actividades: {
+  // ====== ACTIVIDAD EN TIEMPO REAL ======
+  // Igual que en admin-empresa: buildDashboardActivity() reconstruye desde
+  // los datos (fecha de creacion), que no cambia si solo editas/activas algo
+  // ya existente. pushActivity() registra la accion real en el momento en
+  // que pasa, para que se vea arriba de todo aunque el registro sea viejo.
+  private manualActivities: {
+    tipo: 'ok' | 'warn' | 'info';
+    titulo: string;
+    cuando: string;
+    timestamp: number;
+  }[] = [];
+  private lastBuiltActivities: {
+    tipo: 'ok' | 'warn' | 'info';
+    titulo: string;
+    cuando: string;
+    timestamp: number;
+  }[] = [];
+  private readonly MANUAL_ACTIVITY_TTL_MS = 5 * 60 * 1000;
+
+  private pushActivity(
+    tipo: 'ok' | 'warn' | 'info',
+    titulo: string,
+    cuando: string = this.formatActivityMoment(new Date().toISOString())
+  ): void {
+    this.manualActivities.unshift({
+      tipo,
+      titulo,
+      cuando,
+      timestamp: Date.now(),
+    });
+    this.pruneManualActivities();
+    this.combineActivities(this.lastBuiltActivities);
+  }
+
+  private pruneManualActivities(): void {
+    const cutoff = Date.now() - this.MANUAL_ACTIVITY_TTL_MS;
+    this.manualActivities = this.manualActivities
+      .filter((entry) => entry.timestamp >= cutoff)
+      .slice(0, this.MAX_ACTIVIDADES);
+  }
+
+  private combineActivities(
+    dataActivities: {
+      tipo: 'ok' | 'warn' | 'info';
+      titulo: string;
+      cuando: string;
+      timestamp: number;
+    }[]
+  ): void {
+    this.pruneManualActivities();
+    const final: {
       tipo: 'ok' | 'warn' | 'info';
       titulo: string;
       cuando: string;
       timestamp: number;
     }[] = [];
 
-    const pushActividad = (
+    const seen = new Map<string, number>();
+    const keyFor = (entry: { tipo: 'ok' | 'warn' | 'info'; titulo: string }) =>
+      `${entry.tipo}::${entry.titulo}`;
+
+    const sortedManual = [...this.manualActivities].sort(
+      (a, b) => b.timestamp - a.timestamp
+    );
+    for (const entry of sortedManual) {
+      const key = keyFor(entry);
+      if (!seen.has(key)) {
+        final.push(entry);
+        seen.set(key, entry.timestamp);
+      }
+    }
+
+    const sortedData = [...dataActivities].sort(
+      (a, b) => b.timestamp - a.timestamp
+    );
+    for (const entry of sortedData) {
+      const key = keyFor(entry);
+      if (!seen.has(key)) {
+        final.push(entry);
+        seen.set(key, entry.timestamp);
+      } else {
+        const existingTs = seen.get(key) ?? 0;
+        if (entry.timestamp > existingTs) {
+          const index = final.findIndex((item) => keyFor(item) === key);
+          if (index !== -1) {
+            final[index] = entry;
+            seen.set(key, entry.timestamp);
+          }
+        }
+      }
+    }
+
+    const trimmed = final
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, this.MAX_ACTIVIDADES);
+
+    this.actividadReciente = trimmed.map(({ tipo, titulo, cuando }) => ({
+      tipo,
+      titulo,
+      cuando,
+    }));
+  }
+
+  private buildDashboardActivity(): void {
+    const toActividad = (
       tipo: 'ok' | 'warn' | 'info',
       titulo: string,
       item: any
-    ) => {
-      actividades.push({
-        tipo,
-        titulo,
-        cuando: this.getActivityLabel(item),
-        timestamp: this.getItemTimestamp(item),
-      });
-    };
+    ) => ({
+      tipo,
+      titulo,
+      cuando: this.getActivityLabel(item),
+      timestamp: this.getItemTimestamp(item),
+    });
 
-    [...this.empresas]
+    const empresasAct = [...this.empresas]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((empresa) => {
+      .map((empresa) => {
         const estadoLabel = empresa.estado ? 'activa' : 'inactiva';
-        const tipo = empresa.estado ? 'ok' : 'warn';
-        pushActividad(
-          tipo,
-          `Empresa ${empresa.nombre} ${estadoLabel}`,
-          empresa
-        );
+        const tipo = empresa.estado ? 'ok' : ('warn' as const);
+        return toActividad(tipo, `Empresa ${empresa.nombre} ${estadoLabel}`, empresa);
       });
 
-    [...this.usuarios]
+    const usuariosAct = [...this.usuarios]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((usuario) => {
+      .map((usuario) => {
         const estadoLabel = usuario.estado ? 'habilitado' : 'inhabilitado';
-        const tipo = usuario.estado ? 'ok' : 'warn';
-        pushActividad(
-          tipo,
-          `Usuario ${usuario.nombre} ${estadoLabel}`,
-          usuario
-        );
+        const tipo = usuario.estado ? 'ok' : ('warn' as const);
+        return toActividad(tipo, `Usuario ${usuario.nombre} ${estadoLabel}`, usuario);
       });
 
-    [...this.serviciosPolo]
+    // ServicioPolo y Lote no tienen ningun campo de fecha propio en la base,
+    // asi que sin esto siempre calculaban timestamp 0 y quedaban al final de
+    // la lista sin importar cuando se hayan creado en verdad. Se les asigna
+    // como fecha la de la empresa dueña (dato real: se cargaron junto con
+    // ella en la misma importacion), no una fecha inventada.
+    const serviciosAct = [...this.serviciosPolo]
+      .map((servicio) => ({
+        ...servicio,
+        fecha_ingreso: (servicio as any).fecha_ingreso ?? this.getEmpresaFecha(servicio.cuil),
+      }))
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((servicio) => {
-        pushActividad(
+      .map((servicio) =>
+        toActividad(
           'info',
           `Servicio ${
             servicio.nombre || servicio.tipo_servicio_polo || ''
           } actualizado`,
           servicio
-        );
-      });
+        )
+      );
 
-    [...this.lotes]
+    const lotesAct = [...this.lotes]
+      .map((lote) => {
+        const servicioPolo = this.serviciosPolo.find(
+          (s) => s.id_servicio_polo === lote.id_servicio_polo
+        );
+        return {
+          ...lote,
+          fecha_ingreso: servicioPolo ? this.getEmpresaFecha(servicioPolo.cuil) : undefined,
+        };
+      })
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((lote) => {
-        pushActividad(
-          'info',
-          `Lote M${lote.manzana} - ${lote.lote} actualizado`,
-          lote
-        );
-      });
+      .map((lote) =>
+        toActividad('info', `Lote M${lote.manzana} - ${lote.lote} actualizado`, lote)
+      );
 
-    this.actividadReciente = actividades
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, this.MAX_ACTIVIDADES)
-      .map(({ timestamp: _timestamp, ...rest }) => ({
-        ...rest,
-        cuando: rest.cuando || '-',
-      }));
+    // Se entrelazan las categorías (en vez de concatenarlas una atrás de la
+    // otra) antes de ordenar por fecha: como varios registros comparten la
+    // misma fecha (solo hay granularidad de día, no de hora), un sort
+    // estable sobre una lista concatenada dejaba bloques enteros de un
+    // mismo tipo juntos. Entrelazando primero, esos empates quedan
+    // mezclados en vez de agrupados.
+    const entrelazadas = this.interleaveActividades([
+      empresasAct,
+      usuariosAct,
+      serviciosAct,
+      lotesAct,
+    ]).map((a) => ({ ...a, cuando: a.cuando || '-' }));
+
+    this.lastBuiltActivities = entrelazadas;
+    this.combineActivities(entrelazadas);
+  }
+
+  private interleaveActividades<T>(listas: T[][]): T[] {
+    const resultado: T[] = [];
+    const maxLen = Math.max(0, ...listas.map((l) => l.length));
+    for (let i = 0; i < maxLen; i++) {
+      for (const lista of listas) {
+        if (i < lista.length) resultado.push(lista[i]);
+      }
+    }
+    return resultado;
   }
 
   private getActivityLabel(item: any): string {
     const raw = this.getItemDateSource(item);
     return this.formatActivityMoment(raw ?? undefined);
+  }
+
+  private getEmpresaFecha(cuil: number | undefined | null): string | undefined {
+    if (cuil === undefined || cuil === null) return undefined;
+    return this.empresas.find((e) => e.cuil === cuil)?.fecha_ingreso;
   }
 
   private getItemDateSource(item: any): string | null {
@@ -1109,17 +1233,21 @@ export class AdminPoloComponent implements OnInit {
   onSubmitPoloEdit(): void {
     this.loading = true;
     this.clearFormErrors('polo');
+    this.submitting.polo = true;
 
     this.adminPoloService.updatePolo(this.poloEditForm).subscribe({
       next: () => {
         this.showMessage('Datos del polo actualizados exitosamente', 'success');
+        this.pushActivity('info', 'Datos del Polo actualizados');
         this.loadPoloData();
         this.resetForms();
         this.loading = false;
+        this.submitting.polo = false;
       },
       error: (error) => {
         this.handleError(error, 'polo', 'actualizar datos del polo');
         this.loading = false;
+        this.submitting.polo = false;
       },
     });
   }
@@ -1165,6 +1293,7 @@ export class AdminPoloComponent implements OnInit {
   onSubmitEmpresa(): void {
     this.loading = true;
     this.clearFormErrors('empresa');
+    this.submitting.empresa = true;
 
     if (this.editingEmpresa) {
       // Actualizar
@@ -1182,13 +1311,16 @@ export class AdminPoloComponent implements OnInit {
         .subscribe({
           next: () => {
             this.showMessage('Empresa actualizada exitosamente', 'success');
+            this.pushActivity('ok', `Empresa ${this.empresaForm.nombre} actualizada`);
             this.loadEmpresas();
             this.resetForms();
             this.loading = false;
+            this.submitting.empresa = false;
           },
           error: (error) => {
             this.handleError(error, 'empresa', 'actualizar empresa');
             this.loading = false;
+            this.submitting.empresa = false;
           },
         });
     } else {
@@ -1196,13 +1328,16 @@ export class AdminPoloComponent implements OnInit {
       this.adminPoloService.createEmpresa(this.empresaForm).subscribe({
         next: () => {
           this.showMessage('Empresa creada exitosamente', 'success');
+          this.pushActivity('ok', `Empresa ${this.empresaForm.nombre} creada`);
           this.loadEmpresas();
           this.resetForms();
           this.loading = false;
+          this.submitting.empresa = false;
         },
         error: (error) => {
           this.handleError(error, 'empresa', 'crear empresa');
           this.loading = false;
+          this.submitting.empresa = false;
         },
       });
     }
@@ -1210,9 +1345,11 @@ export class AdminPoloComponent implements OnInit {
 
   deleteEmpresa(cuil: number): void {
     if (confirm('¿Está seguro de que desea eliminar esta empresa?')) {
+      const nombre = this.empresas.find((e) => e.cuil === cuil)?.nombre || 'Empresa';
       this.adminPoloService.deleteEmpresa(cuil).subscribe({
         next: () => {
           this.showMessage('Empresa eliminada exitosamente', 'success');
+          this.pushActivity('warn', `${nombre} eliminada`);
           this.loadEmpresas();
         },
         error: (error) => {
@@ -1273,6 +1410,7 @@ export class AdminPoloComponent implements OnInit {
         .subscribe({
           next: () => {
             this.showMessage('Usuario actualizado exitosamente', 'success');
+            this.pushActivity('ok', `Usuario ${this.usuarioForm.nombre} actualizado`);
             this.loadUsuarios();
             this.resetForms();
             this.loading = false;
@@ -1301,6 +1439,7 @@ export class AdminPoloComponent implements OnInit {
             'Usuario creado. Enviamos las credenciales por email. Esto puede demorar unos minutos.',
             'success'
           );
+          this.pushActivity('ok', `Usuario ${this.usuarioForm.nombre} creado`);
           this.loadUsuarios();
           this.resetForms();
           this.loading = false;
@@ -1317,6 +1456,7 @@ export class AdminPoloComponent implements OnInit {
 
   toggleUsuarioEstado(usuario: Usuario): void {
     const accion = usuario.estado ? 'inhabilitar' : 'habilitar';
+    const participio = usuario.estado ? 'inhabilitado' : 'habilitado';
     const nuevoEstado = !usuario.estado;
 
     if (confirm(`¿Está seguro de que desea ${accion} este usuario?`)) {
@@ -1344,7 +1484,11 @@ export class AdminPoloComponent implements OnInit {
               this.filteredUsuarios[filteredIndex] = usuarioActualizado;
             }
 
-            this.showMessage(`Usuario ${accion}do exitosamente`, 'success');
+            this.showMessage(`Usuario ${participio} exitosamente`, 'success');
+            this.pushActivity(
+              nuevoEstado ? 'ok' : 'warn',
+              `Usuario ${usuario.nombre} ${participio}`
+            );
           },
           error: (error) => {
             this.handleError(error, 'general', `${accion} usuario`);
@@ -1409,16 +1553,20 @@ export class AdminPoloComponent implements OnInit {
       return;
     }
 
+    this.submitting.servicioPolo = true;
     this.adminPoloService.createServicioPolo(this.servicioPoloForm).subscribe({
       next: () => {
         this.showMessage('Servicio del polo creado exitosamente', 'success');
+        this.pushActivity('ok', `Servicio ${this.servicioPoloForm.nombre} creado`);
         this.loadServiciosPolo();
         this.resetForms();
         this.loading = false;
+        this.submitting.servicioPolo = false;
       },
       error: (error) => {
         this.handleError(error, 'servicioPolo', 'crear servicio del polo');
         this.loading = false;
+        this.submitting.servicioPolo = false;
       },
     });
   }
@@ -1455,12 +1603,16 @@ export class AdminPoloComponent implements OnInit {
 
   deleteServicioPolo(id: number): void {
     if (confirm('¿Está seguro de que desea eliminar este servicio del polo?')) {
+      const nombre =
+        this.serviciosPolo.find((s) => s.id_servicio_polo === id)?.nombre ||
+        'Servicio del polo';
       this.adminPoloService.deleteServicioPolo(id).subscribe({
         next: () => {
           this.showMessage(
             'Servicio del polo eliminado exitosamente',
             'success'
           );
+          this.pushActivity('warn', `Servicio ${nombre} eliminado`);
           this.loadServiciosPolo();
         },
         error: (error) => {
@@ -1502,25 +1654,35 @@ export class AdminPoloComponent implements OnInit {
       this.loteForm.id_servicio_polo = this.selectedServicioPoloId;
     }
 
+    this.submitting.lote = true;
     this.adminPoloService.createLote(this.loteForm).subscribe({
       next: () => {
         this.showMessage('Lote creado exitosamente', 'success');
+        this.pushActivity(
+          'ok',
+          `Lote M${this.loteForm.manzana} - ${this.loteForm.lote} creado`
+        );
         this.loadLotes();
         this.resetForms();
         this.loading = false;
+        this.submitting.lote = false;
       },
       error: (error) => {
         this.handleError(error, 'lote', 'crear lote');
         this.loading = false;
+        this.submitting.lote = false;
       },
     });
   }
 
   deleteLote(id: number): void {
     if (confirm('¿Está seguro de que desea eliminar este lote?')) {
+      const lote = this.lotes.find((l) => l.id_lotes === id);
+      const nombre = lote ? `M${lote.manzana} - ${lote.lote}` : 'Lote';
       this.adminPoloService.deleteLote(id).subscribe({
         next: () => {
           this.showMessage('Lote eliminado exitosamente', 'success');
+          this.pushActivity('warn', `Lote ${nombre} eliminado`);
           this.loadLotes();
         },
         error: (error) => {
@@ -1731,6 +1893,7 @@ export class AdminPoloComponent implements OnInit {
       this.adminPoloService.desactivarEmpresa(empresa.cuil).subscribe({
         next: () => {
           this.showMessage('Empresa desactivada correctamente', 'success');
+          this.pushActivity('warn', `Empresa ${empresa.nombre} desactivada`);
           this.loadEmpresas(); // recarga la lista
         },
         error: (error) => {
@@ -1742,6 +1905,7 @@ export class AdminPoloComponent implements OnInit {
       this.adminPoloService.activarEmpresa(empresa.cuil).subscribe({
         next: () => {
           this.showMessage('Empresa activada correctamente', 'success');
+          this.pushActivity('ok', `Empresa ${empresa.nombre} activada`);
           this.loadEmpresas();
         },
         error: (error) => {

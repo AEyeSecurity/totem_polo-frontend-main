@@ -4,8 +4,18 @@ export interface FormError {
   type: 'required' | 'invalid' | 'duplicate' | 'server' | 'validation';
 }
 
+/** Item individual de un error de validacion de FastAPI/Pydantic. */
+export interface FastApiValidationErrorItem {
+  loc?: (string | number)[];
+  msg?: string;
+  type?: string;
+}
+
 export interface HttpErrorBody {
-  detail?: string;
+  // FastAPI manda un string para errores "de negocio" (ej. HTTPException) y
+  // un array de FastApiValidationErrorItem para errores de validacion de
+  // Pydantic (422) - hay que soportar las dos formas.
+  detail?: string | FastApiValidationErrorItem[];
   message?: string;
   errors?: Record<string, string[]>;
   status?: number;

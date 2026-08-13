@@ -128,8 +128,7 @@ describe('LoginComponent', () => {
 
       expect(authServiceSpy.login).toHaveBeenCalledWith(
         'usuario@empresa.com',
-        '123456',
-        false
+        '123456'
       );
       expect(component.successMessage).toContain('exitoso');
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/me']);

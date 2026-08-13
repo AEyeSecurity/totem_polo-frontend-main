@@ -1,4 +1,39 @@
-import { FormError, HttpErrorBody, HttpErrorLike } from './form-error.model';
+import {
+  FastApiValidationErrorItem,
+  FormError,
+  HttpErrorBody,
+  HttpErrorLike,
+} from './form-error.model';
+
+/**
+ * Extrae un mensaje de texto legible de `detail`, sin importar si vino como
+ * string plano (HTTPException de FastAPI) o como array de errores de
+ * validacion de Pydantic ({loc, msg, type}[]). Nunca deja pasar un objeto
+ * crudo a un campo `message: string` (eso es lo que termina renderizando
+ * "[object Object]" en el template).
+ */
+function firstDetailMessage(
+  detail: string | FastApiValidationErrorItem[] | undefined,
+  fallback: string
+): string {
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+  if (Array.isArray(detail) && detail.length) {
+    const first = detail[0];
+    if (typeof first?.msg === 'string' && first.msg.trim()) {
+      return first.msg;
+    }
+  }
+  return fallback;
+}
+
+/** Nombre de campo legible a partir del `loc` de un error de Pydantic (ej. ["body","email"] -> "email"). */
+function fieldFromLoc(loc: (string | number)[] | undefined): string {
+  if (!loc || !loc.length) return 'general';
+  const last = loc[loc.length - 1];
+  return last === undefined || last === null ? 'general' : String(last);
+}
 
 // Traducciones de errores de campo comunes a todos los formularios,
 // usadas como fallback cuando el formulario no tiene una traduccion propia.
@@ -73,6 +108,7 @@ export function buildFormErrorsFromHttpError(
   } else if (error.status === 422) {
     const errorResponse: HttpErrorBody | undefined = error.error;
     if (errorResponse?.errors) {
+      // Formato custom propio: { errors: { campo: [mensajes] } }
       Object.keys(errorResponse.errors).forEach((field) => {
         const fieldErrors = errorResponse.errors![field];
         fieldErrors.forEach((message) => {
@@ -83,15 +119,32 @@ export function buildFormErrorsFromHttpError(
           });
         });
       });
+    } else if (Array.isArray(errorResponse?.detail)) {
+      // Formato estandar de FastAPI/Pydantic: detail = [{ loc, msg, type }, ...]
+      errorResponse!.detail.forEach((item) => {
+        const field = fieldFromLoc(item?.loc);
+        const rawMsg =
+          typeof item?.msg === 'string' && item.msg.trim()
+            ? item.msg
+            : 'Dato inválido';
+        errorMessages.push({
+          field,
+          message: translateFieldError(field, rawMsg, formName),
+          type: 'validation',
+        });
+      });
     } else if (errorResponse?.detail) {
       errorMessages.push({
         field: 'general',
-        message: translateGenericError(errorResponse.detail, formName),
+        message: translateGenericError(
+          firstDetailMessage(errorResponse.detail, 'Datos inválidos'),
+          formName
+        ),
         type: 'validation',
       });
     }
   } else if (error.status === 400) {
-    const errorDetail = error.error?.detail || 'Datos inválidos';
+    const errorDetail = firstDetailMessage(error.error?.detail, 'Datos inválidos');
     errorMessages.push({
       field: 'general',
       message: translateGenericError(errorDetail, formName),
@@ -104,7 +157,10 @@ export function buildFormErrorsFromHttpError(
       type: 'server',
     });
   } else {
-    const detail = error.error?.detail || error.message || 'Error desconocido';
+    const detail = firstDetailMessage(
+      error.error?.detail,
+      error.message || 'Error desconocido'
+    );
     errorMessages.push({
       field: 'general',
       message: translateGenericError(detail, formName),

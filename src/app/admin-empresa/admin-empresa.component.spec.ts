@@ -32,7 +32,8 @@ describe('AdminEmpresaComponent', () => {
 
     fixture.detectChanges();
 
-    // ngOnInit fires loadTipos() (4 catalogs) and loadEmpresaData() (/me)
+    // ngOnInit fires loadTipos() (4 catalogs), loadEmpresaData() (/me) y
+    // loadComercialInfo() (/companies/me/comercial)
     httpMock.expectOne(`${base}/tipos/vehiculo`).flush([]);
     httpMock.expectOne(`${base}/tipos/servicio`).flush([]);
     httpMock.expectOne(`${base}/tipos/contacto`).flush([]);
@@ -49,6 +50,10 @@ describe('AdminEmpresaComponent', () => {
       servicios: [],
       servicios_polo: [],
     });
+    // Empresa sin ficha comercial cargada todavia: el backend devuelve 404.
+    httpMock
+      .expectOne(`${base}/companies/me/comercial`)
+      .flush(null, { status: 404, statusText: 'Not Found' });
   });
 
   afterEach(() => {

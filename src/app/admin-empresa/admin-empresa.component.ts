@@ -150,6 +150,18 @@ export class EmpresaMeComponent implements OnInit {
   formErrors: Partial<Record<string, FormError[]>> = {};
   showErrorDetails = false;
 
+  // Estado de "guardando" por modal, para mostrar el aviso de progreso
+  submitting: Record<'empresa' | 'vehiculo' | 'servicio' | 'contacto', boolean> = {
+    empresa: false,
+    vehiculo: false,
+    servicio: false,
+    contacto: false,
+  };
+
+  isModalBusy(formName: 'empresa' | 'vehiculo' | 'servicio' | 'contacto'): boolean {
+    return !!this.submitting[formName];
+  }
+
   // Tipos desde la BD
   tiposVehiculo: TipoVehiculo[] = [];
   tiposServicio: TipoServicio[] = [];
@@ -476,44 +488,32 @@ export class EmpresaMeComponent implements OnInit {
 
   /** reconstruye actividad desde los datos existentes */
   private buildActividadRecienteFromData(): void {
-    const actividades: {
-      tipo: 'ok' | 'warn' | 'info';
-      titulo: string;
-      cuando: string;
-      timestamp: number;
-    }[] = [];
-    const fallbackBase = new Date();
-    let fallbackSteps = 0;
-    const nextFallbackIso = () => {
-      const iso = new Date(
-        fallbackBase.getTime() - fallbackSteps * 60000
-      ).toISOString();
-      fallbackSteps += 1;
-      return iso;
-    };
-
-    const pushActividad = (
+    // Vehiculo/Servicio/Contacto no tienen ningun campo de fecha en la base.
+    // Antes se les inventaba una fecha "recien ahora" (fallback secuencial)
+    // cada vez que se reconstruia esta lista, asi que CUALQUIER guardado
+    // (aunque fuera de otra seccion, como info comercial) hacia que items
+    // sin tocar aparecieran como recien actualizados. Ahora, si no hay fecha
+    // real, queda sin fecha (timestamp 0, "-"): solo pushActivity() (la
+    // accion real, en el momento en que pasa) los hace aparecer como
+    // recientes.
+    const toActividad = (
       tipo: 'ok' | 'warn' | 'info',
       titulo: string,
       item: any
     ) => {
       const raw = this.getItemDateSource(item);
-      const chosenIso = raw ?? nextFallbackIso();
-      actividades.push({
+      return {
         tipo,
         titulo,
-        cuando: this.formatActivityMoment(chosenIso),
-        timestamp:
-          raw !== null && raw !== undefined
-            ? this.getItemTimestamp(item)
-            : new Date(chosenIso).getTime(),
-      });
+        cuando: raw ? this.formatActivityMoment(raw) : '-',
+        timestamp: raw ? this.getItemTimestamp(item) : 0,
+      };
     };
 
-    [...(this.empresaData?.vehiculos ?? [])]
+    const vehiculosAct = [...(this.empresaData?.vehiculos ?? [])]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((vehiculo) =>
-        pushActividad(
+      .map((vehiculo) =>
+        toActividad(
           'ok',
           `Vehiculo ${this.getTipoVehiculoName(
             vehiculo.id_tipo_vehiculo
@@ -522,10 +522,10 @@ export class EmpresaMeComponent implements OnInit {
         )
       );
 
-    [...(this.empresaData?.servicios ?? [])]
+    const serviciosAct = [...(this.empresaData?.servicios ?? [])]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((servicio) =>
-        pushActividad(
+      .map((servicio) =>
+        toActividad(
           'info',
           `Servicio ${this.getTipoServicioName(
             servicio.id_tipo_servicio
@@ -534,11 +534,20 @@ export class EmpresaMeComponent implements OnInit {
         )
       );
 
-    [...(this.empresaData?.contactos ?? [])]
+    const contactosAct = [...(this.empresaData?.contactos ?? [])]
       .sort((a, b) => this.getItemTimestamp(b) - this.getItemTimestamp(a))
-      .forEach((contacto) =>
-        pushActividad('ok', `Contacto ${contacto.nombre} actualizado`, contacto)
+      .map((contacto) =>
+        toActividad('ok', `Contacto ${contacto.nombre} actualizado`, contacto)
       );
+
+    // Entrelazadas antes de ordenar: varios registros comparten fecha (solo
+    // hay granularidad de dia), asi que un sort estable sobre listas
+    // concatenadas dejaba bloques enteros de un mismo tipo juntos.
+    const actividades = this.interleaveActividades([
+      vehiculosAct,
+      serviciosAct,
+      contactosAct,
+    ]);
 
     this.actividadReciente = actividades
       .sort((a, b) => b.timestamp - a.timestamp)
@@ -549,6 +558,17 @@ export class EmpresaMeComponent implements OnInit {
       }));
     this.lastBuiltActivities = actividades;
     this.combineActivities(actividades);
+  }
+
+  private interleaveActividades<T>(listas: T[][]): T[] {
+    const resultado: T[] = [];
+    const maxLen = Math.max(0, ...listas.map((l) => l.length));
+    for (let i = 0; i < maxLen; i++) {
+      for (const lista of listas) {
+        if (i < lista.length) resultado.push(lista[i]);
+      }
+    }
+    return resultado;
   }
 
   private getItemDateSource(item: any): string | null {
@@ -1144,6 +1164,7 @@ export class EmpresaMeComponent implements OnInit {
         this.comercialProgresoTotal = res.progreso_total;
         this.comercialChatLoading = false;
         if (res.done) {
+          this.pushActivity('ok', 'Informacion comercial completada');
           this.loadComercialInfo();
         }
       },
@@ -1192,6 +1213,7 @@ export class EmpresaMeComponent implements OnInit {
             'Informacion comercial actualizada exitosamente',
             'success'
           );
+          this.pushActivity('ok', 'Informacion comercial actualizada');
         },
         error: (error) => {
           this.handleError(error, 'comercial', 'actualizar informacion comercial');
@@ -1271,6 +1293,13 @@ export class EmpresaMeComponent implements OnInit {
     this.expandedVehiculos.clear();
     this.expandedServicios.clear();
 
+    this.submitting = {
+      empresa: false,
+      vehiculo: false,
+      servicio: false,
+      contacto: false,
+    };
+
     this.formErrors = {};
 
     this.passwordForm = { password: '', confirmPassword: '' };
@@ -1330,6 +1359,7 @@ export class EmpresaMeComponent implements OnInit {
   onSubmitEmpresaEdit(): void {
     this.loading = true;
     this.clearFormErrors('empresa');
+    this.submitting.empresa = true;
 
     this.adminEmpresaService.updateMyCompany(this.empresaEditForm).subscribe({
       next: () => {
@@ -1341,10 +1371,12 @@ export class EmpresaMeComponent implements OnInit {
         this.loadEmpresaData();
         this.resetForms();
         this.loading = false;
+        this.submitting.empresa = false;
       },
       error: (error) => {
         this.handleError(error, 'empresa', 'actualizar datos de empresa');
         this.loading = false;
+        this.submitting.empresa = false;
       },
     });
   }
@@ -1381,6 +1413,7 @@ export class EmpresaMeComponent implements OnInit {
   onSubmitVehiculo(): void {
     this.loading = true;
     this.clearFormErrors('vehiculo');
+    this.submitting.vehiculo = true;
 
     if (this.editingVehiculo) {
       this.adminEmpresaService
@@ -1397,10 +1430,12 @@ export class EmpresaMeComponent implements OnInit {
             this.loadEmpresaData();
             this.resetForms();
             this.loading = false;
+            this.submitting.vehiculo = false;
           },
           error: (error) => {
             this.handleError(error, 'vehiculo', 'actualizar vehiculo');
             this.loading = false;
+            this.submitting.vehiculo = false;
           },
         });
     } else {
@@ -1416,10 +1451,12 @@ export class EmpresaMeComponent implements OnInit {
           this.loadEmpresaData();
           this.resetForms();
           this.loading = false;
+          this.submitting.vehiculo = false;
         },
         error: (error) => {
           this.handleError(error, 'vehiculo', 'crear vehiculo');
           this.loading = false;
+          this.submitting.vehiculo = false;
         },
       });
     }
@@ -1478,6 +1515,7 @@ export class EmpresaMeComponent implements OnInit {
   onSubmitServicio(): void {
     this.loading = true;
     this.clearFormErrors('servicio');
+    this.submitting.servicio = true;
 
     if (this.editingServicio) {
       const sid = this.editingServicio.id_servicio;
@@ -1498,10 +1536,12 @@ export class EmpresaMeComponent implements OnInit {
           this.loadEmpresaData();
           this.resetForms();
           this.loading = false;
+          this.submitting.servicio = false;
         },
         error: (error) => {
           this.handleError(error, 'servicio', 'actualizar servicio');
           this.loading = false;
+          this.submitting.servicio = false;
         },
       });
     } else {
@@ -1517,10 +1557,12 @@ export class EmpresaMeComponent implements OnInit {
           this.loadEmpresaData();
           this.resetForms();
           this.loading = false;
+          this.submitting.servicio = false;
         },
         error: (error) => {
           this.handleError(error, 'servicio', 'crear servicio');
           this.loading = false;
+          this.submitting.servicio = false;
         },
       });
     }
@@ -1673,6 +1715,8 @@ export class EmpresaMeComponent implements OnInit {
       }
     }
 
+    this.submitting.contacto = true;
+
     if (this.editingContacto) {
       this.adminEmpresaService
         .updateContacto(this.editingContacto.id_contacto, this.contactoForm)
@@ -1685,10 +1729,12 @@ export class EmpresaMeComponent implements OnInit {
             this.loadEmpresaData();
             this.resetForms();
             this.loading = false;
+            this.submitting.contacto = false;
           },
           error: (error) => {
             this.handleError(error, 'contacto', 'actualizar contacto');
             this.loading = false;
+            this.submitting.contacto = false;
           },
         });
     } else {
@@ -1701,10 +1747,12 @@ export class EmpresaMeComponent implements OnInit {
           this.loadEmpresaData();
           this.resetForms();
           this.loading = false;
+          this.submitting.contacto = false;
         },
         error: (error) => {
           this.handleError(error, 'contacto', 'crear contacto');
           this.loading = false;
+          this.submitting.contacto = false;
         },
       });
     }
@@ -1975,7 +2023,7 @@ export class EmpresaMeComponent implements OnInit {
 
   // dentro de la clase EmpresaMeComponent
   confirmAndSubmit(
-    kind: 'empresa' | 'vehiculo' | 'servicio' | 'contacto',
+    kind: 'empresa' | 'vehiculo' | 'servicio' | 'contacto' | 'comercial',
     formRef: NgForm
   ) {
     // 1) Validacion: marcar controles, no abrir confirm si esta invalido
@@ -1998,6 +2046,7 @@ export class EmpresaMeComponent implements OnInit {
       contacto: this.editingContacto
         ? 'actualizar el contacto'
         : 'agregar el contacto',
+      comercial: 'guardar la informacion comercial',
     };
 
     const ok = window.confirm(
@@ -2018,6 +2067,9 @@ export class EmpresaMeComponent implements OnInit {
         break;
       case 'contacto':
         this.onSubmitContacto();
+        break;
+      case 'comercial':
+        this.submitComercialEdit();
         break;
     }
   }

@@ -75,6 +75,33 @@ describe('form-errors.util', () => {
       expect(result[1].field).toBe('cuil');
     });
 
+    it('should translate each item of a FastAPI/Pydantic validation array (422) instead of leaking the raw object', () => {
+      const result = buildFormErrorsFromHttpError(
+        {
+          status: 422,
+          error: {
+            detail: [
+              { loc: ['body', 'email'], msg: 'value is not a valid email address', type: 'value_error' },
+              { loc: ['body', 'nombre'], msg: 'field required', type: 'missing' },
+            ],
+          },
+        },
+        'usuario',
+        translateField,
+        translateGeneric
+      );
+
+      expect(result.length).toBe(2);
+      expect(result[0]).toEqual({
+        field: 'email',
+        message: 'T:email:value is not a valid email address',
+        type: 'validation',
+      });
+      expect(result[1].field).toBe('nombre');
+      // Ninguno de los dos mensajes debe ser el objeto crudo stringificado.
+      expect(result.every((e) => !e.message.includes('[object Object]'))).toBeTrue();
+    });
+
     it('should use the generic translator for a 422 with only a detail message', () => {
       const result = buildFormErrorsFromHttpError(
         { status: 422, error: { detail: 'Ya existe' } },

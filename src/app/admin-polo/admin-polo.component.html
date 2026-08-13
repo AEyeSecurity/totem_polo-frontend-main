@@ -660,13 +660,14 @@
                   <!-- Editar Polo (todos opcionales) -->
                   @if (showPoloEditForm) {
                     <div class="overlay">
-                      <div class="modal modal--md">
+                      <div class="modal modal--md" [attr.aria-busy]="isModalBusy('polo')">
                         <div class="modal-header">
                           <h3>Editar datos del Polo</h3>
                           <button
                             type="button"
                             class="icon-btn"
                             (click)="cancelForm('polo')"
+                            [disabled]="isModalBusy('polo')"
                             aria-label="Cerrar"
                             >
                             ✕
@@ -678,6 +679,14 @@
                           #fPolo="ngForm"
                           novalidate
                           >
+                          @if (isModalBusy('polo')) {
+                            <div class="alert alert--loading">
+                              <span class="alert-spinner" aria-hidden="true"></span>
+                              <span>
+                                Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                              </span>
+                            </div>
+                          }
                           @if (message && messageType === 'success') {
                             <div
                               class="alert alert--success"
@@ -760,13 +769,14 @@
                       <!-- Empresa: crear/editar -->
                       @if (showEmpresaForm) {
                         <div class="overlay">
-                          <div class="modal modal--md">
+                          <div class="modal modal--md" [attr.aria-busy]="isModalBusy('empresa')">
                             <div class="modal-header">
                               <h3>{{ editingEmpresa ? "Editar empresa" : "Nueva empresa" }}</h3>
                               <button
                                 type="button"
                                 class="icon-btn"
                                 (click)="cancelForm('empresa')"
+                                [disabled]="isModalBusy('empresa')"
                                 aria-label="Cerrar"
                                 >
                                 ✕
@@ -778,6 +788,14 @@
                               #fEmp="ngForm"
                               novalidate
                               >
+                              @if (isModalBusy('empresa')) {
+                                <div class="alert alert--loading">
+                                  <span class="alert-spinner" aria-hidden="true"></span>
+                                  <span>
+                                    Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                  </span>
+                                </div>
+                              }
                               @if (message && messageType === 'success') {
                                 <div
                                   class="alert alert--success"
@@ -987,24 +1005,13 @@
                                         >
                                         <!-- Aviso de progreso -->
                                         @if (isModalBusy('usuario')) {
-                                          <div
-                                            class="alert"
-                                            style="margin-bottom: 0.75rem"
-                                            >
-                                            <span class="material-symbols-outlined" style="vertical-align: middle"
-                                              >hourglass_top</span
-                                              >
-                                              <span
-          style="
-            margin-left: 0.5rem;
-            font-family: &quot;Inter&quot;, sans-serif;
-          "
-                                                >
-                                                Procesando… Puede demorar unos minutos. No cierres este formulario ni
-                                                navegues fuera.
-                                              </span>
-                                            </div>
-                                          }
+                                          <div class="alert alert--loading">
+                                            <span class="alert-spinner" aria-hidden="true"></span>
+                                            <span>
+                                              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                            </span>
+                                          </div>
+                                        }
                                           @if (message && messageType === 'success') {
                                             <div
                                               class="alert alert--success"
@@ -1148,13 +1155,14 @@
                                           <!-- Servicio del Polo: crear -->
                                           @if (showServicioPoloForm) {
                                             <div class="overlay">
-                                              <div class="modal modal-lg">
+                                              <div class="modal modal-lg" [attr.aria-busy]="isModalBusy('servicioPolo')">
                                                 <div class="modal-header">
                                                   <h3>Nuevo servicio del Polo</h3>
                                                   <button
                                                     type="button"
                                                     class="icon-btn"
                                                     (click)="cancelForm('servicioPolo')"
+                                                    [disabled]="isModalBusy('servicioPolo')"
                                                     aria-label="Cerrar"
                                                     >
                                                     ✕
@@ -1166,6 +1174,14 @@
                                                   #fSP="ngForm"
                                                   novalidate
                                                   >
+                                                  @if (isModalBusy('servicioPolo')) {
+                                                    <div class="alert alert--loading">
+                                                      <span class="alert-spinner" aria-hidden="true"></span>
+                                                      <span>
+                                                        Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                                      </span>
+                                                    </div>
+                                                  }
                                                   @if (message && messageType === 'success') {
                                                     <div
                                                       class="alert alert--success"
@@ -1480,7 +1496,7 @@
                                                                 <!-- Lote: crear -->
                                                                 @if (showLoteForm) {
                                                                   <div class="overlay">
-                                                                    <div class="modal modal--sm">
+                                                                    <div class="modal modal--sm" [attr.aria-busy]="isModalBusy('lote')">
                                                                       <div class="modal-header">
                                                                         <h3>
                                                                           Nuevo lote
@@ -1492,6 +1508,7 @@
                                                                           type="button"
                                                                           class="icon-btn"
                                                                           (click)="cancelForm('lote')"
+                                                                          [disabled]="isModalBusy('lote')"
                                                                           aria-label="Cerrar"
                                                                           >
                                                                           ✕
@@ -1503,6 +1520,14 @@
                                                                         #fLote="ngForm"
                                                                         novalidate
                                                                         >
+                                                                        @if (isModalBusy('lote')) {
+                                                                          <div class="alert alert--loading">
+                                                                            <span class="alert-spinner" aria-hidden="true"></span>
+                                                                            <span>
+                                                                              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                                                            </span>
+                                                                          </div>
+                                                                        }
                                                                         @if (message && messageType === 'success') {
                                                                           <div
                                                                             class="alert alert--success"

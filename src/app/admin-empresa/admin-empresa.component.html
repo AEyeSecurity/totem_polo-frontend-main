@@ -1085,13 +1085,14 @@
 <!-- Empresa: editar propios -->
 @if (showEmpresaEditForm) {
   <div class="overlay">
-    <div class="modal modal--md">
+    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('empresa')">
       <div class="modal-header">
         <h3>Editar datos de la empresa</h3>
         <button
           type="button"
           class="icon-btn"
           (click)="cancelForm('empresa')"
+          [disabled]="isModalBusy('empresa')"
           aria-label="Cerrar"
         >
           ✕
@@ -1103,6 +1104,14 @@
         #fEmp="ngForm"
         novalidate
       >
+        @if (isModalBusy('empresa')) {
+          <div class="alert alert--loading">
+            <span class="alert-spinner" aria-hidden="true"></span>
+            <span>
+              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+            </span>
+          </div>
+        }
         @if (formErrors["empresa"]?.length) {
           <div class="alert alert--error">
             @for (err of formErrors["empresa"]; track err) {
@@ -1167,19 +1176,33 @@
 <!-- Informacion comercial: editar -->
 @if (showComercialEditForm) {
   <div class="overlay">
-    <div class="modal modal--md">
+    <div class="modal modal--md" [attr.aria-busy]="comercialChatLoading">
       <div class="modal-header">
         <h3>Editar informacion comercial</h3>
         <button
           type="button"
           class="icon-btn"
           (click)="cancelComercialEditForm()"
+          [disabled]="comercialChatLoading"
           aria-label="Cerrar"
         >
           ✕
         </button>
       </div>
-      <form (ngSubmit)="submitComercialEdit()" class="nice-form" novalidate>
+      <form
+        (ngSubmit)="confirmAndSubmit('comercial', fComercial)"
+        class="nice-form"
+        #fComercial="ngForm"
+        novalidate
+      >
+        @if (comercialChatLoading) {
+          <div class="alert alert--loading">
+            <span class="alert-spinner" aria-hidden="true"></span>
+            <span>
+              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+            </span>
+          </div>
+        }
         @if (formErrors["comercial"]?.length) {
           <div class="alert alert--error">
             @for (err of formErrors["comercial"]; track err.message) {
@@ -1305,13 +1328,14 @@
 <!-- Vehiculo: crear/editar -->
 @if (showVehiculoForm) {
   <div class="overlay">
-    <div class="modal modal--lg">
+    <div class="modal modal--lg" [attr.aria-busy]="isModalBusy('vehiculo')">
       <div class="modal-header">
         <h3>{{ editingVehiculo ? "Editar vehiculo" : "Nuevo vehiculo" }}</h3>
         <button
           type="button"
           class="icon-btn"
           (click)="cancelForm('vehiculo')"
+          [disabled]="isModalBusy('vehiculo')"
           aria-label="Cerrar"
         >
           ✕
@@ -1324,6 +1348,14 @@
         class="nice-form"
         novalidate
       >
+        @if (isModalBusy('vehiculo')) {
+          <div class="alert alert--loading">
+            <span class="alert-spinner" aria-hidden="true"></span>
+            <span>
+              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+            </span>
+          </div>
+        }
         @if (formErrors["vehiculo"]?.length) {
           <div class="alert alert--error">
             @for (err of formErrors["vehiculo"]; track err) {
@@ -1549,7 +1581,7 @@
 <!-- Contacto: crear/editar -->
 @if (showContactoForm) {
   <div class="overlay">
-    <div class="modal modal--md">
+    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('contacto')">
       <div class="modal-header">
         <h3>
           {{ editingContacto ? "Editar contacto" : "Nuevo contacto" }}
@@ -1558,6 +1590,7 @@
           type="button"
           class="icon-btn"
           (click)="cancelForm('contacto')"
+          [disabled]="isModalBusy('contacto')"
           aria-label="Cerrar"
         >
           ✕
@@ -1569,6 +1602,14 @@
         #fCont="ngForm"
         novalidate
       >
+        @if (isModalBusy('contacto')) {
+          <div class="alert alert--loading">
+            <span class="alert-spinner" aria-hidden="true"></span>
+            <span>
+              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+            </span>
+          </div>
+        }
         @if (formErrors["contacto"]?.length) {
           <div class="alert alert--error">
             @for (err of formErrors["contacto"]; track err) {
@@ -1707,7 +1748,7 @@
 <!-- Servicio propio: crear/editar -->
 @if (showServicioForm) {
   <div class="overlay">
-    <div class="modal modal--md">
+    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('servicio')">
       <div class="modal-header">
         <h3>
           {{ editingServicio ? "Editar servicio" : "Nuevo servicio" }}
@@ -1716,6 +1757,7 @@
           type="button"
           class="icon-btn"
           (click)="cancelForm('servicio')"
+          [disabled]="isModalBusy('servicio')"
           aria-label="Cerrar"
         >
           ✕
@@ -1727,6 +1769,14 @@
         class="nice-form"
         novalidate
       >
+        @if (isModalBusy('servicio')) {
+          <div class="alert alert--loading">
+            <span class="alert-spinner" aria-hidden="true"></span>
+            <span>
+              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+            </span>
+          </div>
+        }
         @if (formErrors["servicio"]?.length) {
           <div class="alert alert--error">
             @for (err of formErrors["servicio"]; track err) {
