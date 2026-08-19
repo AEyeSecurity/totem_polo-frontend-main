@@ -210,19 +210,19 @@
               <div class="grid-3 nice-form">
                 <div class="field">
                   <label for="ro-polo-cuil">CUIL</label>
-                  <input id="ro-polo-cuil" type="text" [value]="poloData?.cuil" disabled />
+                  <input id="ro-polo-cuil" class="readout" type="text" [value]="poloData?.cuil" readonly />
                 </div>
                 <div class="field">
                   <label for="ro-polo-nombre">Nombre</label>
-                  <input id="ro-polo-nombre" type="text" [value]="poloData?.nombre" disabled />
+                  <input id="ro-polo-nombre" class="readout" type="text" [value]="poloData?.nombre" readonly />
                 </div>
                 <div class="field">
                   <label for="ro-polo-rubro">Rubro</label>
-                  <input id="ro-polo-rubro" type="text" [value]="poloData?.rubro" disabled />
+                  <input id="ro-polo-rubro" class="readout" type="text" [value]="poloData?.rubro" readonly />
                 </div>
                 <div class="field">
                   <label for="ro-polo-fecha">Fecha ingreso</label>
-                  <input id="ro-polo-fecha" type="text" [value]="poloData?.fecha_ingreso" disabled />
+                  <input id="ro-polo-fecha" class="readout" type="text" [value]="poloData?.fecha_ingreso" readonly />
                 </div>
                 <div class="field">
                   <label for="ro-polo-cant-empleados">Cant. empleados</label>
@@ -231,7 +231,7 @@
                     class="readout"
                     type="text"
                     [value]="poloData?.cant_empleados || '—'"
-                    disabled
+                    readonly
                     />
                   </div>
                   <div class="field">
@@ -241,7 +241,7 @@
                       class="readout"
                       type="text"
                       [value]="poloData?.horario_trabajo || '—'"
-                      disabled
+                      readonly
                       />
                     </div>
                     <div class="field col-3">
@@ -251,7 +251,7 @@
                         class="readout"
                         rows="3"
                         [value]="poloData?.observaciones || 'Todavía no se cargó una descripción.'"
-                        disabled
+                        readonly
                       ></textarea>
                     </div>
                   </div>
@@ -266,6 +266,140 @@
                     </button>
                   </div>
                 </div>
+
+                <!-- INFORMACION COMERCIAL DEL POLO -->
+                <div class="card comercial-card">
+                  <div class="company-info-head">
+                    <div>
+                      <h2>Informacion comercial</h2>
+                    </div>
+                    @if (comercialInfo) {
+                      <button
+                        class="btn outline-primary"
+                        type="button"
+                        (click)="openComercialEditForm()"
+                        >
+                        <span class="material-symbols-outlined">edit</span>
+                        <span>Editar datos</span>
+                      </button>
+                    }
+                  </div>
+
+                  @if (formErrors["comercial"]?.length) {
+                    <div class="alert alert--error">
+                      @for (err of formErrors["comercial"]; track err.message) {
+                        <div>{{ err.message }}</div>
+                      }
+                    </div>
+                  }
+
+                  @if (comercialLoadingInfo) {
+                    <div class="muted">Cargando informacion comercial...</div>
+                  } @else if (comercialInfo) {
+                    <div class="grid-2 nice-form profile-readout-grid">
+                      <div class="field col-2">
+                        <label for="co-productos">Productos / servicios</label>
+                        <textarea
+                          id="co-productos"
+                          class="readout multiline"
+                          readonly
+                          [value]="comercialInfo.productos_servicios || '-'"
+                        ></textarea>
+                      </div>
+                      <div class="field">
+                        <label for="co-publico">Publico objetivo</label>
+                        <input
+                          id="co-publico"
+                          class="readout"
+                          type="text"
+                          [value]="comercialInfo.publico_objetivo || '-'"
+                          readonly
+                          />
+                        </div>
+                        <div class="field">
+                          <label for="co-atiende">Atiende al publico</label>
+                          <input
+                            id="co-atiende"
+                            class="readout"
+                            type="text"
+                            [value]="formatBoolean(comercialInfo.atiende_publico)"
+                            readonly
+                            />
+                          </div>
+                          <div class="field">
+                            <label for="co-horario">Horario de atencion comercial</label>
+                            <input
+                              id="co-horario"
+                              class="readout"
+                              type="text"
+                              [value]="comercialInfo.horario_atencion_comercial || '-'"
+                              readonly
+                              />
+                            </div>
+                            <div class="field">
+                              <label for="co-precios">Rango de precios</label>
+                              <input
+                                id="co-precios"
+                                class="readout"
+                                type="text"
+                                [value]="comercialInfo.rango_precios || '-'"
+                                readonly
+                                />
+                              </div>
+                              <div class="field">
+                                <label for="co-modalidad">Modalidad de venta</label>
+                                <input
+                                  id="co-modalidad"
+                                  class="readout"
+                                  type="text"
+                                  [value]="comercialInfo.modalidad_venta || '-'"
+                                  readonly
+                                  />
+                                </div>
+                                <div class="field">
+                                  <label for="co-marcas">Marcas representadas</label>
+                                  <input
+                                    id="co-marcas"
+                                    class="readout"
+                                    type="text"
+                                    [value]="comercialInfo.marcas_representadas || '-'"
+                                    readonly
+                                    />
+                                  </div>
+                                  <div class="field">
+                                    <label for="co-certif">Certificaciones</label>
+                                    <input
+                                      id="co-certif"
+                                      class="readout"
+                                      type="text"
+                                      [value]="comercialInfo.certificaciones || '-'"
+                                      readonly
+                                      />
+                                    </div>
+                                    <div class="field col-2">
+                                      <label for="co-obs">Observaciones</label>
+                                      <textarea
+                                        id="co-obs"
+                                        class="readout multiline"
+                                        readonly
+                                        [value]="comercialInfo.observaciones_comerciales || '-'"
+                                      ></textarea>
+                                    </div>
+                                  </div>
+                                } @else {
+                                  <div class="muted">
+                                    Todavia no se cargo informacion comercial del Polo.
+                                  </div>
+                                  <button
+                                    class="btn primary"
+                                    type="button"
+                                    (click)="openComercialEditForm()"
+                                    >
+                                    <span class="material-symbols-outlined">edit</span>
+                                    <span>Cargar informacion comercial</span>
+                                  </button>
+                                }
+                              </div>
               </section>
             }
 
@@ -765,6 +899,158 @@
                           </div>
                         </div>
                       }
+
+                      <!-- Informacion comercial del Polo: editar -->
+                      @if (showComercialEditForm) {
+                        <div class="overlay">
+                          <div class="modal modal--md" [attr.aria-busy]="comercialSaving">
+                            <div class="modal-header">
+                              <h3>Editar informacion comercial</h3>
+                              <button
+                                type="button"
+                                class="icon-btn"
+                                (click)="cancelComercialEditForm()"
+                                [disabled]="comercialSaving"
+                                aria-label="Cerrar"
+                                >
+                                ✕
+                              </button>
+                            </div>
+                            <form
+                              (ngSubmit)="confirmAndSubmit('comercial', fComercial)"
+                              class="nice-form"
+                              #fComercial="ngForm"
+                              novalidate
+                              >
+                              @if (comercialSaving) {
+                                <div class="alert alert--loading">
+                                  <span class="alert-spinner" aria-hidden="true"></span>
+                                  <span>
+                                    Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                  </span>
+                                </div>
+                              }
+                              @if (formErrors['comercial']?.length) {
+                                <div class="alert alert--error">
+                                  @for (err of formErrors['comercial']; track err) {
+                                    <div>{{ err.message }}</div>
+                                  }
+                                </div>
+                              }
+                              <div class="modal-body grid-2">
+                                <div class="field col-2">
+                                  <label for="ce-productos">Productos / servicios</label>
+                                  <textarea
+                                    id="ce-productos"
+                                    rows="3"
+                                    [(ngModel)]="comercialEditForm.productos_servicios"
+                                    name="productos_servicios"
+                                  ></textarea>
+                                </div>
+                                <div class="field">
+                                  <label for="ce-publico">Publico objetivo</label>
+                                  <select
+                                    id="ce-publico"
+                                    [(ngModel)]="comercialEditForm.publico_objetivo"
+                                    name="publico_objetivo"
+                                    >
+                                    @for (op of comercialPublicoOpciones; track op) {
+                                      <option [value]="op">{{ op }}</option>
+                                    }
+                                  </select>
+                                </div>
+                                <div class="field">
+                                  <label for="ce-atiende">Atiende al publico</label>
+                                  <select
+                                    id="ce-atiende"
+                                    [(ngModel)]="comercialEditForm.atiende_publico"
+                                    name="atiende_publico"
+                                    >
+                                    <option [ngValue]="true">Si</option>
+                                    <option [ngValue]="false">No</option>
+                                  </select>
+                                </div>
+                                <div class="field">
+                                  <label for="ce-horario">Horario de atencion comercial</label>
+                                  <input
+                                    id="ce-horario"
+                                    type="text"
+                                    [(ngModel)]="comercialEditForm.horario_atencion_comercial"
+                                    name="horario_atencion_comercial"
+                                    />
+                                  </div>
+                                  <div class="field">
+                                    <label for="ce-precios">Rango de precios</label>
+                                    <select
+                                      id="ce-precios"
+                                      [(ngModel)]="comercialEditForm.rango_precios"
+                                      name="rango_precios"
+                                      >
+                                      @for (op of comercialRangoPreciosOpciones; track op) {
+                                        <option [value]="op">{{ op }}</option>
+                                      }
+                                    </select>
+                                  </div>
+                                  <div class="field">
+                                    <label for="ce-modalidad">Modalidad de venta</label>
+                                    <select
+                                      id="ce-modalidad"
+                                      [(ngModel)]="comercialEditForm.modalidad_venta"
+                                      name="modalidad_venta"
+                                      >
+                                      @for (op of comercialModalidadVentaOpciones; track op) {
+                                        <option [value]="op">{{ op }}</option>
+                                      }
+                                    </select>
+                                  </div>
+                                  <div class="field">
+                                    <label for="ce-marcas">Marcas representadas</label>
+                                    <input
+                                      id="ce-marcas"
+                                      type="text"
+                                      [(ngModel)]="comercialEditForm.marcas_representadas"
+                                      name="marcas_representadas"
+                                      />
+                                    </div>
+                                    <div class="field">
+                                      <label for="ce-certif">Certificaciones</label>
+                                      <input
+                                        id="ce-certif"
+                                        type="text"
+                                        [(ngModel)]="comercialEditForm.certificaciones"
+                                        name="certificaciones"
+                                        />
+                                      </div>
+                                      <div class="field col-2">
+                                        <label for="ce-obs">Observaciones</label>
+                                        <textarea
+                                          id="ce-obs"
+                                          rows="3"
+                                          [(ngModel)]="comercialEditForm.observaciones_comerciales"
+                                          name="observaciones_comerciales"
+                                        ></textarea>
+                                      </div>
+                                    </div>
+                                    <div class="modal-actions">
+                                      <button
+                                        class="btn primary"
+                                        type="submit"
+                                        [disabled]="comercialSaving"
+                                        >
+                                        Guardar cambios
+                                      </button>
+                                      <button
+                                        class="btn ghost"
+                                        type="button"
+                                        (click)="cancelComercialEditForm()"
+                                        >
+                                        Cancelar
+                                      </button>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            }
 
                       <!-- Empresa: crear/editar -->
                       @if (showEmpresaForm) {

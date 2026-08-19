@@ -118,6 +118,32 @@ export interface PoloSelfUpdate {
   horario_trabajo: string;
 }
 
+// Informacion comercial del Polo (misma ficha que usan las empresas)
+export interface InfoComercial {
+  productos_servicios?: string | null;
+  publico_objetivo?: string | null;
+  atiende_publico?: boolean | null;
+  horario_atencion_comercial?: string | null;
+  rango_precios?: string | null;
+  modalidad_venta?: string | null;
+  marcas_representadas?: string | null;
+  certificaciones?: string | null;
+  observaciones_comerciales?: string | null;
+  completado: boolean;
+}
+
+export interface InfoComercialUpdate {
+  productos_servicios?: string | null;
+  publico_objetivo?: string | null;
+  atiende_publico?: boolean | null;
+  horario_atencion_comercial?: string | null;
+  rango_precios?: string | null;
+  modalidad_venta?: string | null;
+  marcas_representadas?: string | null;
+  certificaciones?: string | null;
+  observaciones_comerciales?: string | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -133,6 +159,15 @@ export class AdminPoloService {
 
   updatePolo(poloData: PoloSelfUpdate): Observable<PoloDetail> {
     return this.http.put<PoloDetail>(`${this.apiUrl}/polo/me`, poloData);
+  }
+
+  // Informacion comercial del Polo (carga/edicion directa, sin wizard)
+  getComercialInfo(): Observable<InfoComercial> {
+    return this.http.get<InfoComercial>(`${this.apiUrl}/polo/comercial`);
+  }
+
+  updateComercialInfo(data: InfoComercialUpdate): Observable<InfoComercial> {
+    return this.http.put<InfoComercial>(`${this.apiUrl}/polo/comercial`, data);
   }
 
   changePasswordRequest(): Observable<any> {

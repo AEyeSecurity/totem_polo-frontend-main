@@ -16,7 +16,9 @@ describe('ChatbotComponent', () => {
     chatServiceSpy = jasmine.createSpyObj('ChatService', [
       'sendMessage',
       'sendAudio',
+      'getHistory',
     ]);
+    chatServiceSpy.getHistory.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [ChatbotComponent],

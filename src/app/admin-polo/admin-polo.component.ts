@@ -19,6 +19,8 @@ import {
   LoteCreate,
   PoloDetail,
   PoloSelfUpdate,
+  InfoComercial,
+  InfoComercialUpdate,
 } from './admin-polo.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
@@ -86,6 +88,18 @@ export class AdminPoloComponent implements OnInit {
     observaciones: '',
     horario_trabajo: '',
   };
+
+  // Informacion comercial del Polo (se carga/edita directa, sin wizard:
+  // la conoce el propio Polo, no hace falta completarla de a un campo)
+  comercialInfo: InfoComercial | null = null;
+  comercialLoadingInfo = false;
+  comercialSaving = false;
+
+  showComercialEditForm = false;
+  comercialEditForm: InfoComercialUpdate = {};
+  readonly comercialPublicoOpciones = ['B2B', 'B2C', 'Ambos'];
+  readonly comercialRangoPreciosOpciones = ['Económico', 'Medio', 'Premium'];
+  readonly comercialModalidadVentaOpciones = ['Presencial', 'Online', 'Ambas'];
 
   // PROPIEDADES PARA CONTROL DE CAMBIOS - MEJORADO
   private changes = new UnsavedChangesTracker();
@@ -199,6 +213,7 @@ export class AdminPoloComponent implements OnInit {
     this.loadRoles();
     this.loadPoloData();
     this.loadData();
+    this.loadComercialInfo();
   }
 
   setActiveTab(tab: AdminPoloTab): void {
@@ -1252,6 +1267,83 @@ export class AdminPoloComponent implements OnInit {
     });
   }
 
+  formatBoolean(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return '-';
+    }
+    if (typeof value === 'boolean') {
+      return value ? 'Si' : 'No';
+    }
+    const normalized = `${value}`.trim().toLowerCase();
+    if (['true', '1', 'si', 'yes'].includes(normalized)) {
+      return 'Si';
+    }
+    if (['false', '0', 'no'].includes(normalized)) {
+      return 'No';
+    }
+    return `${value}`;
+  }
+
+  // ===== Informacion comercial del Polo (carga/edicion directa, sin wizard) =====
+  loadComercialInfo(): void {
+    this.comercialLoadingInfo = true;
+    this.adminPoloService.getComercialInfo().subscribe({
+      next: (data) => {
+        this.comercialInfo = data;
+        this.comercialLoadingInfo = false;
+      },
+      error: () => {
+        // 404 = todavia no se cargo nada: es un estado valido, no un error.
+        this.comercialInfo = null;
+        this.comercialLoadingInfo = false;
+      },
+    });
+  }
+
+  openComercialEditForm(): void {
+    this.clearFormErrors('comercial');
+    const info = this.comercialInfo;
+    this.comercialEditForm = {
+      productos_servicios: info?.productos_servicios || '',
+      publico_objetivo: info?.publico_objetivo || '',
+      atiende_publico: info?.atiende_publico ?? null,
+      horario_atencion_comercial: info?.horario_atencion_comercial || '',
+      rango_precios: info?.rango_precios || '',
+      modalidad_venta: info?.modalidad_venta || '',
+      marcas_representadas: info?.marcas_representadas || '',
+      certificaciones: info?.certificaciones || '',
+      observaciones_comerciales: info?.observaciones_comerciales || '',
+    };
+    this.showComercialEditForm = true;
+  }
+
+  cancelComercialEditForm(): void {
+    this.showComercialEditForm = false;
+    this.clearFormErrors('comercial');
+  }
+
+  submitComercialEdit(): void {
+    this.comercialSaving = true;
+    this.adminPoloService
+      .updateComercialInfo(this.comercialEditForm)
+      .subscribe({
+        next: (data) => {
+          this.comercialInfo = data;
+          this.showComercialEditForm = false;
+          this.comercialSaving = false;
+          this.showMessage(
+            'Informacion comercial actualizada exitosamente',
+            'success'
+          );
+          this.pushActivity('ok', 'Informacion comercial del Polo actualizada');
+        },
+        error: (error) => {
+          this.handleError(error, 'comercial', 'actualizar informacion comercial');
+          this.comercialSaving = false;
+        },
+      });
+  }
+
   // EMPRESAS
   openEmpresaForm(empresa?: Empresa): void {
     this.clearFormErrors('empresa');
@@ -1802,7 +1894,7 @@ export class AdminPoloComponent implements OnInit {
   }
 
   confirmAndSubmit(
-    kind: 'polo' | 'empresa' | 'usuario' | 'servicioPolo' | 'lote',
+    kind: 'polo' | 'empresa' | 'usuario' | 'servicioPolo' | 'lote' | 'comercial',
     formRef: NgForm
   ) {
     // 1) Si el form es inválido, marco controles y corto
@@ -1835,6 +1927,7 @@ export class AdminPoloComponent implements OnInit {
         : 'crear el usuario',
       servicioPolo: 'crear el servicio del Polo',
       lote: 'agregar el lote',
+      comercial: 'guardar la informacion comercial',
     };
 
     const ok = window.confirm(
@@ -1858,6 +1951,9 @@ export class AdminPoloComponent implements OnInit {
         break;
       case 'lote':
         this.onSubmitLote();
+        break;
+      case 'comercial':
+        this.submitComercialEdit();
         break;
     }
   }

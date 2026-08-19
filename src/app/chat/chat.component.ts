@@ -174,38 +174,6 @@ interface Message {
                 </button>
               }
             </div>
-            <div class="sidebar-card contact-card">
-              <div class="card-header">
-                <span class="material-symbols-outlined">support_agent</span>
-                <div>
-                  <h3>Conexi&oacute;n Directa</h3>
-                  <p>Equipo POLO 52</p>
-                </div>
-              </div>
-              <ul class="contact-list">
-                <li>
-                  <span class="material-symbols-outlined">call</span>
-                  <div>
-                    <strong>+54 351 123-4567</strong>
-                    <small>Atenci&oacute;n comercial</small>
-                  </div>
-                </li>
-                <li>
-                  <span class="material-symbols-outlined">mail</span>
-                  <div>
-                    <strong>info&#64;polo52.com</strong>
-                    <small>Contacto general</small>
-                  </div>
-                </li>
-                <li>
-                  <span class="material-symbols-outlined">schedule</span>
-                  <div>
-                    <strong>24/7 Disponible</strong>
-                    <small>Siempre listos para ayudarte</small>
-                  </div>
-                </li>
-              </ul>
-            </div>
           </aside>
         </div>
       } @else {
@@ -392,9 +360,32 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   ngOnInit() {
     this.loadPopularQuestions();
-    this.addBotMessage(
-      'Bienvenido al Parque Industrial POLO 52.\n\nMi nombre es POLO y estoy aqu\u00ed para ayudarte con consultas sobre el parque. \u00bfEn qu\u00e9 puedo asistirte?',
-    );
+    this.loadHistory();
+  }
+
+  private readonly welcomeMessage =
+    'Bienvenido al Parque Industrial POLO 52.\n\nMi nombre es POLO y estoy aqu\u00ed para ayudarte con consultas sobre el parque. \u00bfEn qu\u00e9 puedo asistirte?';
+
+  private loadHistory(): void {
+    this.chatService.getHistory().subscribe({
+      next: (history) => {
+        if (history && history.length > 0) {
+          this.messages = history.map((m) => ({
+            sender: m.remitente,
+            content: m.contenido,
+            timestamp: new Date(m.fecha),
+            id: this.generateMessageId(),
+          }));
+          this.shouldScrollToBottom = true;
+        } else {
+          this.addBotMessage(this.welcomeMessage);
+        }
+      },
+      error: () => {
+        // Si no se pudo traer el historial no bloqueamos el chat: arrancamos igual.
+        this.addBotMessage(this.welcomeMessage);
+      },
+    });
   }
 
   ngAfterViewChecked() {

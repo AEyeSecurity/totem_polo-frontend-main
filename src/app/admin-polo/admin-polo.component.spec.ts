@@ -50,6 +50,10 @@ describe('AdminPoloComponent', () => {
     httpMock.expectOne(`${base}/usuarios`).flush([]);
     httpMock.expectOne(`${base}/serviciopolo`).flush([]);
     httpMock.expectOne(`${base}/lotes`).flush([]);
+    httpMock.expectOne(`${base}/polo/comercial`).flush(
+      { detail: 'Todavía no se cargó información comercial del Polo' },
+      { status: 404, statusText: 'Not Found' }
+    );
   });
 
   afterEach(() => {

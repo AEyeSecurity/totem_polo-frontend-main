@@ -22,6 +22,12 @@ export interface VoiceChatResponse {
   message?: string;
 }
 
+export interface ChatMensajeOut {
+  remitente: 'user' | 'bot';
+  contenido: string;
+  fecha: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
@@ -53,6 +59,11 @@ export class ChatService {
   // Exponer base de API para usos de streaming manual (fetch/SSE)
   getApiUrl(): string {
     return this.apiUrl;
+  }
+
+  // Historial completo de la conversacion del usuario logueado
+  getHistory(): Observable<ChatMensajeOut[]> {
+    return this.http.get<ChatMensajeOut[]>(`${this.apiUrl}history`);
   }
 
   // (Opcional) Solo STT
