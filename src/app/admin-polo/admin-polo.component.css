@@ -1066,10 +1066,23 @@ html, body {
   text-align: left !important;
 }
 
-/* (por si alguna regla previa dejó .horario-cell en columna, la pisamos) */
-.table--empresas .row > div:nth-child(6) .horario-cell,
-.table--servicios .row > div:nth-child(2) .horario-cell{
-  flex-direction: row !important;
+/* Horario expandido: texto arriba, "Ocultar" debajo. En fila (el layout que
+   se aplicaba antes vía .table--empresas .row > div:nth-child(6)) el botón
+   quedaba a la altura de la primera línea de texto y se superponía con los
+   botones de Acciones cuando el texto era largo. La celda del horario ES el
+   div:nth-child(N) (no un hijo suyo), así que el selector tiene que apuntar
+   al propio elemento. */
+.table--empresas .row > div:nth-child(6).horario-cell,
+.table--servicios .row > div:nth-child(2).horario-cell{
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+.table--empresas .row > div:nth-child(6).horario-cell .vermenos,
+.table--servicios .row > div:nth-child(2).horario-cell .vermenos{
+  align-self: flex-start !important;
+  margin-top: .35rem;
 }
 /* ===== Empresas: redistribución de columnas para dar más ancho a "Horario" ===== */
 .table--empresas .thead,

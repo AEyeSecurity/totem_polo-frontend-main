@@ -12,7 +12,7 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 4px 10px 12px;
+  padding: 0 0 12px;
   background: linear-gradient(
     120deg,
     #e6f0ff 0%,
@@ -90,18 +90,21 @@
   position: relative;
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #9a9a9a, #cfcfcf);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  font-size: 12px;
+  flex-shrink: 0;
 }
 
-.avatar-icon {
-  letter-spacing: 0.5px;
+.avatar-logo-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.avatar-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .status-indicator {

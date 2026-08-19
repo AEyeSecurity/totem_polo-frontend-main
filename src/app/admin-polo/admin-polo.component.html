@@ -206,7 +206,17 @@
         @if (activeTab === 'perfil') {
           <section class="card-grid">
             <div class="card card--table">
-              <h2>Datos del Polo</h2>
+              <div class="company-info-head">
+                <h2>Datos del Polo</h2>
+                <button
+                  class="btn outline-primary"
+                  type="button"
+                  (click)="openPoloEditForm()"
+                  >
+                  <span class="material-symbols-outlined">edit</span>
+                  <span>Editar datos</span>
+                </button>
+              </div>
               <div class="grid-3 nice-form">
                 <div class="field">
                   <label for="ro-polo-cuil">CUIL</label>
@@ -254,16 +264,6 @@
                         readonly
                       ></textarea>
                     </div>
-                  </div>
-                  <div class="actions" style="margin-top: 1rem">
-                    <button
-                      class="btn primary"
-                      type="button"
-                      (click)="openPoloEditForm()"
-                      >
-                      <span class="material-symbols-outlined">edit</span>
-                      <span>Editar datos del Polo</span>
-                    </button>
                   </div>
                 </div>
 

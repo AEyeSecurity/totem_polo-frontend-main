@@ -32,7 +32,13 @@ interface Message {
       <div class="chat-header">
         <div class="header-content">
           <div class="bot-avatar">
-            <div class="avatar-icon">P52</div>
+            <div class="avatar-logo-frame">
+              <img
+                class="avatar-logo"
+                src="assets/images/PoloLogo-rojo.jpg"
+                alt="Logo Polo 52"
+              />
+            </div>
             <div class="status-indicator" [class.active]="!isTyping"></div>
           </div>
           <div class="header-info">
