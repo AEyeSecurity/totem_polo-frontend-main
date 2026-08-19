@@ -1,15 +1,13 @@
 :host {
   display: block;
-}
-
-:host {
-  display: block;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .chat-wrapper {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 0 0 12px;
@@ -23,7 +21,7 @@
   color: #495057;
   font-size: clamp(0.88rem, 0.9vw, 0.98rem);
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   box-sizing: border-box;
 }
 
@@ -47,6 +45,40 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Toque discreto: en el totem el boton de Cerrar sesion viene oculto para
+   que el publico no cierre la sesion sin querer. Este circulito casi
+   invisible es el unico modo de mostrarlo/ocultarlo, pero mantiene un area
+   de toque de tamano normal para que el personal lo encuentre facil. */
+.kiosk-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.kiosk-toggle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -50%);
+  transition: background-color 0.2s ease;
+}
+
+.kiosk-toggle:hover::after,
+.kiosk-toggle:focus-visible::after {
+  background: rgba(0, 0, 0, 0.28);
 }
 
 .chat-mode-switch {
@@ -155,11 +187,13 @@
 .voice-experience {
   width: 100%;
   flex: 1;
-  padding: clamp(8px, 1.6vw, 22px);
+  min-height: 0;
+  padding: clamp(8px, 1.6vmin, 22px);
   box-sizing: border-box;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
 }
 
 .voice-hero {
@@ -172,8 +206,8 @@
       rgba(255, 255, 255, 0.75)
     ),
     url('/assets/images/polo-inicio.jpg') center/cover no-repeat;
-  border-radius: clamp(20px, 2.8vw, 32px);
-  padding: clamp(14px, 1.8vw, 22px);
+  border-radius: clamp(20px, 2.8vmin, 32px);
+  padding: clamp(14px, 1.8vmin, 22px);
   color: #101a2d;
   box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.65);
@@ -181,7 +215,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: clamp(12px, 1.6vw, 24px);
+  gap: clamp(12px, 1.6vmin, 24px);
   box-sizing: border-box;
 }
 
@@ -189,12 +223,12 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: clamp(10px, 2vw, 24px);
+  gap: clamp(10px, 2vmin, 24px);
 }
 
 .voice-hero-header h3 {
   margin: 6px 0 4px;
-  font-size: clamp(1.3rem, 2.3vw, 2rem);
+  font-size: clamp(1.3rem, 2.3vmin, 2rem);
 }
 
 .voice-hero-header .subtitle {
@@ -222,7 +256,7 @@
   display: grid;
   grid-template-columns: minmax(150px, 0.9fr) auto minmax(150px, 0.9fr);
   grid-template-areas: 'bot robot user';
-  gap: clamp(10px, 1.6vw, 20px);
+  gap: clamp(10px, 1.6vmin, 20px);
   align-items: center;
   align-content: center;
   justify-content: center;
@@ -236,14 +270,14 @@
   background: rgba(255, 255, 255, 0.96);
   color: #1d1f2c;
   border-radius: 18px;
-  padding: clamp(10px, 1vw, 16px);
+  padding: clamp(10px, 1vmin, 16px);
   min-height: 110px;
   box-shadow: 0 12px 22px rgba(15, 23, 42, 0.14);
   position: relative;
   backdrop-filter: blur(8px);
   transition: transform 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.9);
-  max-width: clamp(150px, 26vw, 210px);
+  max-width: clamp(150px, 26vmin, 210px);
   width: 100%;
 }
 
@@ -299,18 +333,18 @@
 .user-bubble {
   grid-area: user;
   justify-self: start;
-  margin-left: clamp(12px, 2vw, 40px);
+  margin-left: clamp(12px, 2vmin, 40px);
 }
 
 .bot-bubble {
   grid-area: bot;
   justify-self: end;
-  margin-right: clamp(12px, 2vw, 40px);
+  margin-right: clamp(12px, 2vmin, 40px);
 }
 
 .robot-figure {
   grid-area: robot;
-  margin-top: clamp(8px, 1.5vw, 24px);
+  margin-top: clamp(8px, 1.5vmin, 24px);
   --body-light: #ffffff;
   --body-mid: #eef2f8;
   --body-shadow: #d3dbe8;
@@ -334,7 +368,7 @@
   position: absolute;
   bottom: -8px;
   left: 50%;
-  width: clamp(90px, 15vw, 160px);
+  width: clamp(90px, 15vmin, 160px);
   height: 20px;
   background: radial-gradient(
     ellipse at center,
@@ -404,15 +438,15 @@
 }
 
 .robot-head {
-  width: clamp(140px, 18vw, 190px);
-  height: clamp(120px, 15vw, 160px);
+  width: clamp(140px, 18vmin, 190px);
+  height: clamp(120px, 15vmin, 160px);
   background: linear-gradient(160deg, var(--body-light) 0%, var(--body-mid) 55%, var(--body-shadow) 100%);
   border-radius: 46% 46% 42% 42% / 58% 58% 42% 42%;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(8px, 1.4vw, 14px);
+  padding: clamp(8px, 1.4vmin, 14px);
   box-shadow:
     inset 0 4px 8px rgba(255, 255, 255, 0.9),
     inset 0 -14px 18px rgba(159, 179, 219, 0.4),
@@ -421,8 +455,8 @@
 
 .head-ear {
   position: absolute;
-  width: clamp(18px, 2.8vw, 26px);
-  height: clamp(18px, 2.8vw, 26px);
+  width: clamp(18px, 2.8vmin, 26px);
+  height: clamp(18px, 2.8vmin, 26px);
   background: radial-gradient(circle at 35% 30%, var(--body-light), var(--body-shadow));
   border-radius: 50%;
   top: 55%;
@@ -433,11 +467,11 @@
 }
 
 .ear-left {
-  left: calc(clamp(18px, 2.8vw, 26px) / -2 - 1px);
+  left: calc(clamp(18px, 2.8vmin, 26px) / -2 - 1px);
 }
 
 .ear-right {
-  right: calc(clamp(18px, 2.8vw, 26px) / -2 - 1px);
+  right: calc(clamp(18px, 2.8vmin, 26px) / -2 - 1px);
 }
 
 .robot-face {
@@ -449,7 +483,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1.2vw, 12px);
+  gap: clamp(6px, 1.2vmin, 12px);
   box-shadow:
     inset 0 3px 6px rgba(255, 255, 255, 0.08),
     inset 0 -8px 14px rgba(0, 0, 0, 0.55),
@@ -458,12 +492,12 @@
 
 .robot-eyes {
   display: flex;
-  gap: clamp(14px, 2.8vw, 24px);
+  gap: clamp(14px, 2.8vmin, 24px);
 }
 
 .eye {
-  width: clamp(16px, 2.6vw, 24px);
-  height: clamp(20px, 3.2vw, 28px);
+  width: clamp(16px, 2.6vmin, 24px);
+  height: clamp(20px, 3.2vmin, 28px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -495,8 +529,8 @@
 }
 
 .robot-smile {
-  width: clamp(26px, 4.4vw, 40px);
-  height: clamp(9px, 1.6vw, 14px);
+  width: clamp(26px, 4.4vmin, 40px);
+  height: clamp(9px, 1.6vmin, 14px);
   border: none;
   border-radius: 0 0 50% 50% / 0 0 100% 100%;
   background: radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--glow-deep) 85%);
@@ -571,7 +605,7 @@
   }
 }
 .robot-neck {
-  width: clamp(26px, 4.6vw, 40px);
+  width: clamp(26px, 4.6vmin, 40px);
   height: 10px;
   background: linear-gradient(180deg, var(--body-mid), var(--body-shadow));
   border-radius: 10px;
@@ -580,8 +614,8 @@
 }
 
 .robot-body {
-  width: clamp(135px, 18.5vw, 180px);
-  height: clamp(150px, 20.5vw, 200px);
+  width: clamp(135px, 18.5vmin, 180px);
+  height: clamp(150px, 20.5vmin, 200px);
   background: linear-gradient(165deg, var(--body-light) 0%, var(--body-mid) 50%, var(--body-shadow) 100%);
   border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
   position: relative;
@@ -624,8 +658,8 @@
 }
 
 .body-plate {
-  width: clamp(48px, 8vw, 70px);
-  height: clamp(48px, 8vw, 70px);
+  width: clamp(48px, 8vmin, 70px);
+  height: clamp(48px, 8vmin, 70px);
   margin-top: 18%;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #ffffff, var(--body-mid) 65%, var(--body-shadow));
@@ -651,21 +685,21 @@
 .robot-arm {
   position: absolute;
   top: 16%;
-  width: clamp(28px, 4.8vw, 44px);
-  height: clamp(92px, 14vw, 128px);
+  width: clamp(28px, 4.8vmin, 44px);
+  height: clamp(92px, 14vmin, 128px);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .arm-left {
-  left: calc(-1 * clamp(26px, 4.6vw, 40px));
+  left: calc(-1 * clamp(26px, 4.6vmin, 40px));
   transform-origin: top center;
   animation: arm-sway-left 2.6s ease-in-out infinite;
 }
 
 .arm-right {
-  right: calc(-1 * clamp(26px, 4.6vw, 40px));
+  right: calc(-1 * clamp(26px, 4.6vmin, 40px));
   transform-origin: top center;
   animation: arm-sway-right 2.6s ease-in-out infinite;
 }
@@ -713,7 +747,7 @@
 }
 
 .voice-controls {
-  margin-top: clamp(12px, 2vw, 24px);
+  margin-top: clamp(12px, 2vmin, 24px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1132,12 +1166,15 @@
   }
 
   .sidebar {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
+    max-width: none;
+    width: 100%;
   }
 
   .sidebar-card {
-    flex: 1 1 220px;
+    flex: 1 1 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .voice-stage {

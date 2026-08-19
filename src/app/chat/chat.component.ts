@@ -49,7 +49,15 @@ interface Message {
           </div>
         </div>
         <div class="header-actions">
-          <app-logout-button></app-logout-button>
+          @if (showLogout) {
+            <app-logout-button></app-logout-button>
+          }
+          <button
+            type="button"
+            class="kiosk-toggle"
+            (click)="toggleLogoutVisible()"
+            aria-label="Mostrar u ocultar cerrar sesion"
+          ></button>
         </div>
       </div>
 
@@ -313,6 +321,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   isTyping = false;
   quickQuestions: string[] = [];
   chatMode: 'text' | 'voice' = 'voice';
+  showLogout = false;
   isRecording = false;
   isStartingRecording = false;
   isProcessingVoice = false;
@@ -442,12 +451,17 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     if (mode === 'text') {
       this.stopBubbleTyping('user');
       this.stopBubbleTyping('bot');
+      this.shouldScrollToBottom = true;
     }
     if (mode === 'voice') {
       this.voiceError = this.supportsVoice
         ? null
         : 'Tu navegador no soporta la experiencia de voz.';
     }
+  }
+
+  toggleLogoutVisible() {
+    this.showLogout = !this.showLogout;
   }
 
   toggleRecording() {
