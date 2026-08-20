@@ -216,9 +216,6 @@
           <div class="company-info-head">
             <div>
               <h2>{{ empresaData?.nombre || "Perfil de empresa" }}</h2>
-              <p class="muted">
-                Revisa o edita los datos principales de tu empresa.
-              </p>
             </div>
             <button
               class="btn outline-primary"
@@ -322,10 +319,6 @@
           <div class="company-info-head">
             <div>
               <h2>Informacion comercial</h2>
-              <p class="muted">
-                Completa este cuestionario para que el asistente del Polo pueda
-                responder consultas comerciales sobre tu empresa.
-              </p>
             </div>
             @if (comercialDone && comercialInfo) {
               <button
@@ -440,76 +433,6 @@
                     [value]="comercialInfo.observaciones_comerciales || '-'"
                   ></textarea>
                 </div>
-              </div>
-
-              <div class="comercial-contacto-mirror">
-                <h3>Contacto comercial</h3>
-                @if (comercialContactos.length) {
-                  @for (c of comercialContactos; track c.id_contacto) {
-                    <div class="grid-2 nice-form profile-readout-grid">
-                      <div class="field">
-                        <label>Nombre</label>
-                        <input
-                          class="readout"
-                          type="text"
-                          [value]="c.nombre || '-'"
-                          readonly
-                        />
-                      </div>
-                      <div class="field">
-                        <label>Telefono</label>
-                        <input
-                          class="readout"
-                          type="text"
-                          [value]="c.telefono || '-'"
-                          readonly
-                        />
-                      </div>
-                      <div class="field">
-                        <label>Direccion</label>
-                        <input
-                          class="readout"
-                          type="text"
-                          [value]="c.direccion || '-'"
-                          readonly
-                        />
-                      </div>
-                      <div class="field">
-                        <label>Sitio web</label>
-                        <input
-                          class="readout"
-                          type="text"
-                          [value]="c.datos?.pagina_web || '-'"
-                          readonly
-                        />
-                      </div>
-                      <div class="field">
-                        <label>Correo</label>
-                        <input
-                          class="readout"
-                          type="text"
-                          [value]="c.datos?.correo || '-'"
-                          readonly
-                        />
-                      </div>
-                      <div class="field">
-                        <label>Redes sociales</label>
-                        <input
-                          class="readout"
-                          type="text"
-                          [value]="c.datos?.redes_sociales || '-'"
-                          readonly
-                        />
-                      </div>
-                    </div>
-                  }
-                } @else {
-                  <p class="muted">
-                    Todavia no cargaste un contacto de tipo "comercial". Podes
-                    agregarlo desde la pestaña
-                    <a (click)="goTo('contactos')">Contactos</a>.
-                  </p>
-                }
               </div>
             } @else if (!comercialChatStarted) {
               <button
@@ -874,86 +797,7 @@
                 </div>
                 <div class="details-cell">
                   @if (s.datos && hasKeys(s.datos)) {
-                    @if (isServicioExpanded(s.id_servicio)) {
-                      @switch (s.id_tipo_servicio) {
-                        @case (1) {
-                          @if (
-                            s.datos.biofiltro !== undefined &&
-                            s.datos.biofiltro !== null
-                          ) {
-                            <div class="det-row">
-                              Biofiltro: {{ formatBoolean(s.datos.biofiltro) }}
-                            </div>
-                          }
-                          @if (s.datos.tratamiento_aguas_grises) {
-                            <div class="det-row">
-                              Tratamiento:
-                              {{ s.datos.tratamiento_aguas_grises }}
-                            </div>
-                          }
-                        }
-                        @case (2) {
-                          @if (
-                            s.datos.abierto !== undefined &&
-                            s.datos.abierto !== null
-                          ) {
-                            <div class="det-row">
-                              Abierto: {{ formatBoolean(s.datos.abierto) }}
-                            </div>
-                          }
-                          @if (s.datos.m2) {
-                            <div class="det-row">
-                              Superficie: {{ s.datos.m2 }} m²
-                            </div>
-                          }
-                        }
-                        @case (3) {
-                          @if (s.datos.tipo) {
-                            <div class="det-row">Tipo: {{ s.datos.tipo }}</div>
-                          }
-                          @if (s.datos.proveedor) {
-                            <div class="det-row">
-                              Proveedor: {{ s.datos.proveedor }}
-                            </div>
-                          }
-                        }
-                        @case (4) {
-                          @if (s.datos.tipo) {
-                            <div class="det-row">Tipo: {{ s.datos.tipo }}</div>
-                          }
-                          @if (s.datos.cantidad) {
-                            <div class="det-row">
-                              Cantidad: {{ s.datos.cantidad }}
-                            </div>
-                          }
-                        }
-                        @default {
-                          @if (s.datos.descripcion) {
-                            <div class="det-row">
-                              {{ s.datos.descripcion }}
-                            </div>
-                          }
-                        }
-                      }
-                      <button
-                        class="link-btn small vermenos"
-                        type="button"
-                        (click)="toggleServicioDatos(s.id_servicio)"
-                      >
-                        Ocultar
-                      </button>
-                    } @else {
-                      <span class="clamped">{{
-                        getServicioDatosResumen(s)
-                      }}</span>
-                      <button
-                        class="link-btn"
-                        type="button"
-                        (click)="toggleServicioDatos(s.id_servicio)"
-                      >
-                        Ver mas
-                      </button>
-                    }
+                    <span>{{ getServicioDatosResumen(s) }}</span>
                   } @else {
                     -
                   }
@@ -1104,11 +948,12 @@
         #fEmp="ngForm"
         novalidate
       >
-        @if (isModalBusy('empresa')) {
+        @if (isModalBusy("empresa")) {
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+              Procesando tu solicitud, puede demorar unos segundos. No cierres
+              esta ventana ni navegues fuera.
             </span>
           </div>
         }
@@ -1199,7 +1044,8 @@
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+              Procesando tu solicitud, puede demorar unos segundos. No cierres
+              esta ventana ni navegues fuera.
             </span>
           </div>
         }
@@ -1348,11 +1194,12 @@
         class="nice-form"
         novalidate
       >
-        @if (isModalBusy('vehiculo')) {
+        @if (isModalBusy("vehiculo")) {
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+              Procesando tu solicitud, puede demorar unos segundos. No cierres
+              esta ventana ni navegues fuera.
             </span>
           </div>
         }
@@ -1602,11 +1449,12 @@
         #fCont="ngForm"
         novalidate
       >
-        @if (isModalBusy('contacto')) {
+        @if (isModalBusy("contacto")) {
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+              Procesando tu solicitud, puede demorar unos segundos. No cierres
+              esta ventana ni navegues fuera.
             </span>
           </div>
         }
@@ -1769,11 +1617,12 @@
         class="nice-form"
         novalidate
       >
-        @if (isModalBusy('servicio')) {
+        @if (isModalBusy("servicio")) {
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+              Procesando tu solicitud, puede demorar unos segundos. No cierres
+              esta ventana ni navegues fuera.
             </span>
           </div>
         }

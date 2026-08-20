@@ -50,6 +50,21 @@ interface Message {
           </div>
         </div>
         <div class="header-actions">
+          <button
+            type="button"
+            class="fullscreen-toggle"
+            (click)="toggleFullscreen()"
+            [attr.aria-label]="
+              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+            "
+            [attr.title]="
+              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+            "
+          >
+            <span class="material-symbols-outlined">
+              {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
+            </span>
+          </button>
           @if (showLogout) {
             <app-logout-button></app-logout-button>
           }
@@ -160,9 +175,15 @@ interface Message {
               <div class="landing-input">
                 <input
                   #messageInput
+                  type="text"
+                  inputmode="text"
+                  enterkeyhint="send"
+                  autocomplete="off"
+                  autocorrect="off"
                   [(ngModel)]="userMessage"
                   placeholder="Escribe tu consulta..."
                   (keyup.enter)="sendMessage()"
+                  (focus)="onMessageInputFocus()"
                   [disabled]="isTyping"
                   class="message-input"
                 />
@@ -326,6 +347,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   quickQuestions: string[] = [];
   chatMode: 'text' | 'voice' = 'voice';
   showLogout = false;
+  isFullscreen = false;
   isRecording = false;
   isStartingRecording = false;
   isProcessingVoice = false;
@@ -391,6 +413,34 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.loadPopularQuestions();
     this.startFreshConversation();
     this.resetIdleTimer();
+
+    // En pantalla completa el navegador no reacomoda solo la pagina cuando
+    // aparece el teclado tactil (si lo hace en modo ventana normal), asi que
+    // usamos el Visual Viewport para detectarlo y llevar el input a la vista.
+    if (typeof window !== 'undefined' && window.visualViewport) {
+      window.visualViewport.addEventListener(
+        'resize',
+        this.onVisualViewportResize,
+      );
+    }
+  }
+
+  private onVisualViewportResize = (): void => {
+    if (!this.isFullscreen) return;
+    const input = this.messageInput?.nativeElement;
+    if (input && document.activeElement === input) {
+      input.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    }
+  };
+
+  onMessageInputFocus(): void {
+    if (!this.isFullscreen) return;
+    setTimeout(() => {
+      this.messageInput?.nativeElement.scrollIntoView({
+        block: 'end',
+        behavior: 'smooth',
+      });
+    }, 50);
   }
 
   private readonly welcomeMessage =
@@ -465,6 +515,12 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     if (this.idleTimer) {
       clearTimeout(this.idleTimer);
     }
+    if (typeof window !== 'undefined' && window.visualViewport) {
+      window.visualViewport.removeEventListener(
+        'resize',
+        this.onVisualViewportResize,
+      );
+    }
   }
 
   get voiceHelperText(): string {
@@ -507,6 +563,31 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   toggleLogoutVisible() {
     this.showLogout = !this.showLogout;
+  }
+
+  toggleFullscreen(): void {
+    const doc = document as Document & {
+      webkitExitFullscreen?: () => Promise<void> | void;
+    };
+    const docEl = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void> | void;
+    };
+
+    if (!document.fullscreenElement) {
+      const request = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+      request?.call(docEl)?.catch?.((error: unknown) => {
+        console.error('No se pudo activar pantalla completa:', error);
+      });
+    } else {
+      const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+      exit?.call(doc);
+    }
+  }
+
+  @HostListener('document:fullscreenchange')
+  @HostListener('document:webkitfullscreenchange')
+  onFullscreenChange(): void {
+    this.isFullscreen = !!document.fullscreenElement;
   }
 
   toggleRecording() {

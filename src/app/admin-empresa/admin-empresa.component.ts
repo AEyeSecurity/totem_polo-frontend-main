@@ -144,7 +144,6 @@ export class EmpresaMeComponent implements OnInit {
   message = '';
   messageType: 'success' | 'error' = 'success';
   private expandedVehiculos = new Set<number>();
-  private expandedServicios = new Set<number>();
 
   // Sistema de errores mejorado
   formErrors: Partial<Record<string, FormError[]>> = {};
@@ -228,20 +227,6 @@ export class EmpresaMeComponent implements OnInit {
       this.expandedVehiculos.delete(id);
     } else {
       this.expandedVehiculos.add(id);
-    }
-  }
-
-  isServicioExpanded(id: number | null | undefined): boolean {
-    if (id === null || id === undefined) return false;
-    return this.expandedServicios.has(id);
-  }
-
-  toggleServicioDatos(id: number | null | undefined): void {
-    if (id === null || id === undefined) return;
-    if (this.expandedServicios.has(id)) {
-      this.expandedServicios.delete(id);
-    } else {
-      this.expandedServicios.add(id);
     }
   }
 
@@ -365,7 +350,6 @@ export class EmpresaMeComponent implements OnInit {
     this.editingServicio = null;
     this.editingContacto = null;
     this.expandedVehiculos.clear();
-    this.expandedServicios.clear();
 
     this.formErrors = {};
     this.changes.clearAll();
@@ -1107,7 +1091,6 @@ export class EmpresaMeComponent implements OnInit {
         this.filteredServiciosPolo = [...(data.servicios_polo || [])];
 
         this.expandedVehiculos.clear();
-        this.expandedServicios.clear();
 
         this.buildActividadRecienteFromData();
         this.loading = false;
@@ -1291,7 +1274,6 @@ export class EmpresaMeComponent implements OnInit {
     this.editingServicio = null;
     this.editingContacto = null;
     this.expandedVehiculos.clear();
-    this.expandedServicios.clear();
 
     this.submitting = {
       empresa: false,
