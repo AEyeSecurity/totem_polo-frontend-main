@@ -8,6 +8,7 @@ import {
   OnDestroy,
   ChangeDetectorRef,
   NgZone,
+  HostListener,
   inject,
 } from '@angular/core';
 import { ChatService, VoiceChatResponse } from './chat.service';
@@ -86,60 +87,77 @@ interface Message {
 
       @if (chatMode === 'text') {
         <div class="chat-container">
-          <div class="chat-panel">
-            <div class="panel-card messages-card">
-              <div class="panel-title">
-                <div class="panel-title-icon">
-                  <span class="material-symbols-outlined">robot_2</span>
+          <div class="chat-landing">
+            <div
+              class="landing-card"
+              [class.has-conversation]="hasStartedConversation"
+            >
+              @if (!hasStartedConversation) {
+                <div class="polo-face size-lg">
+                  <div class="polo-visor">
+                    <span class="polo-eye"></span>
+                    <span class="polo-eye"></span>
+                  </div>
                 </div>
-                <div>
-                  <h3>Chat con POLO Bot</h3>
-                  <small>Tu asistente del Parque Industrial POLO 52</small>
-                </div>
-              </div>
-              <div class="chat-messages" #messagesContainer>
-                @for (
-                  message of messages;
-                  track trackByMessageId($index, message)
-                ) {
-                  <div
-                    class="message-wrapper"
-                    [class.user-wrapper]="message.sender === 'user'"
-                    [class.bot-wrapper]="message.sender === 'bot'"
-                  >
+                <h1>Hola, soy POLO</h1>
+                <p>&iquest;En qu&eacute; puedo ayudarte hoy?</p>
+              } @else {
+                <div class="chat-messages" #messagesContainer>
+                  @for (
+                    message of messages;
+                    track trackByMessageId($index, message)
+                  ) {
                     <div
-                      class="message-content"
-                      [class]="
-                        message.sender === 'user'
-                          ? 'user-message'
-                          : 'bot-message'
-                      "
+                      class="message-wrapper"
+                      [class.user-wrapper]="message.sender === 'user'"
+                      [class.bot-wrapper]="message.sender === 'bot'"
                     >
+                      @if (message.sender === 'bot') {
+                        <div class="polo-face size-sm">
+                          <div class="polo-visor">
+                            <span class="polo-eye"></span>
+                            <span class="polo-eye"></span>
+                          </div>
+                        </div>
+                      }
                       <div
-                        class="message-text"
-                        [innerHTML]="formatMessage(message.content)"
-                      ></div>
-                      <div class="message-time">
-                        {{ formatTime(message.timestamp) }}
+                        class="message-content"
+                        [class]="
+                          message.sender === 'user'
+                            ? 'user-message'
+                            : 'bot-message'
+                        "
+                      >
+                        <div
+                          class="message-text"
+                          [innerHTML]="formatMessage(message.content)"
+                        ></div>
+                        <div class="message-time">
+                          {{ formatTime(message.timestamp) }}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                }
-                @if (isTyping) {
-                  <div class="message-wrapper bot-wrapper typing-indicator">
-                    <div class="bot-message typing-message">
-                      <div class="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                  }
+                  @if (isTyping) {
+                    <div class="message-wrapper bot-wrapper typing-indicator">
+                      <div class="polo-face size-sm">
+                        <div class="polo-visor">
+                          <span class="polo-eye"></span>
+                          <span class="polo-eye"></span>
+                        </div>
+                      </div>
+                      <div class="bot-message typing-message">
+                        <div class="typing-dots">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                }
-              </div>
-            </div>
-            <div class="panel-card input-card">
-              <div class="chat-input">
+                  }
+                </div>
+              }
+              <div class="landing-input">
                 <input
                   #messageInput
                   [(ngModel)]="userMessage"
@@ -162,33 +180,22 @@ interface Message {
                   }
                 </button>
               </div>
-              <div class="input-footer">
-                Presion&aacute; Enter o el bot&oacute;n para enviar tu consulta
-              </div>
-            </div>
-          </div>
-          <aside class="sidebar">
-            <div class="sidebar-card quick-queries-card">
-              <div class="card-header">
-                <span class="material-symbols-outlined">bolt</span>
-                <div>
-                  <h3>Consultas R&aacute;pidas</h3>
-                  <p>Las preguntas que m&aacute;s recibimos</p>
+              @if (quickQuestions.length) {
+                <div class="landing-suggestions">
+                  @for (question of quickQuestions; track question) {
+                    <button
+                      type="button"
+                      class="suggestion-chip"
+                      (click)="handleQuickQuestion(question)"
+                      [disabled]="isTyping"
+                    >
+                      {{ question }}
+                    </button>
+                  }
                 </div>
-              </div>
-              @for (question of quickQuestions; track question) {
-                <button
-                  type="button"
-                  class="quick-question"
-                  (click)="handleQuickQuestion(question)"
-                  [disabled]="isTyping"
-                >
-                  <span>{{ question }}</span>
-                  <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
               }
             </div>
-          </aside>
+          </div>
         </div>
       } @else {
         <section class="voice-experience">
@@ -223,16 +230,16 @@ interface Message {
                   [class.talking]="isBotSpeaking"
                   [class.thinking]="isBotThinking"
                 >
-                  <div class="head-ear ear-left"></div>
-                  <div class="head-ear ear-right"></div>
+                  <div class="head-ear ear-left">
+                    <span class="ear-accent"></span>
+                  </div>
+                  <div class="head-ear ear-right">
+                    <span class="ear-accent"></span>
+                  </div>
                   <div class="robot-face">
                     <div class="robot-eyes">
-                      <div class="eye eye-left">
-                        <span class="pupil"></span>
-                      </div>
-                      <div class="eye eye-right">
-                        <span class="pupil"></span>
-                      </div>
+                      <span class="eye eye-left"></span>
+                      <span class="eye eye-right"></span>
                     </div>
                     <div
                       class="robot-smile"
@@ -241,18 +248,15 @@ interface Message {
                   </div>
                 </div>
                 <div class="robot-neck"></div>
-                <div class="robot-body">
-                  <div class="robot-arm arm-left">
-                    <span class="arm-joint"></span>
-                    <span class="hand"></span>
-                  </div>
-                  <div class="robot-arm arm-right">
-                    <span class="arm-joint"></span>
-                    <span class="hand"></span>
-                  </div>
-                  <div class="body-plate">
-                    <div class="logo-box" aria-label="Logo Polo 52"></div>
-                  </div>
+                <div class="robot-body" [class.talking]="isBotSpeaking">
+                  <div
+                    class="robot-arm arm-left"
+                    [class.talking]="isBotSpeaking"
+                  ></div>
+                  <div
+                    class="robot-arm arm-right"
+                    [class.talking]="isBotSpeaking"
+                  ></div>
                 </div>
               </div>
               <div
@@ -340,6 +344,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   get isBotThinking(): boolean {
     return this.isProcessingVoice && !this.isBotSpeaking;
   }
+
+  get hasStartedConversation(): boolean {
+    return this.messages.some((message) => message.sender === 'user');
+  }
   private readonly defaultQuickQuestions = [
     'Disponibilidad de lotes',
     'Empresas instaladas en el parque',
@@ -373,34 +381,68 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  // Duracion de inactividad antes de reiniciar la conversacion: al ser un
+  // totem de uso publico, cada recarga o cada pausa larga debe dejar el
+  // chat como recien abierto, sin arrastrar la consulta de la persona anterior.
+  private readonly idleTimeoutMs = 2 * 60 * 1000;
+  private idleTimer?: number;
+
   ngOnInit() {
     this.loadPopularQuestions();
-    this.loadHistory();
+    this.startFreshConversation();
+    this.resetIdleTimer();
   }
 
   private readonly welcomeMessage =
     'Bienvenido al Parque Industrial POLO 52.\n\nMi nombre es POLO y estoy aqu\u00ed para ayudarte con consultas sobre el parque. \u00bfEn qu\u00e9 puedo asistirte?';
 
-  private loadHistory(): void {
-    this.chatService.getHistory().subscribe({
-      next: (history) => {
-        if (history && history.length > 0) {
-          this.messages = history.map((m) => ({
-            sender: m.remitente,
-            content: m.contenido,
-            timestamp: new Date(m.fecha),
-            id: this.generateMessageId(),
-          }));
-          this.shouldScrollToBottom = true;
-        } else {
-          this.addBotMessage(this.welcomeMessage);
-        }
-      },
-      error: () => {
-        // Si no se pudo traer el historial no bloqueamos el chat: arrancamos igual.
-        this.addBotMessage(this.welcomeMessage);
-      },
-    });
+  private startFreshConversation(): void {
+    this.messages = [];
+    this.addBotMessage(this.welcomeMessage);
+  }
+
+  @HostListener('click')
+  @HostListener('keydown')
+  @HostListener('touchstart')
+  onUserActivity(): void {
+    this.resetIdleTimer();
+  }
+
+  private resetIdleTimer(): void {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+    }
+    this.idleTimer = setTimeout(
+      () => this.handleIdleTimeout(),
+      this.idleTimeoutMs,
+    ) as unknown as number;
+  }
+
+  private handleIdleTimeout(): void {
+    if (this.hasStartedConversation) {
+      this.resetConversation();
+    }
+    this.resetIdleTimer();
+  }
+
+  private resetConversation(): void {
+    this.stopRecording(true);
+    this.cancelBotStream();
+    this.stopBubbleTyping('user');
+    this.stopBubbleTyping('bot');
+    this.activeVoiceRequest?.unsubscribe();
+    this.activeVoiceRequest = undefined;
+    this.isProcessingVoice = false;
+    this.isBotSpeaking = false;
+    this.voiceUserText = '';
+    this.voiceBotText = '';
+    this.voiceError = this.supportsVoice
+      ? null
+      : 'Tu navegador no soporta la experiencia de voz.';
+
+    this.userMessage = '';
+    this.isTyping = false;
+    this.startFreshConversation();
   }
 
   ngAfterViewChecked() {
@@ -419,6 +461,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.activeVoiceRequest?.unsubscribe();
     if (this.speakingFallbackTimeout) {
       clearTimeout(this.speakingFallbackTimeout);
+    }
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
     }
   }
 
