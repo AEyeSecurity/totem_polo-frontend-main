@@ -22,8 +22,6 @@
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   color: #495057;
   font-size: clamp(0.88rem, 0.9vw, 0.98rem);
-  overflow-x: hidden;
-  overflow-y: auto;
   box-sizing: border-box;
 }
 
@@ -354,7 +352,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-y: auto;
 }
 
 .voice-hero {

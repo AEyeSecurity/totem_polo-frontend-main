@@ -623,9 +623,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private updateQuickQuestions() {
-    const stats = Object.values(this.questionStats)
-      .filter((item) => item.count >= 2)
-      .sort((a, b) => b.count - a.count);
+    const stats = Object.values(this.questionStats).sort(
+      (a, b) => b.count - a.count,
+    );
 
     const top = stats.slice(0, 4).map((item) => item.display);
 
@@ -671,12 +671,6 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
         next: (resp: VoiceChatResponse) => {
           const text = resp?.data?.text || 'Respuesta invalida.';
           this.simulateTyping(text);
-
-          const b64 = resp?.data?.audio_base64;
-          if (b64) {
-            const audio = new Audio(`data:audio/mpeg;base64,${b64}`);
-            audio.play().catch(console.error);
-          }
         },
         error: (error) => {
           console.error('Error en la solicitud:', error);
