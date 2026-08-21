@@ -30,74 +30,78 @@ interface Message {
   imports: [FormsModule, LogoutButtonComponent],
   template: `
     <div class="chat-wrapper">
-      <div class="chat-header">
-        <div class="header-content">
-          <div class="bot-avatar">
-            <div class="avatar-logo-frame">
-              <img
-                class="avatar-logo"
-                src="assets/images/PoloLogo-rojo.jpg"
-                alt="Logo Polo 52"
-              />
+      @if (!isFullscreen) {
+        <div class="chat-header">
+          <div class="header-content">
+            <div class="bot-avatar">
+              <div class="avatar-logo-frame">
+                <img
+                  class="avatar-logo"
+                  src="assets/images/PoloLogo-rojo.jpg"
+                  alt="Logo Polo 52"
+                />
+              </div>
+              <div class="status-indicator" [class.active]="!isTyping"></div>
             </div>
-            <div class="status-indicator" [class.active]="!isTyping"></div>
+            <div class="header-info">
+              <h2>Asistente Virtual - Parque Industrial Polo 52</h2>
+              <p class="status-text">
+                {{ isTyping ? 'Escribiendo...' : 'Disponible para consultas' }}
+              </p>
+            </div>
           </div>
-          <div class="header-info">
-            <h2>Asistente Virtual - Parque Industrial Polo 52</h2>
-            <p class="status-text">
-              {{ isTyping ? 'Escribiendo...' : 'Disponible para consultas' }}
-            </p>
+          <div class="header-actions">
+            @if (showLogout) {
+              <app-logout-button></app-logout-button>
+            }
+            <button
+              type="button"
+              class="kiosk-toggle"
+              (click)="toggleLogoutVisible()"
+              aria-label="Mostrar u ocultar cerrar sesion"
+            ></button>
           </div>
         </div>
-        <div class="header-actions">
-          <button
-            type="button"
-            class="fullscreen-toggle"
-            (click)="toggleFullscreen()"
-            [attr.aria-label]="
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
-            "
-            [attr.title]="
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
-            "
-          >
-            <span class="material-symbols-outlined">
-              {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
-            </span>
-          </button>
-          @if (showLogout) {
-            <app-logout-button></app-logout-button>
-          }
-          <button
-            type="button"
-            class="kiosk-toggle"
-            (click)="toggleLogoutVisible()"
-            aria-label="Mostrar u ocultar cerrar sesion"
-          ></button>
-        </div>
-      </div>
+      }
 
       <div class="chat-mode-switch">
         <button
           type="button"
-          class="mode-pill"
-          [class.active]="chatMode === 'voice'"
-          (click)="setChatMode('voice')"
-          [attr.aria-pressed]="chatMode === 'voice'"
+          class="fullscreen-toggle"
+          (click)="toggleFullscreen()"
+          [attr.aria-label]="
+            isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+          "
+          [attr.title]="
+            isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+          "
         >
-          <span class="material-symbols-outlined">volume_up</span>
-          Voz IA
+          <span class="material-symbols-outlined">
+            {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
+          </span>
         </button>
-        <button
-          type="button"
-          class="mode-pill"
-          [class.active]="chatMode === 'text'"
-          (click)="setChatMode('text')"
-          [attr.aria-pressed]="chatMode === 'text'"
-        >
-          <span class="material-symbols-outlined">chat</span>
-          Texto
-        </button>
+        <div class="mode-pill-group">
+          <button
+            type="button"
+            class="mode-pill"
+            [class.active]="chatMode === 'voice'"
+            (click)="setChatMode('voice')"
+            [attr.aria-pressed]="chatMode === 'voice'"
+          >
+            <span class="material-symbols-outlined">volume_up</span>
+            Voz IA
+          </button>
+          <button
+            type="button"
+            class="mode-pill"
+            [class.active]="chatMode === 'text'"
+            (click)="setChatMode('text')"
+            [attr.aria-pressed]="chatMode === 'text'"
+          >
+            <span class="material-symbols-outlined">chat</span>
+            Texto
+          </button>
+        </div>
       </div>
 
       @if (chatMode === 'text') {

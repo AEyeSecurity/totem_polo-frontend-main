@@ -112,9 +112,16 @@
 
 .chat-mode-switch {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
   padding: 16px 14px;
+}
+
+.mode-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .mode-pill {
@@ -454,7 +461,7 @@
   backdrop-filter: blur(8px);
   transition: transform 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.9);
-  max-width: clamp(150px, 26vmin, 210px);
+  max-width: clamp(180px, 32vmin, 300px);
   width: 100%;
 }
 
@@ -1278,7 +1285,7 @@
     justify-self: center;
     margin: 0;
     width: 100%;
-    max-width: min(360px, 86vw);
+    max-width: min(640px, 92vw);
   }
 
   .robot-head {
@@ -1340,7 +1347,7 @@
 
   .speech-bubble {
     min-height: 90px;
-    max-width: clamp(120px, 28vw, 160px);
+    max-width: clamp(160px, 40vw, 260px);
   }
 
   .mic-button {
