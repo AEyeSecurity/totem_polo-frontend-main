@@ -137,9 +137,20 @@ export class LoginComponent implements OnInit {
   }
 
   private handleLoginError(): void {
-    this.loginAttempts++;
     this.usernameError = true;
     this.passwordError = true;
+
+    // 403 = cuenta bloqueada por una razón estructural (pendiente de
+    // aprobación, rechazada, deshabilitada), no por contraseña incorrecta:
+    // se muestra el motivo real y no cuenta como intento fallido.
+    if (this.authService.lastLoginErrorStatus === 403) {
+      this.loginMessage =
+        this.authService.lastLoginErrorDetail ||
+        'No es posible iniciar sesión con esta cuenta.';
+      return;
+    }
+
+    this.loginAttempts++;
     const remaining = this.maxAttempts - this.loginAttempts;
     if (remaining <= 0) this.blockUser();
     else

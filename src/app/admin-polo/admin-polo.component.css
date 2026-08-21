@@ -1,4 +1,11 @@
 ﻿/* Tipografía y reset mínimo */
+/* :host asegura que TODO el texto del componente (incluidos divs/spans/p
+   sin font-family propia, como .muted) herede Inter. El selector "html,
+   body" de abajo no alcanza esos elementos porque, con la encapsulación de
+   estilos de Angular, nunca matchea el <html>/<body> real del documento. */
+:host {
+  font-family: 'Inter', sans-serif;
+}
 html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   font-family: 'Inter', sans-serif;
 }
@@ -496,6 +503,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .table--usuarios .thead, .table--usuarios .row { grid-template-columns: 1.6fr 1fr 140px 130px 120px; }
 .table--servicios .thead, .table--servicios .row { grid-template-columns: 1.4fr 1fr 140px 1fr 140px 120px; }
 .table--lotes .thead, .table--lotes .row { grid-template-columns: 1.2fr 120px 120px 1fr 120px; }
+.table--solicitudes .thead, .table--solicitudes .row { grid-template-columns: 140px 1.4fr 1fr 1.2fr 1.4fr 120px; }
 
 @media (max-width: 1000px){
   .table--empresas .thead, .table--empresas .row { grid-template-columns: 120px 1.2fr 1fr 100px 140px 110px; }
@@ -1139,6 +1147,21 @@ html, body {
   background:#e9efff;
   color:#1a284b;
   font-weight:600;
+}
+.tab-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:18px;
+  height:18px;
+  padding:0 5px;
+  margin-left:.35rem;
+  border-radius:999px;
+  background:#a20000;
+  color:#fff;
+  font-size:.7rem;
+  font-weight:700;
+  vertical-align:middle;
 }
 
 

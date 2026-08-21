@@ -179,13 +179,14 @@
   padding: 10px 30px 15px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   background: white;
+  overflow-y: auto;
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .login-icon {
@@ -195,8 +196,8 @@
   margin: 0 auto 0;
   border-radius: 18px;
   overflow: hidden;
-  width: 120px;
-  height: 120px;
+  width: 90px;
+  height: 90px;
   padding: 10px;
   box-sizing: border-box;
 }
@@ -447,6 +448,23 @@
 
 .footer-info strong {
   color: #4a5568;
+}
+
+.register-prompt {
+  text-align: center;
+  color: #4a5568;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.register-prompt a {
+  color: #B22222;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-prompt a:hover {
+  text-decoration: underline;
 }
 
 /* ============================================

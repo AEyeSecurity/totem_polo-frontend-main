@@ -17,6 +17,13 @@ export const routes: Routes = [
     component: LoginComponent,
   },
   {
+    path: 'register',
+    loadComponent: () =>
+      import('./auth/register/register.component').then(
+        (m) => m.RegisterComponent
+      ),
+  },
+  {
     path: 'auth/success',
     loadComponent: () =>
       import('./auth/auth-success.component').then(
@@ -34,7 +41,7 @@ export const routes: Routes = [
     path: 'chat',
     component: ChatbotComponent,
     canActivate: [AuthGuard],
-    data: { role: 'publico' },
+    data: { role: ['publico', 'admin_empresa'] },
   },
   {
     path: 'empresas',

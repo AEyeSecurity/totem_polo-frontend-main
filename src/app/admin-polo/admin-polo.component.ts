@@ -7,8 +7,8 @@ import { forkJoin } from 'rxjs';
 import {
   AdminPoloService,
   Empresa,
-  EmpresaCreate,
   EmpresaUpdate,
+  SolicitudRegistro,
   Usuario,
   UsuarioCreate,
   UsuarioUpdate,
@@ -33,15 +33,27 @@ import {
 } from '../shared/form-errors.util';
 import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
 import { formatActivityMoment as formatActivityMomentUtil } from '../shared/activity-format.util';
+import { ChatbotFabComponent } from '../shared/chatbot-fab/chatbot-fab.component';
 
 type AdminPoloTab =
   | 'dashboard'
   | 'empresas'
+  | 'solicitudes'
   | 'usuarios'
   | 'servicios'
   | 'lotes'
   | 'perfil'
   | 'config';
+
+interface EmpresaEditForm {
+  cuil: number;
+  nombre: string;
+  rubro: string;
+  cant_empleados: number;
+  observaciones?: string;
+  horario_trabajo: string;
+  estado: boolean;
+}
 
 @Component({
   selector: 'app-empresas',
@@ -52,6 +64,7 @@ type AdminPoloTab =
     RouterModule,
     LogoutButtonComponent,
     PasswordChangeModalComponent,
+    ChatbotFabComponent,
   ],
   templateUrl: './admin-polo.component.html',
   styleUrls: ['./admin-polo.component.css'],
@@ -113,7 +126,7 @@ export class AdminPoloComponent implements OnInit {
   empresas: Empresa[] = [];
   showEmpresaForm = false;
   editingEmpresa: Empresa | null = null;
-  empresaForm: EmpresaCreate = {
+  empresaForm: EmpresaEditForm = {
     cuil: 0,
     nombre: '',
     rubro: '',
@@ -123,6 +136,10 @@ export class AdminPoloComponent implements OnInit {
     estado: true,
   };
   empresaEstadoActual: boolean | null = null;
+
+  // Solicitudes de registro (autoregistro público, pendientes de aprobación)
+  solicitudes: SolicitudRegistro[] = [];
+  solicitudesBusy = false;
 
   selectedEmpresa: Empresa | null = null;
   creatingForEmpresa = false;
@@ -147,6 +164,11 @@ export class AdminPoloComponent implements OnInit {
   // Usuarios
   usuarios: Usuario[] = [];
   roles: Rol[] = [];
+  // admin_empresa ya no se asigna a mano: se crea (junto con su empresa) por
+  // el autoregistro público y su aprobación, no queda como opción acá.
+  get assignableRoles(): Rol[] {
+    return this.roles.filter((r) => r.tipo_rol !== 'admin_empresa');
+  }
   showUsuarioForm = false;
   editingUsuario: Usuario | null = null;
   usuarioForm: UsuarioCreate = {
@@ -214,6 +236,7 @@ export class AdminPoloComponent implements OnInit {
     this.loadPoloData();
     this.loadData();
     this.loadComercialInfo();
+    this.loadSolicitudes();
   }
 
   setActiveTab(tab: AdminPoloTab): void {
@@ -223,9 +246,8 @@ export class AdminPoloComponent implements OnInit {
     this.loadData();
   }
 
-  quickAddEmpresa(): void {
-    this.setActiveTab('empresas');
-    this.openEmpresaForm();
+  quickViewSolicitudes(): void {
+    this.setActiveTab('solicitudes');
   }
 
   quickAddUsuario(): void {
@@ -761,6 +783,10 @@ export class AdminPoloComponent implements OnInit {
       case 'empresas':
         this.loadEmpresas();
         break;
+      case 'solicitudes':
+        this.loadSolicitudes();
+        this.loading = false;
+        break;
       case 'usuarios':
         this.loadUsuarios();
         break;
@@ -1077,6 +1103,52 @@ export class AdminPoloComponent implements OnInit {
     });
   }
 
+  loadSolicitudes(): void {
+    this.adminPoloService.getSolicitudes().subscribe({
+      next: (solicitudes) => {
+        this.solicitudes = solicitudes;
+      },
+      error: (error) => {
+        console.error('Error cargando solicitudes de registro:', error);
+      },
+    });
+  }
+
+  aprobarSolicitud(solicitud: SolicitudRegistro): void {
+    if (!confirm(`¿Aprobar el registro de "${solicitud.nombre}"?`)) return;
+    this.solicitudesBusy = true;
+    this.adminPoloService.aprobarSolicitud(solicitud.cuil).subscribe({
+      next: () => {
+        this.solicitudesBusy = false;
+        this.showMessage(`Empresa '${solicitud.nombre}' aprobada`, 'success');
+        this.pushActivity('ok', `Solicitud de ${solicitud.nombre} aprobada`);
+        this.loadSolicitudes();
+        this.loadEmpresas();
+      },
+      error: (error) => {
+        this.solicitudesBusy = false;
+        this.handleError(error, 'general', 'aprobar la solicitud');
+      },
+    });
+  }
+
+  rechazarSolicitud(solicitud: SolicitudRegistro): void {
+    if (!confirm(`¿Rechazar el registro de "${solicitud.nombre}"?`)) return;
+    this.solicitudesBusy = true;
+    this.adminPoloService.rechazarSolicitud(solicitud.cuil).subscribe({
+      next: () => {
+        this.solicitudesBusy = false;
+        this.showMessage(`Solicitud de '${solicitud.nombre}' rechazada`, 'success');
+        this.pushActivity('warn', `Solicitud de ${solicitud.nombre} rechazada`);
+        this.loadSolicitudes();
+      },
+      error: (error) => {
+        this.solicitudesBusy = false;
+        this.handleError(error, 'general', 'rechazar la solicitud');
+      },
+    });
+  }
+
   loadUsuarios(): void {
     this.adminPoloService.getUsers().subscribe({
       next: (usuarios) => {
@@ -1344,35 +1416,22 @@ export class AdminPoloComponent implements OnInit {
       });
   }
 
-  // EMPRESAS
-  openEmpresaForm(empresa?: Empresa): void {
+  // EMPRESAS (solo edición: las empresas nuevas se crean por autoregistro
+  // público + aprobación, ver pestaña "Solicitudes")
+  openEmpresaForm(empresa: Empresa): void {
     this.clearFormErrors('empresa');
 
-    if (empresa) {
-      this.editingEmpresa = empresa;
-      this.empresaForm = {
-        cuil: empresa.cuil,
-        nombre: empresa.nombre,
-        rubro: empresa.rubro,
-        cant_empleados: empresa.cant_empleados,
-        observaciones: empresa.observaciones || '',
-        horario_trabajo: empresa.horario_trabajo,
-        estado: empresa.estado,
-      };
-      this.empresaEstadoActual = empresa.estado ?? null; // ← NUEVO
-    } else {
-      this.editingEmpresa = null;
-      this.empresaForm = {
-        cuil: 0,
-        nombre: '',
-        rubro: '',
-        cant_empleados: 0,
-        observaciones: '',
-        horario_trabajo: '',
-        estado: true,
-      };
-      this.empresaEstadoActual = null; // ← NUEVO
-    }
+    this.editingEmpresa = empresa;
+    this.empresaForm = {
+      cuil: empresa.cuil,
+      nombre: empresa.nombre,
+      rubro: empresa.rubro,
+      cant_empleados: empresa.cant_empleados,
+      observaciones: empresa.observaciones || '',
+      horario_trabajo: empresa.horario_trabajo,
+      estado: empresa.estado,
+    };
+    this.empresaEstadoActual = empresa.estado ?? null; // ← NUEVO
 
     this.showEmpresaForm = true;
 
@@ -1383,56 +1442,38 @@ export class AdminPoloComponent implements OnInit {
   }
 
   onSubmitEmpresa(): void {
+    if (!this.editingEmpresa) return;
+
     this.loading = true;
     this.clearFormErrors('empresa');
     this.submitting.empresa = true;
 
-    if (this.editingEmpresa) {
-      // Actualizar
-      const updateData: EmpresaUpdate = {
-        nombre: this.empresaForm.nombre,
-        rubro: this.empresaForm.rubro,
-        estado: this.empresaForm.estado,
-        cant_empleados: this.empresaForm.cant_empleados,
-        observaciones: this.empresaForm.observaciones,
-        horario_trabajo: this.empresaForm.horario_trabajo,
-      };
+    const updateData: EmpresaUpdate = {
+      nombre: this.empresaForm.nombre,
+      rubro: this.empresaForm.rubro,
+      estado: this.empresaForm.estado,
+      cant_empleados: this.empresaForm.cant_empleados,
+      observaciones: this.empresaForm.observaciones,
+      horario_trabajo: this.empresaForm.horario_trabajo,
+    };
 
-      this.adminPoloService
-        .updateEmpresa(this.editingEmpresa.cuil, updateData)
-        .subscribe({
-          next: () => {
-            this.showMessage('Empresa actualizada exitosamente', 'success');
-            this.pushActivity('ok', `Empresa ${this.empresaForm.nombre} actualizada`);
-            this.loadEmpresas();
-            this.resetForms();
-            this.loading = false;
-            this.submitting.empresa = false;
-          },
-          error: (error) => {
-            this.handleError(error, 'empresa', 'actualizar empresa');
-            this.loading = false;
-            this.submitting.empresa = false;
-          },
-        });
-    } else {
-      // Crear
-      this.adminPoloService.createEmpresa(this.empresaForm).subscribe({
+    this.adminPoloService
+      .updateEmpresa(this.editingEmpresa.cuil, updateData)
+      .subscribe({
         next: () => {
-          this.showMessage('Empresa creada exitosamente', 'success');
-          this.pushActivity('ok', `Empresa ${this.empresaForm.nombre} creada`);
+          this.showMessage('Empresa actualizada exitosamente', 'success');
+          this.pushActivity('ok', `Empresa ${this.empresaForm.nombre} actualizada`);
           this.loadEmpresas();
           this.resetForms();
           this.loading = false;
           this.submitting.empresa = false;
         },
         error: (error) => {
-          this.handleError(error, 'empresa', 'crear empresa');
+          this.handleError(error, 'empresa', 'actualizar empresa');
           this.loading = false;
           this.submitting.empresa = false;
         },
       });
-    }
   }
 
   deleteEmpresa(cuil: number): void {
@@ -1833,25 +1874,6 @@ export class AdminPoloComponent implements OnInit {
       .split('_')
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
-  }
-
-  createUsuarioForEmpresa(empresa: Empresa): void {
-    this.selectedEmpresa = empresa;
-    this.creatingForEmpresa = true;
-    this.usuarioForm = {
-      email: '',
-      nombre: '',
-      password: '',
-      estado: true,
-      cuil: empresa.cuil,
-      id_rol: 0,
-    };
-    this.showUsuarioForm = true;
-
-    // IMPORTANTE: Guardar estado después de configurar el formulario
-    setTimeout(() => {
-      this.changes.save('usuario', this.usuarioForm);
-    }, 0);
   }
 
   createServicioPoloForEmpresa(empresa: Empresa): void {

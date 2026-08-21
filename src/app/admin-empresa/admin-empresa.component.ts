@@ -17,6 +17,7 @@ import {
   Contacto,
   ContactoCreate,
   EmpresaDetail,
+  EmpresaDirectorio,
   EmpresaSelfUpdate,
   TipoVehiculo,
   TipoServicio,
@@ -29,6 +30,7 @@ import {
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
 import { UpdateReminderModalComponent } from '../shared/update-reminder-modal/update-reminder-modal.component';
+import { WelcomeModalComponent } from '../shared/welcome-modal/welcome-modal.component';
 import { FormError, HttpErrorLike } from '../shared/form-error.model';
 import {
   buildFormErrorsFromHttpError,
@@ -42,6 +44,7 @@ import {
   getItemDateSource as getItemDateSourceUtil,
   getItemTimestamp as getItemTimestampUtil,
 } from '../shared/activity-format.util';
+import { ChatbotFabComponent } from '../shared/chatbot-fab/chatbot-fab.component';
 
 const EMPRESA_DATE_FIELDS = [
   'updated_at',
@@ -62,7 +65,9 @@ const EMPRESA_DATE_FIELDS = [
     LogoutButtonComponent,
     NgxJsonViewerModule,
     PasswordChangeModalComponent,
-    UpdateReminderModalComponent
+    UpdateReminderModalComponent,
+    WelcomeModalComponent,
+    ChatbotFabComponent
 ],
   templateUrl: './admin-empresa.component.html',
   styleUrls: ['./admin-empresa.component.css'],
@@ -78,8 +83,17 @@ export class EmpresaMeComponent implements OnInit {
     | 'servicios'
     | 'contactos'
     | 'serviciosPolo'
+    | 'empresas'
     | 'perfil'
     | 'config' = 'dashboard';
+
+  // Directorio de empresas del parque (networking entre inquilinos)
+  empresasDirectorio: EmpresaDirectorio[] = [];
+  filteredEmpresasDirectorio: EmpresaDirectorio[] = [];
+  empresasDirectorioSearchTerm = '';
+  loadingEmpresasDirectorio = false;
+  empresasDirectorioError = '';
+  private empresasDirectorioLoaded = false;
 
   // Sin tope real: se quiere ver el listado completo, la lista es
   // scrolleable en el html.
@@ -96,6 +110,7 @@ export class EmpresaMeComponent implements OnInit {
   showEmpresaEditForm = false;
   showPasswordModal = false; // ← requerido por la plantilla
   showReminderModal = false;
+  showWelcomeModal = false;
 
   // Estados de edicion
   editingVehiculo: Vehiculo | null = null;
@@ -214,6 +229,7 @@ export class EmpresaMeComponent implements OnInit {
     this.loadTipos();
     this.loadEmpresaData();
     this.loadComercialInfo();
+    this.showWelcomeModal = this.authService.shouldShowWelcome();
   }
 
   isVehiculoExpanded(id: number | null | undefined): boolean {
@@ -337,6 +353,94 @@ export class EmpresaMeComponent implements OnInit {
     this.activeTab = tab;
     this.closeAllFormsWithoutConfirmation();
     this.applyFilters();
+    if (tab === 'empresas' && !this.empresasDirectorioLoaded) {
+      this.loadEmpresasDirectorio();
+    }
+  }
+
+  loadEmpresasDirectorio(): void {
+    this.loadingEmpresasDirectorio = true;
+    this.empresasDirectorioError = '';
+    this.adminEmpresaService.getEmpresasDirectorio().subscribe({
+      next: (empresas) => {
+        this.empresasDirectorioLoaded = true;
+        this.loadingEmpresasDirectorio = false;
+        this.empresasDirectorio = empresas;
+        this.filterEmpresasDirectorio();
+      },
+      error: (error) => {
+        this.loadingEmpresasDirectorio = false;
+        this.empresasDirectorioError =
+          error.status === 403
+            ? 'Tu cuenta no tiene permiso para ver el directorio de empresas del parque.'
+            : 'No se pudo cargar el directorio de empresas. Intenta nuevamente mas tarde.';
+      },
+    });
+  }
+
+  filterEmpresasDirectorio(): void {
+    if (!this.empresasDirectorioSearchTerm.trim()) {
+      this.filteredEmpresasDirectorio = [...this.empresasDirectorio];
+      return;
+    }
+    const term = this.empresasDirectorioSearchTerm.toLowerCase().trim();
+    this.filteredEmpresasDirectorio = this.empresasDirectorio.filter(
+      (empresa) =>
+        empresa.nombre.toLowerCase().includes(term) ||
+        empresa.rubro.toLowerCase().includes(term)
+    );
+  }
+
+  clearEmpresasDirectorioSearch(): void {
+    this.empresasDirectorioSearchTerm = '';
+    this.filterEmpresasDirectorio();
+  }
+
+  // Prioriza el contacto de tipo "comercial", despues "empresarial", y
+  // recien si no hay ninguno de esos dos usa el primero que haya.
+  private getContactoPrincipal(empresa: EmpresaDirectorio) {
+    const contactos = empresa.contactos || [];
+    return (
+      contactos.find((c) => c.tipo_contacto?.toLowerCase() === 'comercial') ||
+      contactos.find((c) => c.tipo_contacto?.toLowerCase() === 'empresarial') ||
+      contactos[0]
+    );
+  }
+
+  getContactoComercial(empresa: EmpresaDirectorio): string {
+    const contacto = this.getContactoPrincipal(empresa);
+    if (!contacto?.nombre) return '-';
+    const tipo = contacto.tipo_contacto
+      ? ` (${this.capitalizar(contacto.tipo_contacto)})`
+      : '';
+    return `${contacto.nombre}${tipo}`;
+  }
+
+  private capitalizar(valor: string): string {
+    return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
+  }
+
+  getTelefonoComercial(empresa: EmpresaDirectorio): string {
+    return this.getContactoPrincipal(empresa)?.telefono || '-';
+  }
+
+  // Datos de contacto web/redes cargados en el contacto comercial/empresarial
+  // (pagina_web, correo, redes_sociales), no la ficha de info comercial.
+  getDatosComerciales(empresa: EmpresaDirectorio): string {
+    const datos = this.getContactoPrincipal(empresa)?.datos;
+    if (!datos) return '-';
+
+    const partes: string[] = [];
+    if (datos.pagina_web) {
+      partes.push(datos.pagina_web);
+    }
+    if (datos.redes_sociales) {
+      partes.push(datos.redes_sociales);
+    }
+    if (datos.correo) {
+      partes.push(datos.correo);
+    }
+    return partes.length ? partes.join(' · ') : '-';
   }
 
   // METODO PARA CERRAR TODOS LOS FORMULARIOS SIN CONFIRMACION
@@ -832,6 +936,9 @@ export class EmpresaMeComponent implements OnInit {
       case 'serviciosPolo':
         this.filterServiciosPolo();
         break;
+      case 'empresas':
+        this.filterEmpresasDirectorio();
+        break;
     }
   }
 
@@ -1244,6 +1351,18 @@ export class EmpresaMeComponent implements OnInit {
     this.showReminderModal = false;
     this.markReminderShown();
     this.openEmpresaEditForm();
+  }
+
+  // ===== Aviso de bienvenida (primer login) =====
+  onWelcomeClosed(): void {
+    this.showWelcomeModal = false;
+    this.authService.markWelcomeSeen().subscribe();
+  }
+
+  onWelcomeGoToComercial(): void {
+    this.showWelcomeModal = false;
+    this.authService.markWelcomeSeen().subscribe();
+    this.setActiveTab('perfil');
   }
 
   // accesos rapidos

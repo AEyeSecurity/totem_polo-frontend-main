@@ -206,24 +206,27 @@ describe('AuthenticationService', () => {
     });
   });
 
-  describe('register', () => {
-    it('should POST the new user payload and resolve true on success', () => {
-      let result: boolean | undefined;
-      service
-        .register('juan', 'juan@test.com', 'secret', '20304050607')
-        .subscribe((ok) => (result = ok));
+  describe('registerEmpresa', () => {
+    it('should POST the empresa+usuario payload and resolve the response on success', () => {
+      const payload = {
+        cuil: 20304050607,
+        nombre: 'Empresa Test',
+        rubro: 'Comercio',
+        cant_empleados: 5,
+        horario_trabajo: '09-18',
+        usuario_nombre: 'juan',
+        email: 'juan@test.com',
+        password: 'Secret1a',
+      };
+      let result: { message: string } | undefined;
+      service.registerEmpresa(payload).subscribe((res) => (result = res));
 
       const req = httpMock.expectOne(`${environment.apiUrl}/register`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({
-        nombre: 'juan',
-        email: 'juan@test.com',
-        password: 'secret',
-        cuil: '20304050607',
-      });
+      expect(req.request.body).toEqual(payload);
       req.flush({ message: 'ok' });
 
-      expect(result).toBeTrue();
+      expect(result).toEqual({ message: 'ok' });
     });
   });
 

@@ -1,4 +1,10 @@
 ﻿
+/* :host asegura que TODO el texto del componente herede Inter (los
+   selectores "html, body" de abajo no matchean el documento real bajo la
+   encapsulación de estilos de Angular). */
+:host {
+  font-family: 'Inter', sans-serif;
+}
 html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   font-family: 'Inter', sans-serif;
 }
@@ -674,6 +680,35 @@ textarea.ng-invalid.ng-touched + .error{
 .table .thead > div:last-child {
   justify-self: end;
   text-align: right;
+}
+
+/* Directorio de empresas: Nombre | Contacto comercial | Telefono | Datos comerciales */
+.table--empresas-directorio .thead,
+.table--empresas-directorio .row {
+  grid-template-columns: 1fr 1fr 0.8fr 2.2fr;
+  align-items: start;
+}
+.table--empresas-directorio .thead > div:last-child,
+.table--empresas-directorio .row > div:last-child {
+  justify-self: stretch;
+  text-align: left;
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .table--empresas-directorio .thead { display: none; }
+  .table--empresas-directorio .row {
+    grid-template-columns: 1fr;
+    gap: .35rem;
+  }
+  .table--empresas-directorio .row > div::before {
+    font-weight: 600;
+    color: #2b3a62;
+  }
+  .table--empresas-directorio .row > div:nth-child(1)::before { content: "Nombre: "; }
+  .table--empresas-directorio .row > div:nth-child(2)::before { content: "Contacto: "; }
+  .table--empresas-directorio .row > div:nth-child(3)::before { content: "Telefono: "; }
+  .table--empresas-directorio .row > div:nth-child(4)::before { content: "Datos comerciales: "; }
 }
 
 .table .row .row-actions {

@@ -1,0 +1,333 @@
+<!-- Contenedor principal, mismo fondo e imagen que login -->
+<div class="main-container">
+  <div class="login-modal register-modal">
+    <!-- Panel Izquierdo - Información (igual que login) -->
+    <div class="left-panel">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <i class="fas fa-industry"></i>
+        </div>
+        <div class="logo-text">
+          <h1>POLO 52</h1>
+          <p>Parque Industrial</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>
+          Sumate al<br /><span class="highlight">Parque Industrial</span>
+        </h2>
+        <p>
+          Registrá tu empresa y su usuario administrador. Tu solicitud queda
+          pendiente de aprobación del administrador del Polo: te avisamos por
+          email apenas esté activa.
+        </p>
+
+        <ul class="features">
+          <li><i class="fas fa-building"></i> Gestión integral de tu empresa</li>
+          <li><i class="fas fa-user-shield"></i> Usuario administrador propio</li>
+          <li>
+            <i class="fas fa-envelope-circle-check"></i> Confirmación por email
+          </li>
+          <li><i class="fas fa-headset"></i> Soporte técnico especializado</li>
+        </ul>
+      </div>
+
+      <div class="location-info">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Córdoba, Argentina</span>
+      </div>
+    </div>
+
+    <!-- Panel Derecho - Formulario -->
+    <div class="right-panel" [class.center-content]="submitted">
+      @if (!submitted) {
+        <div class="login-header">
+          <div class="login-icon">
+            <img src="assets/images/polologo-blanco.png" alt="Logo Polo 52" />
+          </div>
+          <h2>Registrá tu empresa</h2>
+          <p>Completá los datos para solicitar tu alta</p>
+        </div>
+
+        <form
+          #registerForm="ngForm"
+          (ngSubmit)="onSubmit(registerForm)"
+          novalidate
+          class="register-scroll"
+        >
+          <div class="form-group">
+            <label class="form-label" for="r_cuil">
+              <i class="fas fa-id-card"></i>
+              CUIL
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="number"
+                class="form-input"
+                id="r_cuil"
+                name="cuil"
+                [(ngModel)]="form.cuil"
+                placeholder="20304050607"
+                required
+                #rCuil="ngModel"
+                [ngClass]="{ error: rCuil.invalid && (rCuil.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rCuil.invalid && (rCuil.touched || registerForm.submitted)) {
+              <span class="field-error">Ingresá el CUIL de la empresa.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_nombre">
+              <i class="fas fa-building"></i>
+              Nombre / razón social
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                class="form-input"
+                id="r_nombre"
+                name="nombre"
+                [(ngModel)]="form.nombre"
+                placeholder="Mi Empresa S.A."
+                required
+                #rNombre="ngModel"
+                [ngClass]="{ error: rNombre.invalid && (rNombre.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rNombre.invalid && (rNombre.touched || registerForm.submitted)) {
+              <span class="field-error">Ingresá el nombre de la empresa.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_rubro">
+              <i class="fas fa-briefcase"></i>
+              Rubro
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                class="form-input"
+                id="r_rubro"
+                name="rubro"
+                [(ngModel)]="form.rubro"
+                required
+                #rRubro="ngModel"
+                [ngClass]="{ error: rRubro.invalid && (rRubro.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rRubro.invalid && (rRubro.touched || registerForm.submitted)) {
+              <span class="field-error">Ingresá el rubro de la empresa.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_empleados">
+              <i class="fas fa-users"></i>
+              Cantidad de empleados
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="number"
+                min="0"
+                class="form-input"
+                id="r_empleados"
+                name="cant_empleados"
+                [(ngModel)]="form.cant_empleados"
+                required
+                #rEmpleados="ngModel"
+                [ngClass]="{ error: rEmpleados.invalid && (rEmpleados.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rEmpleados.invalid && (rEmpleados.touched || registerForm.submitted)) {
+              <span class="field-error">Ingresá la cantidad de empleados.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_horario">
+              <i class="fas fa-clock"></i>
+              Horario de trabajo
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                class="form-input"
+                id="r_horario"
+                name="horario_trabajo"
+                placeholder="Lun-Vie 8-17"
+                [(ngModel)]="form.horario_trabajo"
+                required
+                #rHorario="ngModel"
+                [ngClass]="{ error: rHorario.invalid && (rHorario.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rHorario.invalid && (rHorario.touched || registerForm.submitted)) {
+              <span class="field-error">Ingresá el horario de trabajo.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_obs">
+              <i class="fas fa-align-left"></i>
+              Sobre la empresa
+            </label>
+            <div class="input-wrapper">
+              <textarea
+                class="form-input"
+                id="r_obs"
+                name="observaciones"
+                rows="2"
+                placeholder="Contanos de qué se trata tu empresa: a qué se dedica, cómo y cuándo se fundó, etc."
+                [(ngModel)]="form.observaciones"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="divider"><span>TU USUARIO ADMINISTRADOR</span></div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_usuario">
+              <i class="fas fa-user"></i>
+              Nombre de usuario
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                class="form-input"
+                id="r_usuario"
+                name="usuario_nombre"
+                minlength="3"
+                maxlength="50"
+                [(ngModel)]="form.usuario_nombre"
+                required
+                #rUsuario="ngModel"
+                [ngClass]="{ error: rUsuario.invalid && (rUsuario.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rUsuario.invalid && (rUsuario.touched || registerForm.submitted)) {
+              <span class="field-error">Entre 3 y 50 caracteres.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_email">
+              <i class="fas fa-envelope"></i>
+              Email
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="email"
+                class="form-input"
+                id="r_email"
+                name="email"
+                [(ngModel)]="form.email"
+                placeholder="usuario@empresa.com"
+                required
+                email
+                #rEmail="ngModel"
+                [ngClass]="{ error: rEmail.invalid && (rEmail.touched || registerForm.submitted) }"
+              />
+            </div>
+            @if (rEmail.invalid && (rEmail.touched || registerForm.submitted)) {
+              <span class="field-error">Ingresá un email válido.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_password">
+              <i class="fas fa-lock"></i>
+              Contraseña
+            </label>
+            <div class="input-wrapper">
+              <input
+                class="form-input"
+                id="r_password"
+                name="password"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="form.password"
+                placeholder="••••••••"
+                required
+                #rPassword="ngModel"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                tabindex="-1"
+              >
+                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <span class="field-hint">{{ passwordComplexityMessage }}</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="r_password_confirm">
+              <i class="fas fa-lock"></i>
+              Confirmar contraseña
+            </label>
+            <div class="input-wrapper">
+              <input
+                class="form-input"
+                id="r_password_confirm"
+                name="confirmPassword"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="confirmPassword"
+                placeholder="••••••••"
+                required
+                #rConfirm="ngModel"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="toggleConfirmPassword()"
+                tabindex="-1"
+              >
+                <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="login-button"
+            [ngClass]="{ loading: loading }"
+            [disabled]="registerForm.invalid || loading"
+          >
+            {{ loading ? "Enviando solicitud..." : "Enviar solicitud" }}
+          </button>
+
+          @if (errorMessage) {
+            <div class="error-message">{{ errorMessage }}</div>
+          }
+
+          <div class="register-prompt">
+            ¿Ya tenés cuenta? <a routerLink="/login">Iniciar sesión</a>
+          </div>
+        </form>
+      } @else {
+        <div class="login-header">
+          <div class="reset-icon">
+            <i class="fas fa-envelope-circle-check"></i>
+          </div>
+          <h2>¡Solicitud enviada!</h2>
+          <p>Tu registro quedó pendiente de aprobación</p>
+        </div>
+
+        <div class="success-message">
+          Recibimos la solicitud de registro de tu empresa. Te vamos a avisar
+          por email apenas el administrador del Polo la apruebe y puedas
+          iniciar sesión.
+        </div>
+
+        <a routerLink="/login" class="login-button confirm-back-btn">
+          Volver al inicio de sesión
+        </a>
+      }
+    </div>
+  </div>
+</div>

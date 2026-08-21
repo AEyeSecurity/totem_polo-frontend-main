@@ -44,6 +44,16 @@
           </button>
           <button
             class="tab"
+            [class.active]="activeTab === 'solicitudes'"
+            (click)="setActiveTab('solicitudes')"
+            >
+            Solicitudes
+            @if (solicitudes.length) {
+              <span class="tab-badge">{{ solicitudes.length }}</span>
+            }
+          </button>
+          <button
+            class="tab"
             [class.active]="activeTab === 'usuarios'"
             (click)="setActiveTab('usuarios')"
             >
@@ -177,9 +187,9 @@
             <div class="card quick">
               <h2>Accesos rápidos</h2>
               <div class="quick-list">
-                <button class="quick-btn" type="button" (click)="quickAddEmpresa()">
-                  <span class="material-symbols-outlined">add</span>
-                  <span class="quick-btn-label">Nueva empresa</span>
+                <button class="quick-btn" type="button" (click)="quickViewSolicitudes()">
+                  <span class="material-symbols-outlined">fact_check</span>
+                  <span class="quick-btn-label">Solicitudes pendientes</span>
                 </button>
                 <button class="quick-btn" type="button" (click)="quickAddUsuario()">
                   <span class="material-symbols-outlined">add</span>
@@ -406,11 +416,11 @@
             <!-- EMPRESAS -->
             @if (activeTab === 'empresas') {
               <section class="card-stack">
-                <!-- Botón arriba a la derecha -->
+                <!-- Las empresas nuevas se dan de alta por autoregistro público + aprobación -->
                 <div class="header-actions">
-                  <button class="btn primary" type="button" (click)="openEmpresaForm()">
-                    <span class="material-symbols-outlined">add_circle</span>
-                    <span>Nueva empresa</span>
+                  <button class="btn ghost" type="button" (click)="setActiveTab('solicitudes')">
+                    <span class="material-symbols-outlined">fact_check</span>
+                    <span>Ver solicitudes de registro</span>
                   </button>
                 </div>
                 <div class="card card--table">
@@ -501,15 +511,6 @@
                               >
                               <span class="material-symbols-outlined">edit</span>
                             </button>
-                            <!-- Crear usuario -->
-                            <button
-                              class="btn icon"
-                              title="Usuario para empresa"
-                              (click)="createUsuarioForEmpresa(e)"
-                              [disabled]="!e.estado"
-                              >
-                              <span class="material-symbols-outlined">person_add</span>
-                            </button>
                             <!-- Crear servicio -->
                             <button
                               class="btn icon"
@@ -523,6 +524,64 @@
                         </div>
                       }
                     </div>
+                  </div>
+                </section>
+              }
+
+              <!-- SOLICITUDES DE REGISTRO -->
+              @if (activeTab === 'solicitudes') {
+                <section class="card-stack">
+                  <div class="card card--table">
+                    <h2>Solicitudes de registro pendientes</h2>
+                    @if (solicitudesBusy) {
+                      <div class="alert alert--loading">
+                        <span class="alert-spinner" aria-hidden="true"></span>
+                        <span>
+                          Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                        </span>
+                      </div>
+                    }
+                    @if (!solicitudes.length) {
+                      <div class="muted">No hay solicitudes pendientes por el momento.</div>
+                    } @else {
+                      <div class="table table--solicitudes">
+                        <div class="thead">
+                          <div>CUIL</div>
+                          <div>Empresa</div>
+                          <div>Rubro</div>
+                          <div>Usuario</div>
+                          <div>Email</div>
+                          <div>Acciones</div>
+                        </div>
+                        @for (s of solicitudes; track s) {
+                          <div class="row">
+                            <div>{{ s.cuil }}</div>
+                            <div>{{ s.nombre }}</div>
+                            <div>{{ s.rubro }}</div>
+                            <div>{{ s.usuario?.nombre || "-" }}</div>
+                            <div>{{ s.usuario?.email || "-" }}</div>
+                            <div class="row-actions">
+                              <button
+                                class="btn icon"
+                                title="Aprobar"
+                                [disabled]="solicitudesBusy"
+                                (click)="aprobarSolicitud(s)"
+                                >
+                                <span class="material-symbols-outlined">check_circle</span>
+                              </button>
+                              <button
+                                class="btn icon danger"
+                                title="Rechazar"
+                                [disabled]="solicitudesBusy"
+                                (click)="rechazarSolicitud(s)"
+                                >
+                                <span class="material-symbols-outlined">cancel</span>
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
                 </section>
               }
@@ -788,6 +847,9 @@
                         </section>
                       }
                     </main>
+
+                    <!-- Acceso al chatbot del Polo (consultar info de las empresas) -->
+                    <app-chatbot-fab></app-chatbot-fab>
                   </div>
                   <!-- ===================== MODALES ===================== -->
 
@@ -1369,7 +1431,7 @@
                                                         #uRol="ngModel"
                                                         >
                                                         <option [ngValue]="null">—</option>
-                                                        @for (r of roles; track r) {
+                                                        @for (r of assignableRoles; track r) {
                                                           <option [ngValue]="r.id_rol">
                                                             {{ r.tipo_rol }}
                                                           </option>

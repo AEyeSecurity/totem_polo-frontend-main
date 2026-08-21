@@ -82,6 +82,28 @@ export interface EmpresaSelfUpdate {
   horario_trabajo?: string;
 }
 
+// Directorio de empresas del parque (para networking entre inquilinos).
+export interface ContactoDirectorio {
+  empresa_nombre: string;
+  nombre?: string;
+  telefono?: string;
+  datos?: any;
+  direccion?: string;
+  tipo_contacto?: string;
+}
+
+export interface EmpresaDirectorio {
+  cuil: number;
+  nombre: string;
+  rubro: string;
+  cant_empleados: number;
+  observaciones?: string;
+  fecha_ingreso: string;
+  horario_trabajo: string;
+  contactos: ContactoDirectorio[];
+  info_comercial?: InfoComercial | null;
+}
+
 export interface EmpresaDetail {
   cuil: number;
   nombre: string;
@@ -229,6 +251,14 @@ export class AdminEmpresaService {
 
   getMyCompanyDetails(): Observable<EmpresaDetail> {
     return this.http.get<EmpresaDetail>(`${this.apiUrl}/me`);
+  }
+
+  // Directorio de empresas del parque (nombre, contacto comercial, telefono
+  // y datos comerciales), accesible para cualquier usuario logueado.
+  getEmpresasDirectorio(): Observable<EmpresaDirectorio[]> {
+    return this.http.get<EmpresaDirectorio[]>(
+      `${this.apiUrl}/empresas/directorio`
+    );
   }
 
   // Solicitar cambio de contraseña por email

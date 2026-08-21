@@ -10,6 +10,11 @@
     (closed)="onReminderClosed()"
     (goToUpdate)="onReminderGoToUpdate()"
   ></app-update-reminder-modal>
+  <app-welcome-modal
+    [showModal]="showWelcomeModal"
+    (closed)="onWelcomeClosed()"
+    (goToComercial)="onWelcomeGoToComercial()"
+  ></app-welcome-modal>
   <!-- NAVBAR SUPERIOR -->
   <!-- TOP NAV -->
   <nav class="topbar">
@@ -69,6 +74,13 @@
         (click)="goTo('serviciosPolo')"
       >
         Servicios del Polo
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'empresas'"
+        (click)="goTo('empresas')"
+      >
+        Empresas
       </button>
     </div>
 
@@ -877,6 +889,67 @@
       </section>
     }
 
+    <!-- EMPRESAS DEL PARQUE (directorio para networking) ============================================-->
+    @if (activeTab === "empresas") {
+      <section class="card-stack">
+        <div class="card card--table">
+          <h2>Empresas del parque</h2>
+          <p class="muted">
+            Directorio de las empresas instaladas en el Parque Industrial
+            Polo 52, para facilitar contacto y networking entre inquilinos.
+          </p>
+          @if (loadingEmpresasDirectorio) {
+            <div class="alert alert--loading">
+              <span class="alert-spinner" aria-hidden="true"></span>
+              <span>Cargando el directorio de empresas...</span>
+            </div>
+          }
+          @if (empresasDirectorioError) {
+            <div class="alert alert--error">
+              {{ empresasDirectorioError }}
+            </div>
+          }
+          @if (!loadingEmpresasDirectorio && !empresasDirectorioError) {
+            <div class="header-search">
+              <input
+                type="text"
+                placeholder="Buscar por nombre o rubro..."
+                [(ngModel)]="empresasDirectorioSearchTerm"
+                (input)="filterEmpresasDirectorio()"
+              />
+              <button
+                class="btn ghost"
+                type="button"
+                (click)="clearEmpresasDirectorioSearch()"
+              >
+                Limpiar
+              </button>
+            </div>
+            @if (!filteredEmpresasDirectorio.length) {
+              <div class="muted">No se encontraron empresas.</div>
+            } @else {
+              <div class="table table--empresas-directorio">
+                <div class="thead">
+                  <div>Nombre</div>
+                  <div>Contacto</div>
+                  <div>Telefono</div>
+                  <div>Datos comerciales</div>
+                </div>
+                @for (e of filteredEmpresasDirectorio; track e) {
+                  <div class="row">
+                    <div>{{ e.nombre }}</div>
+                    <div>{{ getContactoComercial(e) }}</div>
+                    <div>{{ getTelefonoComercial(e) }}</div>
+                    <div>{{ getDatosComerciales(e) }}</div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </section>
+    }
+
     <!-- CONFIGURACION  ==============================================================================-->
     @if (activeTab === "config") {
       <section class="card-grid">
@@ -921,6 +994,9 @@
       </section>
     }
   </main>
+
+  <!-- Acceso al chatbot del Polo (consultar info de otras empresas) -->
+  <app-chatbot-fab></app-chatbot-fab>
 </div>
 
 <!-- =============== OVERLAYS DE FORMULARIO ======================================================== -->

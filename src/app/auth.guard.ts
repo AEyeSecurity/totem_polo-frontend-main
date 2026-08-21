@@ -23,10 +23,15 @@ export class AuthGuard implements CanActivate {
     const userRole = this.authService.getUserRole();
     const requiredRole = route.data['role'];
 
-    if (requiredRole && userRole !== requiredRole) {
-      // Redirigir según el rol del usuario
-      this.redirectByRole(userRole);
-      return false;
+    if (requiredRole) {
+      const allowedRoles = Array.isArray(requiredRole)
+        ? requiredRole
+        : [requiredRole];
+      if (!allowedRoles.includes(userRole)) {
+        // Redirigir según el rol del usuario
+        this.redirectByRole(userRole);
+        return false;
+      }
     }
 
     return true;

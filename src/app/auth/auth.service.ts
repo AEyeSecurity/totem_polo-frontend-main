@@ -11,9 +11,21 @@ interface LoginResponse {
   access_token: string;
   token_type: string;
   tipo_rol: string;
+  mostrar_bienvenida?: boolean;
 }
 interface RegisterResponse {
   message: string;
+}
+export interface EmpresaRegisterPayload {
+  cuil: number;
+  nombre: string;
+  rubro: string;
+  cant_empleados: number;
+  observaciones?: string;
+  horario_trabajo: string;
+  usuario_nombre: string;
+  email: string;
+  password: string;
 }
 interface LogoutResponse {
   message: string;
@@ -45,6 +57,12 @@ export class AuthenticationService {
   private logoutUrl = `${environment.apiUrl}/logout`;
   private sessionKey = 'sessionToken';
 
+  // Detalle del último error de login (p. ej. "pendiente de aprobación",
+  // "cuenta deshabilitada"), para que el componente lo muestre tal cual en
+  // vez de un genérico "usuario o contraseña incorrectos".
+  lastLoginErrorStatus: number | null = null;
+  lastLoginErrorDetail: string | null = null;
+
   // -------------------- LOGIN --------------------
   login(username: string, password: string): Observable<boolean> {
     const body = new HttpParams()
@@ -60,12 +78,20 @@ export class AuthenticationService {
       .post<LoginResponse>(this.loginUrl, body.toString(), { headers })
       .pipe(
         tap((res) => {
+          this.lastLoginErrorStatus = null;
+          this.lastLoginErrorDetail = null;
           localStorage.setItem(this.sessionKey, res.access_token);
           localStorage.setItem('rol', res.tipo_rol);
+          localStorage.setItem(
+            'mostrarBienvenida',
+            res.mostrar_bienvenida ? 'true' : 'false'
+          );
         }),
         map(() => true),
         catchError((err) => {
           console.error('Login fallido', err);
+          this.lastLoginErrorStatus = err?.status ?? null;
+          this.lastLoginErrorDetail = err?.error?.detail ?? null;
           return of(false);
         })
       );
@@ -116,6 +142,28 @@ export class AuthenticationService {
     // Google OAuth (si lo usaste)
     localStorage.removeItem('access_token');
     localStorage.removeItem('tipo_rol');
+
+    localStorage.removeItem('mostrarBienvenida');
+  }
+
+  // -------------------- AVISO DE BIENVENIDA (primer login) --------------------
+  shouldShowWelcome(): boolean {
+    return localStorage.getItem('mostrarBienvenida') === 'true';
+  }
+
+  markWelcomeSeen(): Observable<any> {
+    localStorage.setItem('mostrarBienvenida', 'false');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${this.getToken()}`,
+    });
+    return this.http
+      .post(`${environment.apiUrl}/bienvenida-vista`, {}, { headers })
+      .pipe(
+        catchError((err) => {
+          console.error('Error marcando el aviso de bienvenida como visto:', err);
+          return of(null);
+        })
+      );
   }
 
   // -------------------- LECTURAS --------------------
@@ -280,26 +328,17 @@ export class AuthenticationService {
       );
   }
 
-  register(
-    username: string,
-    email: string,
-    password: string,
-    cuil: string
-  ): Observable<boolean> {
-    return this.http
-      .post<RegisterResponse>(this.registerUrl, {
-        nombre: username,
-        email,
-        password,
-        cuil,
+  /**
+   * Autoregistro público de empresa + usuario admin_empresa. Queda pendiente
+   * de aprobación por admin_polo: no hay login automático.
+   */
+  registerEmpresa(payload: EmpresaRegisterPayload): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(this.registerUrl, payload).pipe(
+      catchError((err) => {
+        console.error('Registro de empresa fallido', err);
+        return throwError(() => err);
       })
-      .pipe(
-        map(() => true),
-        catchError((err) => {
-          console.error('Registro fallido', err);
-          return of(false);
-        })
-      );
+    );
   }
 
   setToken(token: string): void {

@@ -12,17 +12,19 @@ export interface Empresa {
   fecha_ingreso: string;
   horario_trabajo: string;
   estado: boolean; // ← NUEVO
+  estado_solicitud: 'pendiente' | 'aprobada' | 'rechazada';
 }
 
-export interface EmpresaCreate {
+export interface SolicitudRegistro {
   cuil: number;
   nombre: string;
   rubro: string;
   cant_empleados: number;
-  observaciones?: string;
-  fecha_ingreso?: string;
   horario_trabajo: string;
-  estado: boolean;
+  observaciones?: string;
+  fecha_ingreso: string;
+  estado_solicitud: string;
+  usuario: { nombre: string; email: string } | null;
 }
 
 export interface EmpresaUpdate {
@@ -206,8 +208,17 @@ export class AdminPoloService {
     return this.http.get<Empresa[]>(`${this.apiUrl}/empresas`);
   }
 
-  createEmpresa(empresa: EmpresaCreate): Observable<Empresa> {
-    return this.http.post<Empresa>(`${this.apiUrl}/empresas`, empresa);
+  // Solicitudes de registro (autoregistro público, pendientes de aprobación)
+  getSolicitudes(): Observable<SolicitudRegistro[]> {
+    return this.http.get<SolicitudRegistro[]>(`${this.apiUrl}/empresas/solicitudes`);
+  }
+
+  aprobarSolicitud(cuil: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/empresas/${cuil}/aprobar`, {});
+  }
+
+  rechazarSolicitud(cuil: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/empresas/${cuil}/rechazar`, {});
   }
 
   updateEmpresa(cuil: number, empresa: EmpresaUpdate): Observable<Empresa> {
