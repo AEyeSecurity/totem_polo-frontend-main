@@ -948,6 +948,7 @@
                   <div>Contacto</div>
                   <div>Telefono</div>
                   <div>Datos comerciales</div>
+                  <div>Ubicación</div>
                 </div>
                 @for (e of filteredEmpresasDirectorio; track e) {
                   <div class="row row--empresa">
@@ -957,6 +958,13 @@
                         <div>-</div>
                         <div>-</div>
                         <div>-</div>
+                        <div>
+                          @let ubicacion = getPrimeraUbicacion(e);
+                          <app-map-location-view
+                            [lat]="ubicacion?.lat"
+                            [lng]="ubicacion?.lng"
+                          ></app-map-location-view>
+                        </div>
                       </div>
                     } @else {
                       @for (c of e.contactos; track c; let first = $first) {
@@ -1019,6 +1027,15 @@
                                 <span>-</span>
                               }
                             </div>
+                          </div>
+                          <div>
+                            @if (first) {
+                              @let ubicacion = getPrimeraUbicacion(e);
+                              <app-map-location-view
+                                [lat]="ubicacion?.lat"
+                                [lng]="ubicacion?.lng"
+                              ></app-map-location-view>
+                            }
                           </div>
                         </div>
                       }

@@ -782,6 +782,7 @@
                               <div>Manzana</div>
                               <div>Lote</div>
                               <div>Servicio de Polo</div>
+                              <div>Ubicación</div>
                               <div>Acciones</div>
                             </div>
                             @for (l of filteredLotes; track l) {
@@ -790,7 +791,20 @@
                                 <div>{{ l.manzana }}</div>
                                 <div>{{ l.lote }}</div>
                                 <div>{{ getServicioPoloNombre(l.id_servicio_polo) }}</div>
+                                <div>
+                                  <app-map-location-view
+                                    [lat]="l.latitud"
+                                    [lng]="l.longitud"
+                                  ></app-map-location-view>
+                                </div>
                                 <div class="row-actions">
+                                  <button
+                                    class="btn icon"
+                                    title="Editar ubicación"
+                                    (click)="openEditLoteUbicacion(l)"
+                                    >
+                                    <span class="material-symbols-outlined">edit_location_alt</span>
+                                  </button>
                                   <button
                                     class="btn icon danger"
                                     title="Eliminar lote"
@@ -803,6 +817,58 @@
                             }
                           </div>
                         </div>
+
+                        <!-- Editar ubicacion de un lote -->
+                        @if (showEditLoteUbicacionForm) {
+                          <div class="overlay">
+                            <div class="modal modal--md">
+                              <div class="modal-header">
+                                <h3>Ubicación del lote {{ editingLoteLabel }}</h3>
+                                <button
+                                  type="button"
+                                  class="icon-btn"
+                                  (click)="cancelEditLoteUbicacion()"
+                                  [disabled]="savingLoteUbicacion"
+                                  aria-label="Cerrar"
+                                  >
+                                  ✕
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <div class="field col-3">
+                                  <app-map-location-picker
+                                    [lat]="editLoteUbicacion.latitud"
+                                    [lng]="editLoteUbicacion.longitud"
+                                    (locationChange)="onEditLoteLocationChange($event)"
+                                  ></app-map-location-picker>
+                                  @if (editLoteUbicacion.latitud != null && editLoteUbicacion.longitud != null) {
+                                    <div class="map-picker-coords">
+                                      {{ editLoteUbicacion.latitud | number: "1.6-6" }}, {{ editLoteUbicacion.longitud | number: "1.6-6" }}
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                              <div class="modal-actions">
+                                <button
+                                  class="btn primary"
+                                  type="button"
+                                  [disabled]="editLoteUbicacion.latitud == null || savingLoteUbicacion"
+                                  (click)="submitEditLoteUbicacion()"
+                                  >
+                                  Guardar
+                                </button>
+                                <button
+                                  class="btn ghost"
+                                  type="button"
+                                  [disabled]="savingLoteUbicacion"
+                                  (click)="cancelEditLoteUbicacion()"
+                                  >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        }
                       </section>
                     }
 
@@ -1844,7 +1910,7 @@
                                                                 <!-- Lote: crear -->
                                                                 @if (showLoteForm) {
                                                                   <div class="overlay">
-                                                                    <div class="modal modal--sm" [attr.aria-busy]="isModalBusy('lote')">
+                                                                    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('lote')">
                                                                       <div class="modal-header">
                                                                         <h3>
                                                                           Nuevo lote
@@ -1963,6 +2029,19 @@
                                                                                   @for (err of getFieldErrors('lote', 'lote'); track err) {
                                                                                     <div class="error">
                                                                                       {{ err.message }}
+                                                                                    </div>
+                                                                                  }
+                                                                                </div>
+                                                                                <div class="field field--map col-3">
+                                                                                  <label>Ubicacion en Google Maps</label>
+                                                                                  <app-map-location-picker
+                                                                                    [lat]="loteForm.latitud ?? null"
+                                                                                    [lng]="loteForm.longitud ?? null"
+                                                                                    (locationChange)="onLoteLocationChange($event)"
+                                                                                  ></app-map-location-picker>
+                                                                                  @if (loteForm.latitud != null && loteForm.longitud != null) {
+                                                                                    <div class="map-picker-coords">
+                                                                                      {{ loteForm.latitud | number: "1.6-6" }}, {{ loteForm.longitud | number: "1.6-6" }}
                                                                                     </div>
                                                                                   }
                                                                                 </div>

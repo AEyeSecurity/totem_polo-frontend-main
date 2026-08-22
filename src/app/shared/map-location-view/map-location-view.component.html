@@ -1,0 +1,50 @@
+@if (lat == null || lng == null) {
+  <div class="map-view-empty">Sin ubicacion</div>
+} @else if (loadError) {
+  <div class="map-view-empty map-view-error">{{ loadError }}</div>
+} @else if (!ready) {
+  <div class="map-view-empty">Cargando...</div>
+} @else {
+  <button
+    type="button"
+    class="map-view-thumb"
+    (click)="open()"
+    aria-label="Ver ubicacion en el mapa"
+    title="Ver ubicacion en el mapa"
+  >
+    <google-map
+      height="90px"
+      width="140px"
+      [center]="center!"
+      [zoom]="zoom"
+      [options]="mapOptions"
+    >
+      <map-marker [position]="markerPosition!"></map-marker>
+    </google-map>
+    <span class="map-view-thumb-hint material-symbols-outlined">open_in_full</span>
+  </button>
+}
+
+@if (expanded) {
+  <div class="map-view-backdrop" (click)="close()">
+    <div class="map-view-modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="map-view-close"
+        (click)="close()"
+        aria-label="Cerrar"
+      >
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <google-map
+        height="480px"
+        width="100%"
+        [center]="center!"
+        [zoom]="expandedZoom"
+        [options]="expandedMapOptions"
+      >
+        <map-marker [position]="markerPosition!"></map-marker>
+      </google-map>
+    </div>
+  </div>
+}

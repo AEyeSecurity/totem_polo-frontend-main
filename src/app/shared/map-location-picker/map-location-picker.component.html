@@ -1,0 +1,31 @@
+@if (loadError) {
+  <div class="map-picker-error">{{ loadError }}</div>
+} @else if (!ready) {
+  <div class="map-picker-loading">Cargando mapa...</div>
+} @else {
+  <div class="map-picker-search">
+    <span class="material-symbols-outlined">search</span>
+    <input
+      #searchInput
+      type="text"
+      placeholder="Buscar una direccion o lugar..."
+      autocomplete="off"
+    />
+  </div>
+  <google-map
+    height="280px"
+    width="100%"
+    [center]="center"
+    [zoom]="zoom"
+    [options]="mapOptions"
+    (mapClick)="onMapClick($event)"
+  >
+    @if (markerPosition) {
+      <map-marker [position]="markerPosition"></map-marker>
+    }
+  </google-map>
+  <p class="map-picker-hint">
+    Busca una direccion arriba o toca directamente sobre el mapa el punto
+    exacto donde esta ubicada la empresa dentro del parque.
+  </p>
+}

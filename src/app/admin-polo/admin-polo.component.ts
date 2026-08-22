@@ -17,6 +17,7 @@ import {
   ServicioPoloCreate,
   Lote,
   LoteCreate,
+  LoteLocationUpdate,
   PoloDetail,
   PoloSelfUpdate,
   InfoComercial,
@@ -34,6 +35,8 @@ import {
 import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
 import { formatActivityMoment as formatActivityMomentUtil } from '../shared/activity-format.util';
 import { ChatbotFabComponent } from '../shared/chatbot-fab/chatbot-fab.component';
+import { MapLocationPickerComponent } from '../shared/map-location-picker/map-location-picker.component';
+import { MapLocationViewComponent } from '../shared/map-location-view/map-location-view.component';
 
 type AdminPoloTab =
   | 'dashboard'
@@ -65,6 +68,8 @@ interface EmpresaEditForm {
     LogoutButtonComponent,
     PasswordChangeModalComponent,
     ChatbotFabComponent,
+    MapLocationPickerComponent,
+    MapLocationViewComponent,
   ],
   templateUrl: './admin-polo.component.html',
   styleUrls: ['./admin-polo.component.css'],
@@ -212,7 +217,19 @@ export class AdminPoloComponent implements OnInit {
     lote: 0,
     manzana: 0,
     id_servicio_polo: 0,
+    latitud: null,
+    longitud: null,
   };
+
+  // Editar ubicacion de un lote existente
+  showEditLoteUbicacionForm = false;
+  editingLoteId: number | null = null;
+  editingLoteLabel = '';
+  editLoteUbicacion: { latitud: number | null; longitud: number | null } = {
+    latitud: null,
+    longitud: null,
+  };
+  savingLoteUbicacion = false;
 
   // Estados
   loading = false;
@@ -276,6 +293,8 @@ export class AdminPoloComponent implements OnInit {
     this.showUsuarioForm = false;
     this.showServicioPoloForm = false;
     this.showLoteForm = false;
+    this.showEditLoteUbicacionForm = false;
+    this.editingLoteId = null;
     this.editingEmpresa = null;
     this.editingUsuario = null;
     this.selectedEmpresa = null;
@@ -417,6 +436,8 @@ export class AdminPoloComponent implements OnInit {
           lote: originalData.lote,
           manzana: originalData.manzana,
           id_servicio_polo: originalData.id_servicio_polo,
+          latitud: originalData.latitud,
+          longitud: originalData.longitud,
         };
         break;
 
@@ -1206,6 +1227,8 @@ export class AdminPoloComponent implements OnInit {
     this.showUsuarioForm = false;
     this.showServicioPoloForm = false;
     this.showLoteForm = false;
+    this.showEditLoteUbicacionForm = false;
+    this.editingLoteId = null;
     this.editingEmpresa = null;
     this.editingUsuario = null;
     this.selectedEmpresa = null;
@@ -1264,6 +1287,8 @@ export class AdminPoloComponent implements OnInit {
       lote: 0,
       manzana: 0,
       id_servicio_polo: 0,
+      latitud: null,
+      longitud: null,
     };
 
     // Limpiar estados de cambios
@@ -1769,6 +1794,8 @@ export class AdminPoloComponent implements OnInit {
       lote: 0,
       manzana: 0,
       id_servicio_polo: idServicioPolo,
+      latitud: null,
+      longitud: null,
     };
 
     this.showLoteForm = true;
@@ -1777,6 +1804,11 @@ export class AdminPoloComponent implements OnInit {
     setTimeout(() => {
       this.changes.save('lote', this.loteForm);
     }, 0);
+  }
+
+  onLoteLocationChange(location: { lat: number; lng: number }): void {
+    this.loteForm.latitud = location.lat;
+    this.loteForm.longitud = location.lng;
   }
 
   onSubmitLote(): void {
@@ -1823,6 +1855,61 @@ export class AdminPoloComponent implements OnInit {
         },
       });
     }
+  }
+
+  openEditLoteUbicacion(lote: Lote): void {
+    this.editingLoteId = lote.id_lotes;
+    this.editingLoteLabel = `M${lote.manzana} - ${lote.lote}`;
+    this.editLoteUbicacion = {
+      latitud: lote.latitud ?? null,
+      longitud: lote.longitud ?? null,
+    };
+    this.showEditLoteUbicacionForm = true;
+  }
+
+  onEditLoteLocationChange(location: { lat: number; lng: number }): void {
+    this.editLoteUbicacion.latitud = location.lat;
+    this.editLoteUbicacion.longitud = location.lng;
+  }
+
+  cancelEditLoteUbicacion(): void {
+    this.showEditLoteUbicacionForm = false;
+    this.editingLoteId = null;
+  }
+
+  submitEditLoteUbicacion(): void {
+    if (
+      this.editingLoteId == null ||
+      this.editLoteUbicacion.latitud == null ||
+      this.editLoteUbicacion.longitud == null
+    ) {
+      return;
+    }
+
+    const ubicacion: LoteLocationUpdate = {
+      latitud: this.editLoteUbicacion.latitud,
+      longitud: this.editLoteUbicacion.longitud,
+    };
+
+    this.savingLoteUbicacion = true;
+    this.adminPoloService
+      .updateLoteUbicacion(this.editingLoteId, ubicacion)
+      .subscribe({
+        next: () => {
+          this.showMessage('Ubicación actualizada exitosamente', 'success');
+          this.pushActivity(
+            'ok',
+            `Ubicación del lote ${this.editingLoteLabel} actualizada`
+          );
+          this.loadLotes();
+          this.savingLoteUbicacion = false;
+          this.cancelEditLoteUbicacion();
+        },
+        error: (error) => {
+          this.handleError(error, 'general', 'actualizar ubicación del lote');
+          this.savingLoteUbicacion = false;
+        },
+      });
   }
 
   getRoleName(id: number): string {

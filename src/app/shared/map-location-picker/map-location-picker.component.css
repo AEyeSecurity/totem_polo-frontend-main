@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.map-picker-loading,
+.map-picker-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 280px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.map-picker-error {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.map-picker-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.map-picker-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.map-picker-search .material-symbols-outlined {
+  font-size: 20px;
+  color: #6b7280;
+}
+
+.map-picker-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: transparent;
+}
+
+google-map {
+  display: block;
+  border-radius: 8px;
+  overflow: hidden;
+}

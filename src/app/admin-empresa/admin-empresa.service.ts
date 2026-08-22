@@ -32,6 +32,8 @@ export interface Lote {
   lote: number;
   manzana: number;
   id_servicio_polo: number;
+  latitud?: number | null;
+  longitud?: number | null;
 }
 
 export interface ServicioPolo {
@@ -92,6 +94,13 @@ export interface ContactoDirectorio {
   tipo_contacto?: string;
 }
 
+export interface ServicioPoloDirectorio {
+  nombre: string;
+  horario?: string;
+  tipo_servicio_polo?: string;
+  lotes: Lote[];
+}
+
 export interface EmpresaDirectorio {
   cuil: number;
   nombre: string;
@@ -100,6 +109,7 @@ export interface EmpresaDirectorio {
   observaciones?: string;
   fecha_ingreso: string;
   horario_trabajo: string;
+  servicios_polo: ServicioPoloDirectorio[];
   contactos: ContactoDirectorio[];
   info_comercial?: InfoComercial | null;
 }

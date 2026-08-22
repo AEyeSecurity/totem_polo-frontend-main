@@ -46,6 +46,7 @@ import {
   getItemTimestamp as getItemTimestampUtil,
 } from '../shared/activity-format.util';
 import { ChatbotFabComponent } from '../shared/chatbot-fab/chatbot-fab.component';
+import { MapLocationViewComponent } from '../shared/map-location-view/map-location-view.component';
 
 const EMPRESA_DATE_FIELDS = [
   'updated_at',
@@ -68,7 +69,8 @@ const EMPRESA_DATE_FIELDS = [
     PasswordChangeModalComponent,
     UpdateReminderModalComponent,
     WelcomeModalComponent,
-    ChatbotFabComponent
+    ChatbotFabComponent,
+    MapLocationViewComponent
 ],
   templateUrl: './admin-empresa.component.html',
   styleUrls: ['./admin-empresa.component.css'],
@@ -399,6 +401,21 @@ export class EmpresaMeComponent implements OnInit {
 
   private capitalizar(valor: string): string {
     return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
+  }
+
+  // Una empresa puede tener varios lotes (o ninguno con ubicacion cargada
+  // todavia): mostramos el primero que tenga coordenadas.
+  getPrimeraUbicacion(
+    empresa: EmpresaDirectorio
+  ): { lat: number; lng: number } | null {
+    for (const servicio of empresa.servicios_polo || []) {
+      for (const lote of servicio.lotes || []) {
+        if (lote.latitud != null && lote.longitud != null) {
+          return { lat: lote.latitud, lng: lote.longitud };
+        }
+      }
+    }
+    return null;
   }
 
   formatContactoNombre(contacto: ContactoDirectorio): string {

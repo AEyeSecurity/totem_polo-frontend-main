@@ -682,10 +682,10 @@ textarea.ng-invalid.ng-touched + .error{
   text-align: right;
 }
 
-/* Directorio de empresas: Nombre | Contacto comercial | Telefono | Datos comerciales */
+/* Directorio de empresas: Nombre | Contacto comercial | Telefono | Datos comerciales | Ubicacion */
 .table--empresas-directorio .thead,
 .table--empresas-directorio .row {
-  grid-template-columns: 1fr 1fr 0.8fr 2.2fr;
+  grid-template-columns: 1fr 1fr 0.8fr 2.2fr 160px;
   align-items: start;
 }
 .table--empresas-directorio .thead > div:last-child,
@@ -705,7 +705,7 @@ textarea.ng-invalid.ng-touched + .error{
 }
 .table--empresas-directorio .contact-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 0.8fr 2.2fr;
+  grid-template-columns: 1fr 1fr 0.8fr 2.2fr 160px;
   align-items: start;
   gap: 0.7rem;
   padding: 0.9rem 1.25rem;
@@ -729,6 +729,8 @@ textarea.ng-invalid.ng-touched + .error{
   .table--empresas-directorio .contact-row > div:nth-child(2)::before { content: "Contacto: "; }
   .table--empresas-directorio .contact-row > div:nth-child(3)::before { content: "Telefono: "; }
   .table--empresas-directorio .contact-row > div:nth-child(4)::before { content: "Datos comerciales: "; }
+  .table--empresas-directorio .contact-row > div:nth-child(5):empty { display: none; }
+  .table--empresas-directorio .contact-row > div:nth-child(5):not(:empty)::before { content: "Ubicación: "; display: block; margin-bottom: .25rem; }
 }
 
 .table .row .row-actions {

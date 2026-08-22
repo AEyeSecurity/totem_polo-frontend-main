@@ -502,7 +502,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .table--empresas .thead, .table--empresas .row { grid-template-columns: 140px 1.4fr 1fr 120px 160px 120px; }
 .table--usuarios .thead, .table--usuarios .row { grid-template-columns: 1.6fr 1fr 140px 130px 120px; }
 .table--servicios .thead, .table--servicios .row { grid-template-columns: 1.4fr 1fr 140px 1fr 140px 120px; }
-.table--lotes .thead, .table--lotes .row { grid-template-columns: 1.2fr 120px 120px 1fr 120px; }
+.table--lotes .thead, .table--lotes .row { grid-template-columns: 1.2fr 120px 120px 1fr 160px 120px; }
 .table--solicitudes .thead, .table--solicitudes .row { grid-template-columns: 140px 1.4fr 1fr 1.2fr 1.4fr 120px; }
 
 @media (max-width: 1000px){
@@ -547,6 +547,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   .table--lotes .row > div:nth-child(2)::before { content: "Manzana: "; }
   .table--lotes .row > div:nth-child(3)::before { content: "Lote: "; }
   .table--lotes .row > div:nth-child(4)::before { content: "Servicio de Polo: "; }
+  .table--lotes .row > div:nth-child(5)::before { content: "Ubicación: "; }
 }
 
 /* Chips / enlaces de datos (si los necesitás) */
@@ -580,6 +581,13 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 
 .modal-body{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; }
 .modal .col-2{ grid-column:span 2; } .modal .col-3{ grid-column:span 3; }
+
+.field--map { margin-top: .2rem; }
+.map-picker-coords {
+  margin-top: .4rem;
+  font-size: .8rem;
+  color: #30406b;
+}
 
 .modal-actions{ display:flex; justify-content:flex-end; gap:.8rem; margin-top:1rem; }
 
@@ -924,10 +932,10 @@ html, body {
   grid-template-columns: 1.4fr 1.2fr 1fr 1.2fr 140px;
 }
 
-/* LOTES: Dueño | Manzana | Lote | Servicio | Acciones */
+/* LOTES: Dueño | Manzana | Lote | Servicio | Ubicacion | Acciones */
 .table--lotes .thead,
 .table--lotes .row {
-  grid-template-columns: 1.2fr 120px 120px 1fr 140px;
+  grid-template-columns: 1.2fr 120px 120px 1fr 160px 140px;
   column-gap: 1.2rem;   /* un pelín más de aire */
 }
 

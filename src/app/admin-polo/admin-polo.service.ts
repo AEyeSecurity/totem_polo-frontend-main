@@ -90,6 +90,8 @@ export interface Lote {
   lote: number;
   manzana: number;
   id_servicio_polo: number;
+  latitud?: number | null;
+  longitud?: number | null;
 }
 
 export interface LoteCreate {
@@ -97,6 +99,13 @@ export interface LoteCreate {
   lote: number;
   manzana: number;
   id_servicio_polo: number;
+  latitud?: number | null;
+  longitud?: number | null;
+}
+
+export interface LoteLocationUpdate {
+  latitud: number;
+  longitud: number;
 }
 
 // 🔥 NUEVAS INTERFACES PARA EL PERFIL DEL POLO
@@ -252,6 +261,10 @@ export class AdminPoloService {
 
   createLote(lote: LoteCreate): Observable<Lote> {
     return this.http.post<Lote>(`${this.apiUrl}/lotes`, lote);
+  }
+
+  updateLoteUbicacion(id: number, ubicacion: LoteLocationUpdate): Observable<Lote> {
+    return this.http.put<Lote>(`${this.apiUrl}/lotes/${id}`, ubicacion);
   }
 
   deleteLote(id: number): Observable<any> {
