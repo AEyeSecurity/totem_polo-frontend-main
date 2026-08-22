@@ -16,6 +16,7 @@ import {
   ServicioPolo,
   Contacto,
   ContactoCreate,
+  ContactoDirectorio,
   EmpresaDetail,
   EmpresaDirectorio,
   EmpresaSelfUpdate,
@@ -398,7 +399,7 @@ export class EmpresaMeComponent implements OnInit {
 
   // Prioriza el contacto de tipo "comercial", despues "empresarial", y
   // recien si no hay ninguno de esos dos usa el primero que haya.
-  private getContactoPrincipal(empresa: EmpresaDirectorio) {
+  getContactoPrincipal(empresa: EmpresaDirectorio): ContactoDirectorio | undefined {
     const contactos = empresa.contactos || [];
     return (
       contactos.find((c) => c.tipo_contacto?.toLowerCase() === 'comercial') ||
@@ -422,25 +423,6 @@ export class EmpresaMeComponent implements OnInit {
 
   getTelefonoComercial(empresa: EmpresaDirectorio): string {
     return this.getContactoPrincipal(empresa)?.telefono || '-';
-  }
-
-  // Datos de contacto web/redes cargados en el contacto comercial/empresarial
-  // (pagina_web, correo, redes_sociales), no la ficha de info comercial.
-  getDatosComerciales(empresa: EmpresaDirectorio): string {
-    const datos = this.getContactoPrincipal(empresa)?.datos;
-    if (!datos) return '-';
-
-    const partes: string[] = [];
-    if (datos.pagina_web) {
-      partes.push(datos.pagina_web);
-    }
-    if (datos.redes_sociales) {
-      partes.push(datos.redes_sociales);
-    }
-    if (datos.correo) {
-      partes.push(datos.correo);
-    }
-    return partes.length ? partes.join(' · ') : '-';
   }
 
   // METODO PARA CERRAR TODOS LOS FORMULARIOS SIN CONFIRMACION
@@ -2112,6 +2094,18 @@ export class EmpresaMeComponent implements OnInit {
   externalHref(u?: string): string {
     if (!u) return '#';
     return /^https?:\/\//i.test(u) ? u : `https://${u.trim()}`;
+  }
+
+  /**
+   * Datos importados desde planillas viejas a veces tienen texto libre
+   * ("Instagram Facebook La Italiana...") en vez de un link real en
+   * pagina_web/redes_sociales. Mostrar eso como link clickeable termina en
+   * un href roto, asi que solo se linkea si el valor pinta como URL/handle
+   * real (sin espacios).
+   */
+  looksLikeLink(value?: string): boolean {
+    if (!value) return false;
+    return !/\s/.test(value.trim());
   }
 
   markAllAndSubmit(form: NgForm) {

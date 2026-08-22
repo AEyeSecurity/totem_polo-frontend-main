@@ -202,6 +202,7 @@
                 name="usuario_nombre"
                 minlength="3"
                 maxlength="50"
+                autocomplete="username"
                 [(ngModel)]="form.usuario_nombre"
                 required
                 #rUsuario="ngModel"
@@ -224,6 +225,7 @@
                 class="form-input"
                 id="r_email"
                 name="email"
+                autocomplete="email"
                 [(ngModel)]="form.email"
                 placeholder="usuario@empresa.com"
                 required
@@ -247,6 +249,7 @@
                 class="form-input"
                 id="r_password"
                 name="password"
+                autocomplete="new-password"
                 [type]="showPassword ? 'text' : 'password'"
                 [(ngModel)]="form.password"
                 placeholder="••••••••"
@@ -275,6 +278,7 @@
                 class="form-input"
                 id="r_password_confirm"
                 name="confirmPassword"
+                autocomplete="new-password"
                 [type]="showConfirmPassword ? 'text' : 'password'"
                 [(ngModel)]="confirmPassword"
                 placeholder="••••••••"
