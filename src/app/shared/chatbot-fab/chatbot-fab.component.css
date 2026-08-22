@@ -1,6 +1,6 @@
 .chatbot-fab {
   position: fixed;
-  right: 1.5rem;
+  left: 1.5rem;
   bottom: 1.5rem;
   width: 62px;
   height: 62px;
@@ -28,20 +28,53 @@
   height: 100%;
 }
 
-.chatbot-overlay {
+/* Capa invisible que cubre toda la pantalla mientras el chat esta abierto:
+   un click en cualquier lado fuera del panel lo cierra. */
+.chatbot-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 2000;
-  background: #fff;
+  z-index: 1999;
+  background: transparent;
 }
 
-.chatbot-overlay-close {
+/* Panel del chat: overlay chico anclado abajo a la izquierda, no pantalla
+   completa, para quedarse en la misma pagina del admin. */
+.chatbot-widget {
+  position: fixed;
+  left: 1.5rem;
+  bottom: calc(1.5rem + 62px + 0.75rem);
+  z-index: 2000;
+  width: min(560px, calc(100vw - 2 * 1.5rem));
+  height: min(680px, calc(100vh - 2rem - 62px - 0.75rem));
+  /* mismo degrade gris que usa el chat por dentro: si el contenido no
+     llega a cubrir todo el panel, que se vea gris y no blanco */
+  background: linear-gradient(160deg, #fafbfc 0%, #f3f4f6 55%, #ebedf0 100%);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(15, 20, 30, 0.28);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: chatbotWidgetIn 0.18s ease;
+}
+
+@keyframes chatbotWidgetIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatbot-widget-close {
   position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
+  top: 0.6rem;
+  right: 1.35rem;
   z-index: 2001;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
   background: rgba(20, 20, 30, 0.55);
@@ -53,6 +86,29 @@
   backdrop-filter: blur(2px);
 }
 
-.chatbot-overlay-close:hover {
+.chatbot-widget-close .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.chatbot-widget-close:hover {
   background: rgba(20, 20, 30, 0.75);
+}
+
+.chatbot-widget-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.chatbot-widget-body app-chat {
+  display: block;
+  height: 100%;
+}
+
+@media (max-width: 480px) {
+  .chatbot-widget {
+    left: 0.75rem;
+    bottom: calc(0.75rem + 62px + 0.6rem);
+    width: calc(100vw - 1.5rem);
+  }
 }

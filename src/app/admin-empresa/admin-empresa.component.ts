@@ -397,32 +397,20 @@ export class EmpresaMeComponent implements OnInit {
     this.filterEmpresasDirectorio();
   }
 
-  // Prioriza el contacto de tipo "comercial", despues "empresarial", y
-  // recien si no hay ninguno de esos dos usa el primero que haya.
-  getContactoPrincipal(empresa: EmpresaDirectorio): ContactoDirectorio | undefined {
-    const contactos = empresa.contactos || [];
-    return (
-      contactos.find((c) => c.tipo_contacto?.toLowerCase() === 'comercial') ||
-      contactos.find((c) => c.tipo_contacto?.toLowerCase() === 'empresarial') ||
-      contactos[0]
-    );
-  }
-
-  getContactoComercial(empresa: EmpresaDirectorio): string {
-    const contacto = this.getContactoPrincipal(empresa);
-    if (!contacto?.nombre) return '-';
-    const tipo = contacto.tipo_contacto
-      ? ` (${this.capitalizar(contacto.tipo_contacto)})`
-      : '';
-    return `${contacto.nombre}${tipo}`;
-  }
-
   private capitalizar(valor: string): string {
     return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
   }
 
-  getTelefonoComercial(empresa: EmpresaDirectorio): string {
-    return this.getContactoPrincipal(empresa)?.telefono || '-';
+  formatContactoNombre(contacto: ContactoDirectorio): string {
+    if (!contacto?.nombre) return '-';
+    const nombre = contacto.nombre.trim();
+    const tipo = contacto.tipo_contacto?.trim();
+    // Algunos registros viejos ya traen el tipo escrito dentro del nombre
+    // (ej. "ACEITERA BARBIERI (comercial)"): si es asi, no lo repetimos.
+    if (!tipo || nombre.toLowerCase().includes(tipo.toLowerCase())) {
+      return nombre;
+    }
+    return `${nombre} (${this.capitalizar(tipo)})`;
   }
 
   // METODO PARA CERRAR TODOS LOS FORMULARIOS SIN CONFIRMACION

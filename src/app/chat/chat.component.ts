@@ -9,6 +9,8 @@ import {
   ChangeDetectorRef,
   NgZone,
   HostListener,
+  HostBinding,
+  Input,
   inject,
 } from '@angular/core';
 import { ChatService, VoiceChatResponse } from './chat.service';
@@ -29,7 +31,7 @@ interface Message {
   standalone: true,
   imports: [FormsModule, LogoutButtonComponent],
   template: `
-    <div class="chat-wrapper">
+    <div class="chat-wrapper" [class.embedded]="embedded">
       @if (!isFullscreen) {
         <div class="chat-header">
           <div class="header-content">
@@ -50,36 +52,40 @@ interface Message {
               </p>
             </div>
           </div>
-          <div class="header-actions">
-            @if (showLogout) {
-              <app-logout-button></app-logout-button>
-            }
-            <button
-              type="button"
-              class="kiosk-toggle"
-              (click)="toggleLogoutVisible()"
-              aria-label="Mostrar u ocultar cerrar sesion"
-            ></button>
-          </div>
+          @if (!embedded) {
+            <div class="header-actions">
+              @if (showLogout) {
+                <app-logout-button></app-logout-button>
+              }
+              <button
+                type="button"
+                class="kiosk-toggle"
+                (click)="toggleLogoutVisible()"
+                aria-label="Mostrar u ocultar cerrar sesion"
+              ></button>
+            </div>
+          }
         </div>
       }
 
       <div class="chat-mode-switch">
-        <button
-          type="button"
-          class="fullscreen-toggle"
-          (click)="toggleFullscreen()"
-          [attr.aria-label]="
-            isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
-          "
-          [attr.title]="
-            isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
-          "
-        >
-          <span class="material-symbols-outlined">
-            {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
-          </span>
-        </button>
+        @if (!embedded) {
+          <button
+            type="button"
+            class="fullscreen-toggle"
+            (click)="toggleFullscreen()"
+            [attr.aria-label]="
+              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+            "
+            [attr.title]="
+              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+            "
+          >
+            <span class="material-symbols-outlined">
+              {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
+            </span>
+          </button>
+        }
         <div class="mode-pill-group">
           <button
             type="button"
@@ -225,11 +231,13 @@ interface Message {
       } @else {
         <section class="voice-experience">
           <div class="voice-hero">
-            <div class="voice-hero-header">
-              <div>
-                <p class="tag-label">POLO BOT</p>
+            @if (!embedded) {
+              <div class="voice-hero-header">
+                <div>
+                  <p class="tag-label">POLO BOT</p>
+                </div>
               </div>
-            </div>
+            }
             <div class="voice-stage">
               <div
                 class="speech-bubble user-bubble"
@@ -345,6 +353,16 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
 
+  // Usado cuando el chat se muestra dentro del widget flotante del panel de
+  // admin en vez de la pagina propia /chat: llena el contenedor en vez del
+  // viewport, arranca en modo texto (la experiencia de voz esta pensada para
+  // pantalla completa) y oculta controles que no aplican ahi (pantalla
+  // completa, logout).
+  @Input() embedded = false;
+  @HostBinding('class.embedded') get isEmbeddedHost(): boolean {
+    return this.embedded;
+  }
+
   messages: Message[] = [];
   userMessage = '';
   isTyping = false;
@@ -414,6 +432,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private idleTimer?: number;
 
   ngOnInit() {
+    if (this.embedded) {
+      this.chatMode = 'text';
+    }
     this.loadPopularQuestions();
     this.startFreshConversation();
     this.resetIdleTimer();

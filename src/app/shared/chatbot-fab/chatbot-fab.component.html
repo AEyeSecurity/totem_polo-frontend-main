@@ -24,16 +24,23 @@
 </button>
 
 @if (open) {
-  <div class="chatbot-overlay">
+  <div
+    class="chatbot-backdrop"
+    (click)="closeChat()"
+    aria-hidden="true"
+  ></div>
+  <div class="chatbot-widget">
     <button
       type="button"
-      class="chatbot-overlay-close"
+      class="chatbot-widget-close"
       (click)="closeChat()"
       aria-label="Cerrar el asistente virtual"
       title="Cerrar"
     >
       <span class="material-symbols-outlined">close</span>
     </button>
-    <app-chat></app-chat>
+    <div class="chatbot-widget-body">
+      <app-chat [embedded]="true"></app-chat>
+    </div>
   </div>
 }

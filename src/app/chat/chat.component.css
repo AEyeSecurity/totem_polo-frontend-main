@@ -6,6 +6,13 @@
   overflow-y: auto;
 }
 
+/* Dentro del widget flotante del panel de admin: llenar el contenedor que
+   le da el widget en vez del viewport completo (100vh/100dvh ignoran el
+   tamaño del padre, siempre miden la ventana entera). */
+:host(.embedded) {
+  height: 100%;
+}
+
 .chat-wrapper {
   height: 100vh;
   height: 100dvh;
@@ -23,6 +30,11 @@
   color: #495057;
   font-size: clamp(0.88rem, 0.9vw, 0.98rem);
   box-sizing: border-box;
+}
+
+.chat-wrapper.embedded {
+  height: 100%;
+  min-height: 0;
 }
 
 .chat-header {
@@ -1387,4 +1399,50 @@
   100% {
     opacity: 0;
   }
+}
+
+/* ============================================================
+   MODO VOZ EMBEBIDO (widget del panel de admin)
+   El robot y las burbujas se dimensionan con clamp(...vmin...), que mide
+   el viewport completo, no el widget chico donde vive esto ahora. En vez
+   de reescribir cada pieza del robot (rompe las proporciones a mano),
+   se escala la figura entera de una y se le da a la grilla/burbujas un
+   tamaño fijo mas chico para que entren sin recortarse.
+   ============================================================ */
+.chat-wrapper.embedded .voice-hero {
+  min-height: 0;
+  padding: 10px;
+}
+
+.chat-wrapper.embedded .voice-stage {
+  grid-template-columns: minmax(72px, 1fr) 150px minmax(72px, 1fr);
+  gap: 8px;
+}
+
+.chat-wrapper.embedded .speech-bubble {
+  padding: 8px;
+  min-height: 70px;
+  max-width: 140px;
+}
+
+.chat-wrapper.embedded .speech-bubble p {
+  font-size: 0.78rem;
+  min-height: 36px;
+  line-height: 1.25;
+}
+
+.chat-wrapper.embedded .bubble-label {
+  font-size: 0.68rem;
+}
+
+.chat-wrapper.embedded .user-bubble,
+.chat-wrapper.embedded .bot-bubble {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.chat-wrapper.embedded .robot-figure {
+  transform: scale(0.55);
+  transform-origin: top center;
+  margin-top: -12px;
 }

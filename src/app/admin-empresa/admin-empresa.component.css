@@ -695,20 +695,40 @@ textarea.ng-invalid.ng-touched + .error{
   line-height: 1.4;
 }
 
+/* Cuando una empresa tiene varios contactos (ej. comercial y empresarial),
+   cada uno ocupa su propia fila (mismas columnas que la tabla) para que la
+   linea divisoria quede pareja entre Contacto / Telefono / Datos y no se
+   confundan entre si. */
+.table--empresas-directorio .row--empresa {
+  display: block;
+  padding: 0;
+}
+.table--empresas-directorio .contact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr 2.2fr;
+  align-items: start;
+  gap: 0.7rem;
+  padding: 0.9rem 1.25rem;
+}
+.table--empresas-directorio .contact-row + .contact-row {
+  border-top: 1px dashed #dde1ea;
+}
+
 @media (max-width: 760px) {
   .table--empresas-directorio .thead { display: none; }
-  .table--empresas-directorio .row {
+  .table--empresas-directorio .contact-row {
     grid-template-columns: 1fr;
     gap: .35rem;
   }
-  .table--empresas-directorio .row > div::before {
+  .table--empresas-directorio .contact-row > div::before {
     font-weight: 600;
     color: #2b3a62;
   }
-  .table--empresas-directorio .row > div:nth-child(1)::before { content: "Nombre: "; }
-  .table--empresas-directorio .row > div:nth-child(2)::before { content: "Contacto: "; }
-  .table--empresas-directorio .row > div:nth-child(3)::before { content: "Telefono: "; }
-  .table--empresas-directorio .row > div:nth-child(4)::before { content: "Datos comerciales: "; }
+  .table--empresas-directorio .contact-row > div:nth-child(1):empty { display: none; }
+  .table--empresas-directorio .contact-row > div:nth-child(1):not(:empty)::before { content: "Nombre: "; }
+  .table--empresas-directorio .contact-row > div:nth-child(2)::before { content: "Contacto: "; }
+  .table--empresas-directorio .contact-row > div:nth-child(3)::before { content: "Telefono: "; }
+  .table--empresas-directorio .contact-row > div:nth-child(4)::before { content: "Datos comerciales: "; }
 }
 
 .table .row .row-actions {

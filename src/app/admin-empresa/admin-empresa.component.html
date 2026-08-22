@@ -950,66 +950,79 @@
                   <div>Datos comerciales</div>
                 </div>
                 @for (e of filteredEmpresasDirectorio; track e) {
-                  <div class="row">
-                    <div>{{ e.nombre }}</div>
-                    <div>{{ getContactoComercial(e) }}</div>
-                    <div>{{ getTelefonoComercial(e) }}</div>
-                    <div>
-                      <div class="data-stack">
-                        @let datos = getContactoPrincipal(e)?.datos;
-                        @if (datos?.pagina_web) {
-                          @if (looksLikeLink(datos.pagina_web)) {
-                            <a
-                              class="chip-link"
-                              [href]="externalHref(datos.pagina_web)"
-                              target="_blank"
-                              rel="noopener"
-                              title="{{ datos.pagina_web }}"
-                            >
-                              <span class="material-symbols-outlined">language</span>
-                              <span class="text">{{ displayUrl(datos.pagina_web) }}</span>
-                            </a>
-                          } @else {
-                            <span class="chip-plain" title="{{ datos.pagina_web }}">
-                              <span class="material-symbols-outlined">language</span>
-                              <span class="text">{{ datos.pagina_web }}</span>
-                            </span>
-                          }
-                        }
-                        @if (datos?.correo) {
-                          <a
-                            class="chip-link"
-                            [href]="'mailto:' + datos.correo"
-                            title="{{ datos.correo }}"
-                          >
-                            <span class="material-symbols-outlined">mail</span>
-                            <span class="text">{{ datos.correo }}</span>
-                          </a>
-                        }
-                        @if (datos?.redes_sociales) {
-                          @if (looksLikeLink(datos.redes_sociales)) {
-                            <a
-                              class="chip-link"
-                              [href]="externalHref(datos.redes_sociales)"
-                              target="_blank"
-                              rel="noopener"
-                              title="{{ datos.redes_sociales }}"
-                            >
-                              <span class="material-symbols-outlined">link</span>
-                              <span class="text">{{ displayUrl(datos.redes_sociales) }}</span>
-                            </a>
-                          } @else {
-                            <span class="chip-plain" title="{{ datos.redes_sociales }}">
-                              <span class="material-symbols-outlined">link</span>
-                              <span class="text">{{ datos.redes_sociales }}</span>
-                            </span>
-                          }
-                        }
-                        @if (!datos || !hasKeys(datos)) {
-                          <span>-</span>
-                        }
+                  <div class="row row--empresa">
+                    @if (!e.contactos?.length) {
+                      <div class="contact-row">
+                        <div>{{ e.nombre }}</div>
+                        <div>-</div>
+                        <div>-</div>
+                        <div>-</div>
                       </div>
-                    </div>
+                    } @else {
+                      @for (c of e.contactos; track c; let first = $first) {
+                        <div class="contact-row">
+                          <div>{{ first ? e.nombre : "" }}</div>
+                          <div>{{ formatContactoNombre(c) }}</div>
+                          <div>{{ c.telefono || "-" }}</div>
+                          <div>
+                            <div class="data-stack">
+                              @if (hasKeys(c.datos)) {
+                                @if (c.datos.pagina_web) {
+                                  @if (looksLikeLink(c.datos.pagina_web)) {
+                                    <a
+                                      class="chip-link"
+                                      [href]="externalHref(c.datos.pagina_web)"
+                                      target="_blank"
+                                      rel="noopener"
+                                      title="{{ c.datos.pagina_web }}"
+                                    >
+                                      <span class="material-symbols-outlined">language</span>
+                                      <span class="text">{{ displayUrl(c.datos.pagina_web) }}</span>
+                                    </a>
+                                  } @else {
+                                    <span class="chip-plain" title="{{ c.datos.pagina_web }}">
+                                      <span class="material-symbols-outlined">language</span>
+                                      <span class="text">{{ c.datos.pagina_web }}</span>
+                                    </span>
+                                  }
+                                }
+                                @if (c.datos.correo) {
+                                  <a
+                                    class="chip-link"
+                                    [href]="'mailto:' + c.datos.correo"
+                                    title="{{ c.datos.correo }}"
+                                  >
+                                    <span class="material-symbols-outlined">mail</span>
+                                    <span class="text">{{ c.datos.correo }}</span>
+                                  </a>
+                                }
+                                @if (c.datos.redes_sociales) {
+                                  @if (looksLikeLink(c.datos.redes_sociales)) {
+                                    <a
+                                      class="chip-link"
+                                      [href]="externalHref(c.datos.redes_sociales)"
+                                      target="_blank"
+                                      rel="noopener"
+                                      title="{{ c.datos.redes_sociales }}"
+                                    >
+                                      <span class="material-symbols-outlined">link</span>
+                                      <span class="text">{{ displayUrl(c.datos.redes_sociales) }}</span>
+                                    </a>
+                                  } @else {
+                                    <span class="chip-plain" title="{{ c.datos.redes_sociales }}">
+                                      <span class="material-symbols-outlined">link</span>
+                                      <span class="text">{{ c.datos.redes_sociales }}</span>
+                                    </span>
+                                  }
+                                }
+                              } @else {
+                                <span>-</span>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    }
                   </div>
                 }
               </div>
