@@ -105,13 +105,15 @@
   height: 100%;
 }
 
-@media (max-width: 900px), (max-height: 700px) {
+@media (max-width: 860px) {
   /* El panel chico (anclado abajo a la izquierda) no da suficiente ancho
-     NI alto para el modo Voz IA, pensado para pantalla completa: en
-     cualquier ventana angosta o baja (celular, o una ventana de escritorio
-     achicada) pasa a ocupar toda la pantalla, igual que la pagina /chat
-     (que ya se adapta bien a mobile), en vez de intentar encogerla dentro
-     de un cuadro chico donde el avatar y las burbujas no entran. */
+     para el modo Voz IA, pensado para pantalla completa: en celular o en
+     una ventana de escritorio angosta pasa a ocupar toda la pantalla,
+     igual que la pagina /chat (que ya se adapta bien a mobile), en vez de
+     intentar encogerla dentro de un cuadro chico donde el avatar y las
+     burbujas no entran. Solo mira el ANCHO a proposito: una ventana de
+     escritorio normal pero baja (poca altura) tiene que seguir mostrando
+     el panel chico, no pantalla completa. */
   .chatbot-widget {
     left: 0;
     right: 0;

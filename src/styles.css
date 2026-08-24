@@ -3,4 +3,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  /* Sin esto, Safari (y algunos navegadores de Android) agrandan la letra
+     por su cuenta en columnas angostas de texto, ignorando los tamanios
+     definidos en el CSS: en el celular todo se ve mas grande de lo que
+     deberia aunque los media queries esten aplicando bien. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
