@@ -81,13 +81,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   .topbar-tabs {
     order: 3;
     width: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
-  }
-  .topbar-tabs .tab {
-    flex: 0 0 auto;
+    flex-wrap: wrap;
   }
 }
 

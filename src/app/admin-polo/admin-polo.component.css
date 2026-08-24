@@ -157,13 +157,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   .topbar-tabs {
     order: 3;
     width: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
-  }
-  .topbar-tabs .tab {
-    flex: 0 0 auto;
+    flex-wrap: wrap;
   }
 }
 
@@ -547,7 +541,11 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   .table--lotes .row > div:nth-child(2)::before { content: "Manzana: "; }
   .table--lotes .row > div:nth-child(3)::before { content: "Lote: "; }
   .table--lotes .row > div:nth-child(4)::before { content: "Servicio de Polo: "; }
-  .table--lotes .row > div:nth-child(5)::before { content: "Ubicación: "; }
+  .table--lotes .row > div:nth-child(5)::before {
+    content: "Ubicación: ";
+    display: block;
+    margin-bottom: .35rem;
+  }
 }
 
 /* Chips / enlaces de datos (si los necesitás) */
