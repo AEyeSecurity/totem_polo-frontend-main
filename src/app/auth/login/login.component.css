@@ -843,8 +843,8 @@
    RESPONSIVE DESIGN
    ============================================ */
 
-/* Tablet */
-@media (max-width: 768px) {
+/* Tablet / ventana angosta: mismo quiebre que el sidebar del panel de admin (860px) */
+@media (max-width: 860px) {
   .main-container {
     padding: 10px;
   }
@@ -857,8 +857,7 @@
   }
 
   .left-panel {
-    padding: 30px 25px;
-    min-height: auto;
+    display: none;
   }
 
   .right-panel {
@@ -937,7 +936,6 @@
     padding: 5px;
   }
 
-  .left-panel,
   .right-panel {
     padding: 25px 20px;
   }

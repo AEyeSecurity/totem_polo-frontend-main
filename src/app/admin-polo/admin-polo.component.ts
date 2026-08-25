@@ -81,6 +81,9 @@ export class AdminPoloComponent implements OnInit {
 
   activeTab: AdminPoloTab = 'dashboard';
 
+  // Menu lateral en mobile
+  mobileMenuOpen = false;
+
   // Sin tope real: se quiere ver el listado completo (una fila por
   // empresa/usuario/servicio/lote), la lista es scrolleable en el html.
   private readonly MAX_ACTIVIDADES = 2000;
@@ -261,6 +264,15 @@ export class AdminPoloComponent implements OnInit {
     // Cerrar formularios sin confirmación al cambiar de tab
     this.closeAllFormsWithoutConfirmation();
     this.loadData();
+    this.mobileMenuOpen = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 
   quickViewSolicitudes(): void {

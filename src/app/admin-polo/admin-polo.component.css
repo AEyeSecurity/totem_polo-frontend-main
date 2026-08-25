@@ -142,22 +142,128 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   line-height: 1;
 }
 
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #1a284b;
+  cursor: pointer;
+}
+.mobile-menu-btn:hover { background: #eaeaea; }
+
+.mobile-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1100;
+  animation: fadeIn 0.2s ease;
+}
+
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  bottom: 0;
+  width: min(300px, 82vw);
+  background: #fff;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  /* "left" en vez de "transform" a proposito: un transform en este
+     ancestro crearia un containing block nuevo y los modales fixed
+     que se abren desde dentro (ej. confirmar cierre de sesion) quedarian
+     encajonados en el ancho del sidebar en vez de centrarse en toda la
+     pantalla. */
+  transition: left 0.25s ease;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+}
+.mobile-sidebar.open { left: 0; }
+
+.mobile-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+.mobile-sidebar-header .app-title { font-weight: 900; font-size: 22px; }
+.mobile-sidebar-header .app-sub { font-size: 0.8rem; color: #777; }
+
+.mobile-sidebar-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem;
+}
+.mobile-sidebar-tabs .tab,
+.mobile-sidebar-footer .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  color: #555;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.mobile-sidebar-tabs .tab .material-symbols-outlined,
+.mobile-sidebar-footer .tab .material-symbols-outlined {
+  font-size: 20px;
+  color: inherit;
+}
+.mobile-sidebar-tabs .tab:hover,
+.mobile-sidebar-footer .tab:hover { background: #f5f5f5; }
+.mobile-sidebar-tabs .tab.active,
+.mobile-sidebar-footer .tab.active {
+  background: #e9efff;
+  color: #1a284b;
+  font-weight: 600;
+}
+
+.mobile-sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border-top: 1px solid #eee;
+}
+.mobile-sidebar-footer app-logout-button {
+  display: block;
+  margin-top: 0.5rem;
+}
+.mobile-sidebar-footer app-logout-button ::ng-deep .btn {
+  width: 100%;
+  justify-content: center;
+}
+
 @media (max-width: 860px) {
-  .topbar {
-    flex-wrap: wrap;
-    row-gap: 0.5rem;
-  }
-  .topbar-left {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
+  .topbar-tabs,
   .topbar-right {
-    flex: 0 0 auto;
+    display: none;
   }
-  .topbar-tabs {
-    order: 3;
-    width: 100%;
-    flex-wrap: wrap;
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 861px) {
+  .mobile-sidebar,
+  .mobile-sidebar-backdrop {
+    display: none;
   }
 }
 

@@ -90,6 +90,9 @@ export class EmpresaMeComponent implements OnInit {
     | 'perfil'
     | 'config' = 'dashboard';
 
+  // Menu lateral en mobile
+  mobileMenuOpen = false;
+
   // Directorio de empresas del parque (networking entre inquilinos)
   empresasDirectorio: EmpresaDirectorio[] = [];
   filteredEmpresasDirectorio: EmpresaDirectorio[] = [];
@@ -1355,6 +1358,15 @@ export class EmpresaMeComponent implements OnInit {
   // accesos rapidos
   goTo(tab: EmpresaMeComponent['activeTab']) {
     this.setActiveTab(tab);
+    this.mobileMenuOpen = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
   quickAddVehiculo() {
     this.setActiveTab('vehiculos');

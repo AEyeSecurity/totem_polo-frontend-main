@@ -94,7 +94,114 @@
           </button>
           <app-logout-button></app-logout-button>
         </div>
+
+        <button
+          type="button"
+          class="mobile-menu-btn"
+          (click)="toggleMobileMenu()"
+          aria-label="Abrir menu"
+          >
+          <span class="material-symbols-outlined">menu</span>
+        </button>
       </nav>
+
+      <!-- SIDEBAR MOBILE -->
+      @if (mobileMenuOpen) {
+        <div
+          class="mobile-sidebar-backdrop"
+          (click)="closeMobileMenu()"
+          role="button"
+          tabindex="0"
+          aria-label="Cerrar menu"
+          (keyup.enter)="closeMobileMenu()"
+          ></div>
+      }
+      <aside class="mobile-sidebar" [class.open]="mobileMenuOpen">
+        <div class="mobile-sidebar-header">
+          <div class="topbar-title">
+            <div class="app-title">POLO 52</div>
+            <div class="app-sub">Administración</div>
+          </div>
+          <button
+            type="button"
+            class="icon-btn"
+            (click)="closeMobileMenu()"
+            aria-label="Cerrar menu"
+            >
+            ✕
+          </button>
+        </div>
+        <nav class="mobile-sidebar-tabs">
+          <button
+            class="tab"
+            [class.active]="activeTab === 'dashboard'"
+            (click)="setActiveTab('dashboard')"
+            >
+            Dashboard
+          </button>
+          <button
+            class="tab"
+            [class.active]="activeTab === 'empresas'"
+            (click)="setActiveTab('empresas')"
+            >
+            Empresas
+          </button>
+          <button
+            class="tab"
+            [class.active]="activeTab === 'solicitudes'"
+            (click)="setActiveTab('solicitudes')"
+            >
+            Solicitudes
+            @if (solicitudes.length) {
+              <span class="tab-badge">{{ solicitudes.length }}</span>
+            }
+          </button>
+          <button
+            class="tab"
+            [class.active]="activeTab === 'usuarios'"
+            (click)="setActiveTab('usuarios')"
+            >
+            Usuarios
+          </button>
+          <button
+            class="tab"
+            [class.active]="activeTab === 'servicios'"
+            (click)="setActiveTab('servicios')"
+            >
+            Servicios Polo
+          </button>
+          <button
+            class="tab"
+            [class.active]="activeTab === 'lotes'"
+            (click)="setActiveTab('lotes')"
+            >
+            Lotes
+          </button>
+        </nav>
+        <div class="mobile-sidebar-footer">
+          <button
+            type="button"
+            class="tab"
+            [class.active]="activeTab === 'perfil'"
+            (click)="setActiveTab('perfil')"
+            aria-label="Ver información del polo"
+            >
+            <span class="material-symbols-outlined">account_circle</span>
+            <span>Perfil</span>
+          </button>
+          <button
+            type="button"
+            class="tab"
+            [class.active]="activeTab === 'config'"
+            (click)="setActiveTab('config')"
+            aria-label="Abrir configuración"
+            >
+            <span class="material-symbols-outlined">settings</span>
+            <span>Configuración</span>
+          </button>
+          <app-logout-button></app-logout-button>
+        </div>
+      </aside>
 
       <!-- Main -->
       <main class="content">
