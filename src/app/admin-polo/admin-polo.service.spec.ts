@@ -6,7 +6,6 @@ import {
 import { provideHttpClient } from '@angular/common/http';
 import {
   AdminPoloService,
-  EmpresaCreate,
   UsuarioCreate,
   UsuarioUpdate,
   ServicioPoloCreate,
@@ -52,27 +51,20 @@ describe('AdminPoloService', () => {
     req.flush({});
   });
 
-  it('should create, update and delete an empresa', () => {
-    const nueva: EmpresaCreate = {
-      cuil: 20111222333,
-      nombre: 'ACME',
-      rubro: 'Industria',
-      cant_empleados: 20,
-      horario_trabajo: '9-18',
-      estado: true,
-    };
+  it('should update and delete an empresa', () => {
+    // Las empresas ya no se crean a mano desde admin_polo: se crean via
+    // autoregistro publico (/register) y su aprobacion. updateEmpresa /
+    // deleteEmpresa siguen existiendo para gestionar empresas ya creadas.
+    const cuil = 20111222333;
 
-    service.createEmpresa(nueva).subscribe();
-    httpMock.expectOne(`${base}/empresas`).flush({});
-
-    service.updateEmpresa(nueva.cuil, { nombre: 'ACME SA' }).subscribe();
-    const updateReq = httpMock.expectOne(`${base}/empresas/${nueva.cuil}`);
+    service.updateEmpresa(cuil, { nombre: 'ACME SA' }).subscribe();
+    const updateReq = httpMock.expectOne(`${base}/empresas/${cuil}`);
     expect(updateReq.request.method).toBe('PUT');
     updateReq.flush({});
 
-    service.deleteEmpresa(nueva.cuil).subscribe();
+    service.deleteEmpresa(cuil).subscribe();
     expect(
-      httpMock.expectOne(`${base}/empresas/${nueva.cuil}`).request.method
+      httpMock.expectOne(`${base}/empresas/${cuil}`).request.method
     ).toBe('DELETE');
   });
 

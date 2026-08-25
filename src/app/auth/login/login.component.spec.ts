@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthenticationService } from '../auth.service';
@@ -20,13 +20,24 @@ describe('LoginComponent', () => {
     ]);
     authServiceSpy.isLoggedIn.and.returnValue(false);
 
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    routerSpy = jasmine.createSpyObj('Router', [
+      'navigate',
+      'createUrlTree',
+      'serializeUrl',
+    ]);
+    (routerSpy as any).events = of();
+    routerSpy.createUrlTree.and.returnValue({} as any);
+    routerSpy.serializeUrl.and.returnValue('');
 
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
         { provide: AuthenticationService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: () => null } } },
+        },
       ],
     }).compileComponents();
 

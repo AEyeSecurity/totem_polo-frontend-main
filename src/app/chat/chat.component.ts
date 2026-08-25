@@ -313,11 +313,7 @@ interface Message {
                 [class.is-recording]="isRecording"
                 [class.is-starting]="isStartingRecording"
                 (click)="toggleRecording()"
-                [disabled]="
-                  !supportsVoice ||
-                  isStartingRecording ||
-                  (isProcessingVoice && !isRecording)
-                "
+                [disabled]="!supportsVoice || isStartingRecording"
                 [attr.aria-pressed]="isRecording"
               >
                 <span class="material-symbols-outlined">
@@ -418,6 +414,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private analyserNode?: AnalyserNode;
   private silenceRafId?: number;
   private activeVoiceRequest?: Subscription;
+  // Referencia al audio de la respuesta del bot que esta sonando (o a punto
+  // de sonar), para poder cortarlo en seco si el usuario interrumpe tocando
+  // el microfono de nuevo (barge-in, como en las apps de voz en vivo).
+  private currentBotAudio?: HTMLAudioElement;
 
   constructor() {
     if (!this.supportsVoice) {
@@ -503,6 +503,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private resetConversation(): void {
     this.stopRecording(true);
     this.cancelBotStream();
+    this.stopBotAudio();
     this.stopBubbleTyping('user');
     this.stopBubbleTyping('bot');
     this.activeVoiceRequest?.unsubscribe();
@@ -533,6 +534,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.stopRecording(true);
     this.stopSilenceDetection();
     this.cleanupMediaStream();
+    this.stopBotAudio();
     this.activeVoiceRequest?.unsubscribe();
     if (this.speakingFallbackTimeout) {
       clearTimeout(this.speakingFallbackTimeout);
@@ -575,6 +577,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.stopRecording(true);
     }
     if (mode === 'text') {
+      this.stopBotAudio();
+      this.isBotSpeaking = false;
       this.stopBubbleTyping('user');
       this.stopBubbleTyping('bot');
       this.shouldScrollToBottom = true;
@@ -628,7 +632,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     if (this.isRecording) {
       this.stopRecording();
-    } else if (!this.isProcessingVoice && !this.isStartingRecording) {
+    } else if (!this.isStartingRecording) {
+      // Si el bot esta pensando o hablando, esto es una interrupcion
+      // (barge-in): startRecording() se encarga de cortar el audio en
+      // curso y cancelar la respuesta pendiente antes de escuchar de nuevo.
       this.startRecording();
     }
   }
@@ -934,6 +941,18 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  private stopBotAudio(): void {
+    if (this.currentBotAudio) {
+      try {
+        this.currentBotAudio.pause();
+        this.currentBotAudio.currentTime = 0;
+      } catch {
+        // ignore
+      }
+      this.currentBotAudio = undefined;
+    }
+  }
+
   private startSpeechRecognition() {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -991,10 +1010,15 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     if (this.isStartingRecording || this.isRecording) return;
     this.isStartingRecording = true;
 
-    // Si habia una respuesta anterior en camino, la cancelamos: no debe
-    // poder llegar tarde y pisar la respuesta de esta consulta nueva.
+    // Barge-in: si el bot estaba pensando o hablando, esto es una
+    // interrupcion. Cortamos el audio que estuviera sonando, cancelamos la
+    // respuesta que estuviera en camino (no debe poder llegar tarde y pisar
+    // la consulta nueva) y limpiamos los flags de "pensando"/"hablando"
+    // para que el estado quede consistente con que ahora se esta grabando.
+    this.stopBotAudio();
     this.activeVoiceRequest?.unsubscribe();
     this.activeVoiceRequest = undefined;
+    this.isProcessingVoice = false;
 
     this.voiceError = null;
     this.voiceUserText = '';
@@ -1250,16 +1274,26 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
           if (b64) {
             try {
               const audio = new Audio(`data:audio/mpeg;base64,${b64}`);
+              this.currentBotAudio = audio;
               this.isBotSpeaking = true;
               audio.onended = () => {
                 this.isBotSpeaking = false;
+                if (this.currentBotAudio === audio) {
+                  this.currentBotAudio = undefined;
+                }
                 this.cdr.detectChanges();
               };
               audio.onerror = () => {
+                if (this.currentBotAudio === audio) {
+                  this.currentBotAudio = undefined;
+                }
                 this.speakOutFallback(botText);
               };
               audio.play().catch(() => {
                 // El navegador bloqueo el autoplay: igual animamos la boca
+                if (this.currentBotAudio === audio) {
+                  this.currentBotAudio = undefined;
+                }
                 this.speakOutFallback(botText);
               });
             } catch {

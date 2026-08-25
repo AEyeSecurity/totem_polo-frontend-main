@@ -54,6 +54,7 @@ describe('AdminPoloComponent', () => {
       { detail: 'Todavía no se cargó información comercial del Polo' },
       { status: 404, statusText: 'Not Found' }
     );
+    httpMock.expectOne(`${base}/empresas/solicitudes`).flush([]);
   });
 
   afterEach(() => {
@@ -79,6 +80,7 @@ describe('AdminPoloComponent', () => {
         fecha_ingreso: '2024-01-01',
         horario_trabajo: '9-18',
         estado: true,
+        estado_solicitud: 'aprobada',
       },
       {
         cuil: 20444555666,
@@ -88,6 +90,7 @@ describe('AdminPoloComponent', () => {
         fecha_ingreso: '2024-02-01',
         horario_trabajo: '9-18',
         estado: false,
+        estado_solicitud: 'aprobada',
       },
     ];
 
