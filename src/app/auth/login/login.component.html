@@ -160,111 +160,128 @@
           </div>
         </div>
 
-        <!-- Modal de recuperación de contraseña con nuevo diseño -->
+        <!-- Modal de recuperación de contraseña -->
         @if (showResetPassword) {
           <div
-            class="reset-modal-overlay"
+            class="overlay"
             tabindex="-1"
             (click)="closeResetModal()"
             (keydown.escape)="closeResetModal()"
             >
-            <div class="reset-modal" role="presentation" (click)="$event.stopPropagation()">
-              <!-- Panel Izquierdo - Info -->
-              <div class="reset-left-panel">
-                <div class="reset-logo-section">
-                  <div class="reset-logo-icon">
-                    <i class="fas fa-key"></i>
-                  </div>
-                  <div class="reset-logo-text">
-                    <h3>Recuperación<br /><span class="highlight">Segura</span></h3>
-                  </div>
-                </div>
-                <div class="reset-content-section">
-                  <h4>Restablecer Contraseña</h4>
-                  <p>
-                    Ingresa tu correo electrónico corporativo y te enviaremos las
-                    instrucciones para crear una nueva contraseña de forma segura.
-                  </p>
-                  <ul class="reset-features">
-                    <li><i class="fas fa-shield-alt"></i> Proceso seguro y encriptado</li>
-                    <li><i class="fas fa-clock"></i> Enlace válido por 30 minutos</li>
-                    <li>
-                      <i class="fas fa-envelope-circle-check"></i> Confirmación por email
-                    </li>
-                  </ul>
-                </div>
-                <div class="reset-security-info">
-                  <i class="fas fa-lock"></i>
-                  <span>Conexión SSL Segura</span>
-                </div>
+            <div
+              class="modal modal--lg"
+              role="presentation"
+              [attr.aria-busy]="resetLoading"
+              (click)="$event.stopPropagation()"
+              >
+              <div class="modal-header">
+                <h3>Recuperar acceso</h3>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="closeResetModal()"
+                  [disabled]="resetLoading"
+                  aria-label="Cerrar"
+                  >
+                  ✕
+                </button>
               </div>
-              <!-- Panel Derecho - Formulario -->
-              <div class="reset-right-panel">
-                <div class="reset-header">
-                  <div class="reset-icon">
-                    <i class="fas fa-envelope"></i>
-                  </div>
-                  <h3>Recuperar Acceso</h3>
-                  <p>Ingresa tu email corporativo</p>
-                </div>
-                <form (ngSubmit)="requestPasswordReset()" #resetForm="ngForm">
-                  <div class="form-group">
-                    <label class="form-label" for="reset-email">
-                      <i class="fas fa-at"></i>
-                      Correo Electrónico
-                    </label>
-                    <div class="input-wrapper">
-                      <input
-                        type="email"
-                        class="form-input"
-                        id="reset-email"
-                        name="email"
-                        [(ngModel)]="resetEmail"
-                        placeholder="tu-email@empresa.com"
-                        required
-                        email
-                        (input)="onResetEmailChange()"
-                        [ngClass]="{ error: resetError }"
-                        />
-                      </div>
-                      @if (resetError) {
-                        <span class="field-error">{{ resetError }}</span>
-                      }
-                    </div>
-                    <div class="reset-info-box">
-                      <i class="fas fa-info-circle"></i>
-                      <span
-                        >Recibirás un enlace de recuperación en tu bandeja de entrada. Si no
-                        lo encuentras, revisa la carpeta de spam.</span
-                        >
-                      </div>
-                      <button
-                        type="submit"
-                        class="reset-button"
-                        [disabled]="resetForm.invalid || resetLoading"
-                        [ngClass]="{ loading: resetLoading }"
-                        >
-                        {{
-                        resetLoading
-                        ? "Enviando enlace..."
-                        : "Enviar Enlace de Recuperación"
-                        }}
-                      </button>
-                      @if (resetMessage) {
-                        <div class="success-message">
-                          {{ resetMessage }}
+
+              <form (ngSubmit)="requestPasswordReset()" #resetForm="ngForm" class="nice-form">
+                <div class="modal-split">
+                  <!-- Izquierda: info de seguridad -->
+                  <div class="modal-split-left">
+                    <div class="security-info">
+                      <div class="security-info-head">
+                        <span class="material-symbols-outlined security-info-icon">key</span>
+                        <div>
+                          <h4>Recuperación segura</h4>
+                          <p>
+                            Ingresá tu correo electrónico corporativo y te enviamos las
+                            instrucciones para crear una nueva contraseña de forma segura.
+                          </p>
                         </div>
-                      }
-                      <button type="button" class="back-button" (click)="closeResetModal()">
-                        <i class="fas fa-arrow-left"></i>
-                        Volver al inicio de sesión
-                      </button>
-                    </form>
+                      </div>
+                      <ul class="security-features">
+                        <li>
+                          <span class="material-symbols-outlined">shield</span>
+                          Proceso seguro y encriptado
+                        </li>
+                        <li>
+                          <span class="material-symbols-outlined">schedule</span>
+                          Enlace válido por 30 minutos
+                        </li>
+                        <li>
+                          <span class="material-symbols-outlined">mark_email_read</span>
+                          Confirmación por email
+                        </li>
+                      </ul>
+                      <div class="security-ssl">
+                        <span class="material-symbols-outlined">lock</span>
+                        Conexión SSL segura
+                      </div>
+                    </div>
                   </div>
-                  <!-- Botón de cerrar -->
-                  <button class="reset-close-btn" (click)="closeResetModal()">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
+
+                  <!-- Derecha: formulario -->
+                  <div class="modal-split-right">
+                    @if (resetLoading) {
+                      <div class="alert alert--loading">
+                        <span class="alert-spinner" aria-hidden="true"></span>
+                        <span>
+                          Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                        </span>
+                      </div>
+                    }
+                    @if (resetMessage) {
+                      <div class="alert alert--success">{{ resetMessage }}</div>
+                    }
+
+                    <div class="modal-body" [class.readonly]="resetLoading">
+                      <div class="field">
+                        <label for="reset-email">Correo electrónico <span class="req">*</span></label>
+                        <input
+                          type="email"
+                          id="reset-email"
+                          name="email"
+                          [(ngModel)]="resetEmail"
+                          placeholder="tu-email@empresa.com"
+                          required
+                          email
+                          (input)="onResetEmailChange()"
+                          [class.field-invalid]="resetError"
+                          [disabled]="resetLoading"
+                          />
+                          @if (resetError) {
+                            <div class="error">{{ resetError }}</div>
+                          }
+                        </div>
+
+                        <p class="hint">
+                          Vas a recibir un enlace de recuperación en tu bandeja de entrada. Si no lo encontrás, revisá la carpeta de spam.
+                        </p>
+                      </div>
+
+                      <div class="modal-actions">
+                        <button
+                          type="submit"
+                          class="btn primary"
+                          [disabled]="resetForm.invalid || resetLoading"
+                          >
+                          {{ resetLoading ? "Enviando enlace..." : "Enviar enlace de recuperación" }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn ghost"
+                          (click)="closeResetModal()"
+                          [disabled]="resetLoading"
+                          >
+                          Volver al inicio de sesión
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
               </div>
-            }
+            </div>
+          }

@@ -468,23 +468,21 @@
 }
 
 /* ============================================
-   ESTILOS PARA EL MODAL DE RECUPERACIÓN
+   MODAL DE RECUPERACIÓN DE CONTRASEÑA
+   Mismo diseño que el modal "Cambiar contraseña" del panel de admin:
+   overlay + modal blanco, columna de seguridad a la izquierda y
+   formulario a la derecha, sin el degradé rojo de antes.
    ============================================ */
 
-/* Overlay del modal de recuperación */
-.reset-modal-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  z-index: 1000 !important;
-  backdrop-filter: blur(8px);
-  animation: fadeInOverlay 0.3s ease-out;
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeInOverlay 0.2s ease;
 }
 
 @keyframes fadeInOverlay {
@@ -492,337 +490,322 @@
   to { opacity: 1; }
 }
 
-/* Modal principal de recuperación */
-.reset-modal {
-  position: relative;
-  background: transparent;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  width: 90%;
-  max-width: 800px;
-  max-height: 85vh;
-  display: flex;
-  animation: slideInModal 0.4s ease-out;
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: min(640px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+  overflow-x: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  animation: slideInModal 0.2s ease;
+  box-sizing: border-box;
+}
+.modal * {
+  box-sizing: border-box;
+}
+
+.modal--lg {
+  width: min(700px, 94vw);
 }
 
 @keyframes slideInModal {
-  from { 
-    opacity: 0; 
-    transform: translateY(50px) scale(0.9);
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0) scale(1);
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-/* Panel Izquierdo del Modal */
-.reset-left-panel {
-  flex: 1;
-  background: linear-gradient(135deg, #8B0000 0%, #B22222 50%, #DC143C 100%);
-  padding: 30px 25px;
+.modal-header {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.reset-left-panel::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
-  opacity: 0.3;
-  animation: float 6s ease-in-out infinite;
-}
-
-.reset-logo-section {
-  display: flex;
   align-items: center;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 2;
+  margin-bottom: 1rem;
 }
-
-.reset-logo-icon {
-  width: 45px;
-  height: 45px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.reset-logo-icon i {
-  font-size: 20px;
-  color: white;
-}
-
-.reset-logo-text h3 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 2px;
-  line-height: 1.2;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(54, 54, 54, 0.8);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-.reset-logo-text .highlight {
-  color: #ffffff;
-  text-shadow: 2px 2px 4px rgba(54, 54, 54, 0.8);
-}
-
-.reset-content-section {
-  position: relative;
-  flex: 1;
-  z-index: 2;
-}
-
-.reset-content-section h4 {
-  font-size: 1.4rem;
-  margin-bottom: 12px;
+.modal-header h3 {
+  font-size: 1.2rem;
   font-weight: 600;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-.reset-content-section p {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  opacity: 0.9;
-  margin-bottom: 25px;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 1px 1px 2px rgba(44, 44, 44, 0.8);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-.reset-features {
-  list-style: none;
-  padding: 0;
   margin: 0;
-  position: relative;
-}
-
-.reset-features li {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-  opacity: 0.9;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: #1a284b;
 }
 
-.reset-features li i {
-  width: 20px;
-  margin-right: 12px;
-  color: #feca57;
+.icon-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.icon-btn:hover {
+  transform: scale(1.1);
 }
 
-.reset-security-info {
-  display: flex;
-  align-items: center;
-  opacity: 0.7;
-  font-size: 0.9rem;
-  position: relative;
-  z-index: 2;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-.reset-security-info i {
-  margin-right: 8px;
-  color: #feca57;
-}
-
-/* Panel Derecho del Modal */
-.reset-right-panel {
-  flex: 1;
-  padding: 30px 25px;
+/* Apilado: info de seguridad arriba, formulario abajo */
+.modal-split {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  background: white;
-  position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  gap: 1rem;
+}
+.modal-split-left {
+  width: 100%;
+}
+.modal-split-right {
+  width: 100%;
+  min-width: 0;
 }
 
-.reset-header {
-  text-align: center;
-  margin-bottom: 25px;
+/* Bloque de seguridad (panel izquierdo) */
+.security-info {
+  background: #fdf5f5;
+  border: 1px solid #f3dcdc;
+  border-radius: 12px;
+  padding: 0.95rem 1rem 0.95rem 1.3rem;
 }
-
-.reset-icon {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #B22222 0%, #DC143C 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 15px;
-  box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
-}
-
-.reset-icon i {
-  font-size: 24px;
-  color: white;
-}
-
-.reset-header h3 {
-  font-size: 1.4rem;
-  color: #2d3748;
-  margin-bottom: 5px;
-  font-weight: 600;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-.reset-header p {
-  color: #718096;
-  font-size: 0.9rem;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-/* Info box dentro del formulario */
-.reset-info-box {
-  background: #f0f8ff;
-  border: 1px solid #bee3f8;
-  border-left: 4px solid #3182ce;
-  padding: 12px 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+.security-info-head {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 0.7rem;
 }
-
-.reset-info-box i {
-  color: #3182ce;
-  font-size: 14px;
-  margin-top: 2px;
+.security-info-icon {
   flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #a20000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
 }
-
-.reset-info-box span {
-  color: #2d3748;
-  font-size: 0.8rem;
+.security-info-head h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a284b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+.security-info-head p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #53618d;
   line-height: 1.4;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-/* Botón de reset */
-.reset-button {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #8B0000 0%, #B22222 50%, #DC143C 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 15px;
-  font-family: inherit;
+.security-features {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.security-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  color: #30406b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+.security-features li .material-symbols-outlined {
+  font-size: 16px;
+  color: #a20000;
+  flex-shrink: 0;
 }
 
-.reset-button:disabled {
-  background: #cbd5e0;
-  cursor: not-allowed;
-  transform: none;
+.security-ssl {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #f3dcdc;
+  font-size: 0.86rem;
+  color: #53618d;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+.security-ssl .material-symbols-outlined {
+  font-size: 15px;
+  color: #53618d;
 }
 
-.reset-button:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(139, 0, 0, 0.3);
+/* Formulario */
+.nice-form .field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.85rem;
+  min-width: 0;
 }
-
-.reset-button:not(:disabled):active {
-  transform: translateY(0);
-}
-
-/* Botón de volver */
-.back-button {
-  width: 100%;
-  padding: 12px;
-  background: transparent;
-  color: #4a5568;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+.nice-form label {
   font-size: 0.85rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  margin-bottom: 0.3rem;
+  color: #30406b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+.req {
+  color: #a20000;
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+.nice-form input {
+  width: 100%;
+  height: 44px;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.nice-form input::placeholder {
+  color: #9aa0a6;
+  opacity: 1;
+}
+.nice-form input:focus {
+  outline: none;
+  border-color: #a20000;
+  box-shadow: 0 0 0 3px rgba(162, 0, 0, 0.08);
+}
+.nice-form input:disabled {
+  background: #f5f5f5;
+  color: #9aa0a6;
+  cursor: not-allowed;
+}
+.nice-form input.field-invalid {
+  border-color: #e53935;
+  box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.08);
+}
+
+.error {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: #a20000;
+}
+
+.hint {
+  display: block;
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: #53618d;
+  line-height: 1.3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.modal-body.readonly {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Alertas */
+.alert {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-family: inherit;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
 }
-
-.back-button:hover {
-  background: #f7fafc;
-  border-color: #cbd5e0;
-  transform: translateY(-1px);
+.alert--success {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
 }
-
-.back-button i {
-  font-size: 12px;
+.alert--loading {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
 }
-
-/* Botón de cerrar */
-.reset-close-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 35px;
-  height: 35px;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+.alert-spinner {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  color: #4a5568;
-  cursor: pointer;
+  flex-shrink: 0;
+  border: 2.5px solid rgba(29, 78, 216, 0.2);
+  border-top-color: #1d4ed8;
+  animation: alert-spin 0.7s linear infinite;
+}
+@keyframes alert-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Botones */
+.modal-actions {
   display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
   transition: all 0.2s ease;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+.btn.primary {
+  background: #a20000;
+  color: #fff;
+}
+.btn.primary:hover:not(:disabled) {
+  background: #870000;
+}
+.btn.ghost {
+  background: #f5f5f5;
+  color: #2b3a62;
+}
+.btn.ghost:hover:not(:disabled) {
+  background: #eaeaea;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.reset-close-btn:hover {
-  background: white;
-  color: #2d3748;
-  transform: scale(1.1);
-}
-
-.reset-close-btn i {
-  font-size: 14px;
+@media (max-width: 480px) {
+  .overlay {
+    padding: 0.5rem;
+  }
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+  .security-info {
+    padding: 0.75rem 0.85rem;
+  }
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+  .btn {
+    width: 100%;
+  }
 }
 
 /* Estados de carga para los botones */
-.login-button.loading:disabled::after,
-.reset-button.loading:disabled::after {
+.login-button.loading:disabled::after {
   content: '';
   width: 16px;
   height: 16px;
@@ -881,44 +864,6 @@
     height: 70px;
   }
 
-  /* Modal de recuperación en tablet */
-  .reset-modal {
-    flex-direction: column;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .reset-left-panel {
-    padding: 25px 20px;
-    min-height: auto;
-  }
-
-  .reset-right-panel {
-    padding: 25px 20px;
-  }
-
-  .reset-logo-text h3 {
-    font-size: 1.5rem;
-  }
-
-  .reset-content-section h4 {
-    font-size: 1.2rem;
-  }
-
-  .reset-header h3 {
-    font-size: 1.3rem;
-  }
-
-  .reset-icon {
-    width: 50px;
-    height: 50px;
-  }
-
-  .reset-icon i {
-    font-size: 20px;
-  }
-
   .login-extra-row {
     flex-direction: column;
     align-items: flex-start;
@@ -965,75 +910,6 @@
   .login-button {
     padding: 14px;
   }
-
-  /* Modal de recuperación en mobile */
-  .reset-modal-overlay {
-    padding: 0;
-  }
-
-  .reset-modal {
-    width: 100%;
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-    flex-direction: column;
-  }
-
-  .reset-left-panel {
-    padding: 20px 15px;
-    min-height: auto;
-  }
-
-  .reset-right-panel {
-    padding: 20px 15px;
-    flex: 1;
-  }
-
-  .reset-logo-text h3 {
-    font-size: 1.3rem;
-  }
-
-  .reset-content-section h4 {
-    font-size: 1.1rem;
-  }
-
-  .reset-header h3 {
-    font-size: 1.2rem;
-  }
-
-  .reset-icon {
-    width: 45px;
-    height: 45px;
-  }
-
-  .reset-icon i {
-    font-size: 18px;
-  }
-
-  .reset-close-btn {
-    width: 30px;
-    height: 30px;
-    top: 10px;
-    right: 10px;
-  }
-
-  .reset-close-btn i {
-    font-size: 12px;
-  }
-
-  .reset-info-box {
-    padding: 10px 12px;
-  }
-
-  .reset-info-box span {
-    font-size: 0.75rem;
-  }
-
-  .reset-button,
-  .back-button {
-    padding: 16px;
-    font-size: 0.9rem;
-  }
 }
 
 /* Animaciones adicionales */
@@ -1057,8 +933,7 @@
   border-color: #cbd5e0;
 }
 
-.logo-icon:hover,
-.reset-logo-icon:hover {
+.logo-icon:hover {
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
@@ -1066,15 +941,17 @@
 /* Mejoras de accesibilidad */
 .form-input:focus,
 .login-button:focus,
-.google-button:focus,
-.reset-button:focus,
-.back-button:focus {
+.google-button:focus {
   outline: 2px solid #B22222;
   outline-offset: 2px;
 }
 
+.btn:focus-visible {
+  outline: 2px solid #a20000;
+  outline-offset: 2px;
+}
+
 /* Estados de carga */
-.login-button:disabled:not(.loading)::after,
-.reset-button:disabled:not(.loading)::after {
+.login-button:disabled:not(.loading)::after {
   display: none;
 }
