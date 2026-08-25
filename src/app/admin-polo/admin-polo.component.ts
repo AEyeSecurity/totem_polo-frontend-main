@@ -188,6 +188,15 @@ export class AdminPoloComponent implements OnInit {
     id_rol: null as any,
   };
 
+  // Alta de un usuario para una empresa existente (botón en la tabla de empresas)
+  showAddUsuarioEmpresaForm = false;
+  addUsuarioEmpresaTarget: Empresa | null = null;
+  addUsuarioEmpresaForm: { nombre: string; email: string } = {
+    nombre: '',
+    email: '',
+  };
+  addUsuarioEmpresaSubmitting = false;
+
   // Servicios del Polo
   serviciosPolo: ServicioPolo[] = [];
   showServicioPoloForm = false;
@@ -311,6 +320,8 @@ export class AdminPoloComponent implements OnInit {
     this.editingUsuario = null;
     this.selectedEmpresa = null;
     this.creatingForEmpresa = false;
+    this.showAddUsuarioEmpresaForm = false;
+    this.addUsuarioEmpresaTarget = null;
 
     // Limpiar errores de todos los formularios
     this.formErrors = {};
@@ -1245,6 +1256,10 @@ export class AdminPoloComponent implements OnInit {
     this.editingUsuario = null;
     this.selectedEmpresa = null;
     this.creatingForEmpresa = false;
+    this.showAddUsuarioEmpresaForm = false;
+    this.addUsuarioEmpresaTarget = null;
+    this.addUsuarioEmpresaSubmitting = false;
+    this.addUsuarioEmpresaForm = { nombre: '', email: '' };
 
     this.submitting = {
       polo: false,
@@ -1997,6 +2012,68 @@ export class AdminPoloComponent implements OnInit {
     setTimeout(() => {
       this.changes.save('servicioPolo', this.servicioPoloForm);
     }, 0);
+  }
+
+  // Agregar un usuario a una empresa ya existente: solo pide nombre + email,
+  // la contraseña la genera y la manda el backend por email.
+  openAddUsuarioEmpresaForm(empresa: Empresa): void {
+    this.clearFormErrors('usuarioEmpresa');
+    this.addUsuarioEmpresaTarget = empresa;
+    this.addUsuarioEmpresaForm = { nombre: '', email: '' };
+    this.addUsuarioEmpresaSubmitting = false;
+    this.showAddUsuarioEmpresaForm = true;
+  }
+
+  cancelAddUsuarioEmpresaForm(): void {
+    if (this.addUsuarioEmpresaSubmitting) {
+      alert('Hay una operación en curso. Por favor esperá a que finalice.');
+      return;
+    }
+    this.showAddUsuarioEmpresaForm = false;
+    this.addUsuarioEmpresaTarget = null;
+    this.clearFormErrors('usuarioEmpresa');
+  }
+
+  onSubmitAddUsuarioEmpresa(form: NgForm): void {
+    if (!form || form.invalid) {
+      Object.values(form?.controls ?? {}).forEach((c: any) =>
+        c?.markAsTouched?.()
+      );
+      return;
+    }
+    if (!this.addUsuarioEmpresaTarget) return;
+
+    const cuil = this.addUsuarioEmpresaTarget.cuil;
+    const nombreEmpresa = this.addUsuarioEmpresaTarget.nombre;
+
+    this.clearFormErrors('usuarioEmpresa');
+    this.addUsuarioEmpresaSubmitting = true;
+
+    this.adminPoloService
+      .createUsuarioForEmpresa(cuil, {
+        nombre: this.addUsuarioEmpresaForm.nombre,
+        email: this.addUsuarioEmpresaForm.email,
+      })
+      .subscribe({
+        next: () => {
+          this.showMessage(
+            `Usuario creado para ${nombreEmpresa}. Le enviamos la contraseña generada por email.`,
+            'success'
+          );
+          this.pushActivity(
+            'ok',
+            `Usuario ${this.addUsuarioEmpresaForm.nombre} agregado a ${nombreEmpresa}`
+          );
+          this.loadUsuarios();
+          this.showAddUsuarioEmpresaForm = false;
+          this.addUsuarioEmpresaTarget = null;
+          this.addUsuarioEmpresaSubmitting = false;
+        },
+        error: (error) => {
+          this.handleError(error, 'usuarioEmpresa', 'agregar el usuario');
+          this.addUsuarioEmpresaSubmitting = false;
+        },
+      });
   }
 
   openPasswordModal() {

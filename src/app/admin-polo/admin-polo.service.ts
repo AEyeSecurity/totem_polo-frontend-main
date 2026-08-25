@@ -204,6 +204,15 @@ export class AdminPoloService {
     return this.http.post<Usuario>(`${this.apiUrl}/usuarios`, usuario);
   }
 
+  // Alta de un usuario adicional para una empresa ya existente: sin contraseña,
+  // el backend la genera y la manda por email junto con el nombre de usuario.
+  createUsuarioForEmpresa(
+    cuil: number,
+    data: { nombre: string; email: string }
+  ): Observable<Usuario> {
+    return this.http.post<Usuario>(`${this.apiUrl}/empresas/${cuil}/usuarios`, data);
+  }
+
   updateUser(userId: string, usuario: UsuarioUpdate): Observable<Usuario> {
     return this.http.put<Usuario>(`${this.apiUrl}/usuarios/${userId}`, usuario);
   }
