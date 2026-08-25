@@ -91,6 +91,14 @@ export class MapLocationViewComponent implements OnInit, OnChanges {
     this.expanded = true;
   }
 
+  // Ruta de Google Maps hasta el pin, usando la ubicacion actual del
+  // usuario como origen (Google la detecta solo, no hace falta pedir
+  // permiso de geolocalizacion en la app).
+  get directionsUrl(): string {
+    if (this.lat == null || this.lng == null) return '';
+    return `https://www.google.com/maps/dir/?api=1&destination=${this.lat},${this.lng}`;
+  }
+
   close(): void {
     this.expanded = false;
   }

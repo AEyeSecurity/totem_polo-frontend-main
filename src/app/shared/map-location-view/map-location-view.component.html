@@ -45,6 +45,15 @@
       >
         <map-marker [position]="markerPosition!"></map-marker>
       </google-map>
+      <a
+        class="map-view-directions"
+        [href]="directionsUrl"
+        target="_blank"
+        rel="noopener"
+      >
+        <span class="material-symbols-outlined">directions</span>
+        Cómo llegar
+      </a>
     </div>
   </div>
 }
