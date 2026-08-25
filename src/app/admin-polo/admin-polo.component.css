@@ -62,6 +62,31 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   margin-top:-2px;
   font-family:'Inter', sans-serif;
 }
+.topbar-tabs{
+  display:flex;
+  align-items:center;
+  gap:.25rem;
+  flex-wrap:wrap;
+}
+.topbar .tab{
+  border:none;
+  background:transparent;
+  padding:.5rem .9rem;
+  border-radius:999px;
+  color:#555;
+  cursor:pointer;
+  transition:.2s ease;
+  white-space:nowrap;
+  font-weight:500;
+  font-size:.9rem;
+}
+.topbar .tab:hover{ background:#f5f5f5; }
+.topbar .tab.active{
+  background:#e9efff;
+  color:#1a284b;
+  font-weight:600;
+}
+
 .topbar-right{
   display:flex;
   align-items:center;
@@ -1235,30 +1260,6 @@ html, body {
     grid-template-columns: 110px 1.1fr 0.8fr 80px 100px 1.7fr 140px !important;
     column-gap: .7rem !important;
   }
-}
-.topbar-tabs{
-  display:flex;
-  align-items:center;
-  gap:.25rem;
-  flex-wrap:wrap;
-}
-.topbar .tab{
-  border:none;
-  background:transparent;
-  padding:.5rem .9rem;
-  border-radius:999px;
-  color:#555;
-  cursor:pointer;
-  transition:.2s ease;
-  white-space:nowrap;
-  font-weight:500;
-  font-size:.9rem;
-}
-.topbar .tab:hover{ background:#f5f5f5; }
-.topbar .tab.active{
-  background:#e9efff;
-  color:#1a284b;
-  font-weight:600;
 }
 .tab-badge{
   display:inline-flex;
