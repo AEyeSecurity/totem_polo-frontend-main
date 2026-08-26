@@ -1431,3 +1431,48 @@ html, body {
   font-family: 'Inter', sans-serif;
 }
 
+/* ============================================================
+   PANTALLAS ANGOSTAS: achicar tarjetas del dashboard, botones y tablas
+   La letra/padding en rem ya se achican con el font-size de la raiz
+   (styles.css), pero algunas cosas estan en px fijos (el icono de cada
+   tarjeta del dashboard) o quedaron redefinidas mas de una vez en este
+   archivo (el padding/font-size de las tablas), asi que este bloque va al
+   final a proposito: en un empate de especificidad gana el que aparece
+   despues en el archivo, y esto tiene que ganarle a todo lo de arriba.
+   ============================================================ */
+@media (max-width: 560px) {
+  .card {
+    padding: 1rem;
+  }
+  .card--table {
+    padding: 1rem;
+  }
+  .kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .kpi-icon .material-symbols-outlined {
+    font-size: 18px;
+  }
+  .kpi .kpi-number {
+    font-size: 1.7rem;
+  }
+  .btn {
+    padding: 0.5rem 0.9rem;
+  }
+  .btn.icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  .table .thead,
+  .table .row,
+  .card--table .table .thead,
+  .card--table .table .row {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.82rem;
+  }
+}
+
