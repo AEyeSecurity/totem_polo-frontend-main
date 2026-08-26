@@ -418,6 +418,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   // de sonar), para poder cortarlo en seco si el usuario interrumpe tocando
   // el microfono de nuevo (barge-in, como en las apps de voz en vivo).
   private currentBotAudio?: HTMLAudioElement;
+  // <audio> "destrabado" con un gesto real del usuario (ver
+  // unlockAudioPlayback): se reutiliza para reproducir la respuesta real,
+  // en vez de crear un elemento nuevo, para que mobile no lo bloquee.
+  private unlockedAudio?: HTMLAudioElement;
 
   constructor() {
     if (!this.supportsVoice) {
@@ -953,6 +957,28 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
+  // Reproduce un audio silencioso (1 frame, WAV vacio) en un <audio> que
+  // guardamos y reutilizamos: en iOS/Android, una vez que un elemento de
+  // audio reprodujo algo dentro de un gesto real del usuario, ese MISMO
+  // elemento puede seguir reproduciendo despues por codigo (por ejemplo, ya
+  // con la respuesta del bot que llega mas tarde por HTTP) sin que el
+  // navegador lo bloquee.
+  private unlockAudioPlayback(): void {
+    if (this.unlockedAudio) return;
+    try {
+      const audio = new Audio(
+        'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='
+      );
+      audio.play().catch(() => {
+        // Si igual lo bloquea, no pasa nada: el fallback visual (boca
+        // animada sin sonido) sigue funcionando cuando llegue la respuesta.
+      });
+      this.unlockedAudio = audio;
+    } catch {
+      // ignore
+    }
+  }
+
   private startSpeechRecognition() {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -1009,6 +1035,15 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   private async startRecording() {
     if (this.isStartingRecording || this.isRecording) return;
     this.isStartingRecording = true;
+
+    // "Destraba" el audio para navegadores moviles (Safari/Chrome en iOS y
+    // Android): la respuesta del bot se reproduce recien despues de un
+    // viaje de ida y vuelta al servidor, fuera del gesto de tocar el mic,
+    // asi que sin esto el .play() de mas abajo queda bloqueado en silencio.
+    // Tiene que llamarse aca, de forma sincronica dentro del handler del
+    // click (antes del primer await), para que cuente como gesto del
+    // usuario.
+    this.unlockAudioPlayback();
 
     // Barge-in: si el bot estaba pensando o hablando, esto es una
     // interrupcion. Cortamos el audio que estuviera sonando, cancelamos la
@@ -1273,7 +1308,13 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
           const b64 = resp?.data?.audio_base64;
           if (b64) {
             try {
-              const audio = new Audio(`data:audio/mpeg;base64,${b64}`);
+              // Reusar el <audio> ya destrabado por un gesto del usuario
+              // (ver unlockAudioPlayback) en vez de crear uno nuevo: en
+              // mobile, uno nuevo se bloquea porque este play() ocurre
+              // recien despues del viaje de ida y vuelta al servidor.
+              const audio = this.unlockedAudio ?? new Audio();
+              this.unlockedAudio = audio;
+              audio.src = `data:audio/mpeg;base64,${b64}`;
               this.currentBotAudio = audio;
               this.isBotSpeaking = true;
               audio.onended = () => {
