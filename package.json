@@ -8,7 +8,7 @@
     "build:pages": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "e2e": "playwright test",
+    "e2e": "playwright test -c e2e-sistema",
     "serve:ssr:frontend": "node dist/frontend/server/server.mjs",
     "pages:dev": "wrangler pages dev",
     "pages:deploy": "wrangler pages deploy",
