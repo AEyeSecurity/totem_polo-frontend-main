@@ -30,7 +30,7 @@ import {
   buildFormErrorsFromHttpError,
   getFieldErrors as getFieldErrorsUtil,
   hasFieldError as hasFieldErrorUtil,
-  GENERIC_FIELD_ERROR_TRANSLATIONS,
+  resolveFieldErrorMessage,
 } from '../shared/form-errors.util';
 import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
 import { formatActivityMoment as formatActivityMomentUtil } from '../shared/activity-format.util';
@@ -246,7 +246,7 @@ export class AdminPoloComponent implements OnInit {
   // Estados
   loading = false;
   message = '';
-  messageType: 'success' | 'error' = 'success';
+  messageType: 'success' | 'error' | 'info' = 'success';
 
   // PROPIEDADES PARA BÚSQUEDA
   empresaSearchTerm = '';
@@ -298,12 +298,14 @@ export class AdminPoloComponent implements OnInit {
     this.openServicioPoloForm();
   }
 
+  // Un lote siempre pertenece a un servicio del Polo: en vez de asignarlo al
+  // primero de la lista sin preguntar, se lleva a la pestaña para elegirlo.
   quickAddLote(): void {
     this.setActiveTab('servicios');
-    if (this.serviciosPolo.length > 0) {
-      const servicio = this.serviciosPolo[0];
-      this.openLoteForm(servicio.id_servicio_polo, servicio.nombre);
-    }
+    this.showMessage(
+      'Elegí el servicio del Polo al que pertenece el lote y tocá "Agregar/Asignar lote" en su fila.',
+      'info'
+    );
   }
 
   // MÉTODO PARA CERRAR TODOS LOS FORMULARIOS SIN CONFIRMACIÓN
@@ -688,18 +690,18 @@ export class AdminPoloComponent implements OnInit {
       (field, message, form) => this.translateFieldError(field, message, form),
       (detail, form) => this.translateGenericError(detail, form)
     );
-    this.formErrors[formName] = errorMessages;
-
-    // Mostrar mensaje general
-    const generalError = errorMessages.find((e) => e.field === 'general');
-    if (generalError) {
-      this.showMessage(generalError.message, 'error');
-    } else {
-      this.showMessage(
-        `Error en ${operation}. Revise los campos marcados.`,
-        'error'
-      );
+    // Cada error se muestra en UN solo lugar: los de un formulario con modal,
+    // adentro del modal (que tiene su propio bloque de errores); los generales,
+    // en el aviso de la página. Antes salían duplicados.
+    if (formName !== 'general') {
+      this.formErrors[formName] = errorMessages;
+      return;
     }
+    const generalError = errorMessages.find((e) => e.field === 'general');
+    this.showMessage(
+      generalError?.message || `Error en ${operation}. Intentá de nuevo.`,
+      'error'
+    );
   }
 
   // Traductor de errores de campos específicos
@@ -747,12 +749,7 @@ export class AdminPoloComponent implements OnInit {
       },
     };
 
-    const formTranslations = translations[formName];
-    if (formTranslations && formTranslations[field]) {
-      return formTranslations[field];
-    }
-
-    return GENERIC_FIELD_ERROR_TRANSLATIONS[message] || message;
+    return resolveFieldErrorMessage(message, translations[formName]?.[field]);
   }
 
   // Traductor de errores genéricos
@@ -1158,7 +1155,9 @@ export class AdminPoloComponent implements OnInit {
     });
   }
 
-  aprobarSolicitud(solicitud: SolicitudRegistro): void {
+  // Se usa desde la pestaña Solicitudes y también desde Empresas, para
+  // aprobar después una solicitud rechazada (o pendiente).
+  aprobarSolicitud(solicitud: Pick<SolicitudRegistro, 'cuil' | 'nombre'>): void {
     if (!confirm(`¿Aprobar el registro de "${solicitud.nombre}"?`)) return;
     this.solicitudesBusy = true;
     this.adminPoloService.aprobarSolicitud(solicitud.cuil).subscribe({
@@ -1322,7 +1321,7 @@ export class AdminPoloComponent implements OnInit {
     this.changes.clearAll();
   }
 
-  showMessage(message: string, type: 'success' | 'error'): void {
+  showMessage(message: string, type: 'success' | 'error' | 'info'): void {
     this.message = message;
     this.messageType = type;
     setTimeout(() => {

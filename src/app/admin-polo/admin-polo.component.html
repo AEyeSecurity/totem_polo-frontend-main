@@ -598,17 +598,28 @@
                             }
                           </div>
                           <div class="row-actions">
-                            <!-- Activar/Desactivar -->
-                            <button
-                              class="btn icon"
-                              [class.danger]="e.estado"
-                              [title]="e.estado ? 'Desactivar empresa' : 'Activar empresa'"
-                              (click)="toggleEmpresaEstado(e)"
-                              >
-                              <span class="material-symbols-outlined">
-                                {{ e.estado ? "block" : "check_circle" }}
-                              </span>
-                            </button>
+                            <!-- Activar/Desactivar, o Aprobar si la solicitud está rechazada/pendiente -->
+                            @if (!e.estado && e.estado_solicitud !== 'aprobada') {
+                              <button
+                                class="btn icon"
+                                [title]="'Aprobar solicitud (' + e.estado_solicitud + ')'"
+                                (click)="aprobarSolicitud(e)"
+                                [disabled]="solicitudesBusy"
+                                >
+                                <span class="material-symbols-outlined">how_to_reg</span>
+                              </button>
+                            } @else {
+                              <button
+                                class="btn icon"
+                                [class.danger]="e.estado"
+                                [title]="e.estado ? 'Desactivar empresa' : 'Activar empresa'"
+                                (click)="toggleEmpresaEstado(e)"
+                                >
+                                <span class="material-symbols-outlined">
+                                  {{ e.estado ? "block" : "check_circle" }}
+                                </span>
+                              </button>
+                            }
                             <!-- Editar -->
                             <button
                               class="btn icon"
@@ -1569,6 +1580,7 @@
                                                 name="u_email"
                                                 [disabled]="!!editingUsuario || isModalBusy('usuario')"
                                                 required
+                                                email
                                                 #uEmail="ngModel"
                                                 />
                                                 @if (uEmail.invalid && (uEmail.touched || fUsr.submitted)) {
@@ -1758,6 +1770,7 @@
                                                           name="au_email"
                                                           [disabled]="addUsuarioEmpresaSubmitting"
                                                           required
+                                                          email
                                                           #auEmail="ngModel"
                                                           />
                                                           @if (auEmail.invalid && (auEmail.touched || fAddUsr.submitted)) {

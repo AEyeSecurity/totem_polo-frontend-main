@@ -188,6 +188,16 @@ describe('LoginComponent', () => {
 
       expect(component.loginMessage).toContain('Error de conexión');
     });
+
+    it('should not count server/rate-limit errors as failed attempts', () => {
+      authServiceSpy.login.and.returnValue(throwError(() => ({ status: 429 })));
+
+      for (let i = 0; i < 5; i++) component.onLogin();
+
+      expect(component.loginMessage).toBe('Demasiados intentos. Intenta más tarde.');
+      expect(component.isBlocked).toBeFalse();
+      expect(component.loginAttempts).toBe(0);
+    });
   });
 
   describe('password reset modal', () => {

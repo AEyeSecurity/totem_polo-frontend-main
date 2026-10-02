@@ -77,7 +77,7 @@ describe('AuthenticationService', () => {
       expect(localStorage.getItem('rol')).toBe('admin_polo');
     });
 
-    it('should resolve to false and swallow the error when the request fails', () => {
+    it('should resolve to false when the credentials are rejected (401)', () => {
       let result: boolean | undefined;
 
       service.login('juan', 'bad').subscribe((ok) => (result = ok));
@@ -89,6 +89,21 @@ describe('AuthenticationService', () => {
       );
 
       expect(result).toBeFalse();
+    });
+
+    it('should propagate non-credential errors (429, network, 5xx)', () => {
+      let status: number | undefined;
+
+      service.login('juan', 'secret').subscribe({ error: (e) => (status = e.status) });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/login`);
+      req.flush(
+        { detail: 'Demasiadas solicitudes' },
+        { status: 429, statusText: 'Too Many Requests' }
+      );
+
+      expect(status).toBe(429);
+      expect(service.lastLoginErrorStatus).toBe(429);
     });
   });
 

@@ -4,9 +4,11 @@ import {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
+  HttpErrorResponse,
 } from '@angular/common/http';
 import { AuthenticationService } from './auth.service';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -42,7 +44,19 @@ export class AuthInterceptor implements HttpInterceptor {
       const clone = nextReq.clone({
         setHeaders: { Authorization: `Bearer ${token}` },
       });
-      return next.handle(clone);
+      // 401 con nuestro token = la sesión ya no vale (firma inválida, usuario
+      // borrado, SECRET_KEY cambiada): se cierra la sesión y se va al login,
+      // en vez de dejar la pantalla vacía con errores. /login y /logout se
+      // excluyen: ahí el 401 lo maneja quien hizo el pedido.
+      const handlesOwn401 = /\/(login|logout)$/.test(req.url);
+      return next.handle(clone).pipe(
+        catchError((err: unknown) => {
+          if (err instanceof HttpErrorResponse && err.status === 401 && !handlesOwn401) {
+            this.auth.logoutLocal();
+          }
+          return throwError(() => err);
+        })
+      );
     }
 
     // Requests públicas o sin token → pasan sin Authorization

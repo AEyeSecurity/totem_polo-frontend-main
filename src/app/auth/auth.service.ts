@@ -92,7 +92,11 @@ export class AuthenticationService {
           console.error('Login fallido', err);
           this.lastLoginErrorStatus = err?.status ?? null;
           this.lastLoginErrorDetail = err?.error?.detail ?? null;
-          return of(false);
+          // 401/403 = el backend rechazó las credenciales o la cuenta: login
+          // fallido "normal". El resto (429, sin conexión, 5xx) no es culpa
+          // del usuario, así que se propaga para mostrar el motivo real.
+          if (err?.status === 401 || err?.status === 403) return of(false);
+          return throwError(() => err);
         })
       );
   }

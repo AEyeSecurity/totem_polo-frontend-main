@@ -1,0 +1,342 @@
+{
+  "results": [
+    {
+      "area": "Público",
+      "check": "La raíz redirige a /login",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Botón \"Iniciar Sesión\" deshabilitado con formulario vacío",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Login con contraseña incorrecta muestra error",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "\"Olvidé mi contraseña\" envía la solicitud",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Guard: /empresas sin sesión vuelve a /login",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Guard: /chat sin sesión vuelve a /login",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Autoregistro de empresa \"E2E_Registro_Aprobar\"",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Autoregistro de empresa \"E2E_Registro_Rechazar\"",
+      "ok": true
+    },
+    {
+      "area": "Público",
+      "check": "Una empresa pendiente no puede iniciar sesión",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Login redirige a /empresas",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Dashboard muestra actividad y accesos rápidos",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Solicitudes: aparecen las 2 empresas registradas",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Solicitudes: aprobar una",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Solicitudes: rechazar otra",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Empresas: buscador encuentra la empresa aprobada",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Empresas: editar rubro",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Empresas: desactivar",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Empresas: reactivar",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Empresas: agregar usuario a una empresa existente",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Usuarios: crear usuario público",
+      "ok": false,
+      "detalle": "expect(locator).toBeVisible() failed"
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Usuarios: editar (nombre/email bloqueados, cambia estado)",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Usuarios: habilitar e inhabilitar con el botón de la fila",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Servicios Polo: crear coworking",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Servicios Polo: asignar un lote",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Lotes: aparece el lote y se puede buscar",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Lotes: abrir mapa de ubicación",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Lotes: eliminar",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Servicios Polo: eliminar",
+      "ok": false,
+      "detalle": "locator.click: Timeout 15000ms exceeded."
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Perfil: ver datos del Polo",
+      "ok": true,
+      "detalle": "Polo: Parque Industrial Polo 52"
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Perfil: formulario \"Editar datos del Polo\" abre precargado (sin guardar)",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Perfil: formulario \"Información comercial\" abre (sin guardar)",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Configuración: abrir modal de cambio de contraseña",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Asistente virtual (botón flotante) se abre",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Guard: admin_polo no puede entrar a /me",
+      "ok": true
+    },
+    {
+      "area": "Admin Polo",
+      "check": "Cerrar sesión",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Login redirige a /me",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Dashboard: tarjeta ESTADO coincide con la empresa (activa)",
+      "ok": false,
+      "detalle": "La empresa está activa en la base pero la tarjeta dice: \"ESTADO Inactivo desde —\""
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Vehículos: agregar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Vehículos: editar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Vehículos: eliminar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Servicios: agregar (agua)",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Servicios: editar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Servicios: eliminar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Contactos: agregar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Contactos: editar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Contactos: eliminar",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Servicios del Polo: pestaña carga",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Empresas del parque: directorio carga con empresas",
+      "ok": true,
+      "detalle": "cargó en 7.3 s"
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Perfil: editar datos de la empresa",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Perfil: completar información comercial por chat (usa Gemini)",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Perfil: editar información comercial (formulario)",
+      "ok": false,
+      "detalle": "locator.click: Timeout 15000ms exceeded."
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Asistente virtual (botón flotante) responde",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Configuración: cambiar contraseña",
+      "ok": true
+    },
+    {
+      "area": "Admin Empresa",
+      "check": "Cerrar sesión y volver a entrar con la contraseña nueva",
+      "ok": true
+    },
+    {
+      "area": "Chatbot",
+      "check": "Login público redirige a /chat",
+      "ok": true
+    },
+    {
+      "area": "Chatbot",
+      "check": "Guard: público no puede entrar a /empresas",
+      "ok": true
+    },
+    {
+      "area": "Chatbot",
+      "check": "Voz: modo \"Voz IA\" y grabación con micrófono (simulado)",
+      "ok": true,
+      "detalle": "Micrófono simulado: Chromium envía un tono, no voz real; la transcripción no puede validarse automáticamente"
+    },
+    {
+      "area": "Chatbot",
+      "check": "Voz (API): /api/voice/status",
+      "ok": true,
+      "detalle": "{\"success\":true,\"data\":{\"provider\":\"google\",\"services\":{\"google_cloud\":{\"speech_to_text\":\" Disponible\",\"text_to_speech\":\" Disponible\"}}},\"message\":\"Es"
+    },
+    {
+      "area": "Chatbot",
+      "check": "Voz (API): síntesis de audio TTS",
+      "ok": true,
+      "detalle": "audio base64 de 31625 caracteres"
+    },
+    {
+      "area": "Chatbot",
+      "check": "Texto: enviar pregunta escrita y recibir respuesta útil",
+      "ok": true
+    },
+    {
+      "area": "Chatbot",
+      "check": "Texto: pregunta sugerida (chip)",
+      "ok": true,
+      "detalle": "Chip: \"¿Qué empresas hay en el parque?\""
+    },
+    {
+      "area": "Chatbot",
+      "check": "Pantalla completa",
+      "ok": true
+    },
+    {
+      "area": "Chatbot",
+      "check": "Cerrar sesión desde el chat",
+      "ok": false,
+      "detalle": "locator.scrollIntoViewIfNeeded: Timeout 15000ms exceeded."
+    }
+  ],
+  "httpErrors": [
+    "[anonimo] POST /login -> 401",
+    "[admin_empresa] GET /companies/me/comercial -> 404"
+  ],
+  "consoleErrors": [
+    "[anonimo] Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "[anonimo] Login fallido HttpErrorResponse",
+    "[admin_polo] Access to XMLHttpRequest at 'http://localhost:8000/usuarios' from origin 'http://localhost:4200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested re",
+    "[admin_polo] Error en cargar resumen del polo: HttpErrorResponse",
+    "[admin_polo] Failed to load resource: net::ERR_FAILED",
+    "[admin_empresa] Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}

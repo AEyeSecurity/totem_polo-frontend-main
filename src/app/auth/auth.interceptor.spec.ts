@@ -20,6 +20,7 @@ describe('AuthInterceptor', () => {
   beforeEach(() => {
     authServiceSpy = jasmine.createSpyObj('AuthenticationService', [
       'getToken',
+      'logoutLocal',
     ]);
 
     TestBed.configureTestingModule({
@@ -112,5 +113,50 @@ describe('AuthInterceptor', () => {
     );
     expect(req.request.headers.get('Authorization')).toBe('Bearer my-token');
     req.flush({});
+  });
+
+  it('should log out locally when an authenticated request gets a 401', () => {
+    authServiceSpy.getToken.and.returnValue('stale-token');
+    let status: number | undefined;
+
+    httpClient.get('https://api.test.com/empresas').subscribe({ error: (e) => (status = e.status) });
+
+    httpMock.expectOne('https://api.test.com/empresas').flush(
+      { detail: 'Token inválido' },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+    expect(authServiceSpy.logoutLocal).toHaveBeenCalled();
+    expect(status).toBe(401); // el error igual llega a quien hizo el pedido
+  });
+
+  it('should not log out on other errors (403, 500)', () => {
+    authServiceSpy.getToken.and.returnValue('my-token');
+
+    httpClient.get('https://api.test.com/me').subscribe({ error: () => {} });
+    httpMock.expectOne('https://api.test.com/me').flush({}, { status: 403, statusText: 'Forbidden' });
+    httpClient.get('https://api.test.com/empresas').subscribe({ error: () => {} });
+    httpMock.expectOne('https://api.test.com/empresas').flush({}, { status: 500, statusText: 'Server Error' });
+
+    expect(authServiceSpy.logoutLocal).not.toHaveBeenCalled();
+  });
+
+  it('should not log out on a 401 from /login or /logout (handled by the caller)', () => {
+    authServiceSpy.getToken.and.returnValue('my-token');
+
+    httpClient.post('https://api.test.com/login', {}).subscribe({ error: () => {} });
+    httpMock.expectOne('https://api.test.com/login').flush({}, { status: 401, statusText: 'Unauthorized' });
+    httpClient.post('https://api.test.com/logout', {}).subscribe({ error: () => {} });
+    httpMock.expectOne('https://api.test.com/logout').flush({}, { status: 401, statusText: 'Unauthorized' });
+
+    expect(authServiceSpy.logoutLocal).not.toHaveBeenCalled();
+  });
+
+  it('should not log out on a 401 from a request sent without our token', () => {
+    authServiceSpy.getToken.and.returnValue(null);
+
+    httpClient.get('https://api.test.com/empresas').subscribe({ error: () => {} });
+    httpMock.expectOne('https://api.test.com/empresas').flush({}, { status: 401, statusText: 'Unauthorized' });
+
+    expect(authServiceSpy.logoutLocal).not.toHaveBeenCalled();
   });
 });

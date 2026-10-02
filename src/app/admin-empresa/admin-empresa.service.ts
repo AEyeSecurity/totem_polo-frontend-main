@@ -122,6 +122,7 @@ export interface EmpresaDetail {
   observaciones?: string;
   fecha_ingreso: string;
   horario_trabajo: string;
+  estado: boolean;
   vehiculos: Vehiculo[];
   contactos: Contacto[];
   servicios: Servicio[];

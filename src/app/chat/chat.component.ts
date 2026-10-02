@@ -13,23 +13,25 @@ import {
   Input,
   inject,
 } from '@angular/core';
-import { ChatService, VoiceChatResponse } from './chat.service';
+import { ChatService, VoiceChatResponse, ChatLocation } from './chat.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
+import { MapLocationViewComponent } from '../shared/map-location-view/map-location-view.component';
 
 interface Message {
   sender: 'user' | 'bot';
   content: string;
   timestamp: Date;
   id: string;
+  locations?: ChatLocation[];
 }
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule, LogoutButtonComponent],
+  imports: [FormsModule, LogoutButtonComponent, MapLocationViewComponent],
   template: `
     <div class="chat-wrapper" [class.embedded]="embedded">
       @if (!isFullscreen) {
@@ -157,6 +159,25 @@ interface Message {
                           class="message-text"
                           [innerHTML]="formatMessage(message.content)"
                         ></div>
+                        @if (message.sender === 'bot' && message.locations?.length) {
+                          <div class="message-locations">
+                            @for (
+                              loc of message.locations;
+                              track loc.lote + '-' + loc.manzana
+                            ) {
+                              <div class="message-location-item">
+                                <app-map-location-view
+                                  [lat]="loc.latitud"
+                                  [lng]="loc.longitud"
+                                ></app-map-location-view>
+                                <span class="message-location-label">
+                                  {{ loc.empresa_nombre }} &middot; Lote {{ loc.lote }}, Manzana
+                                  {{ loc.manzana }}
+                                </span>
+                              </div>
+                            }
+                          </div>
+                        }
                         <div class="message-time">
                           {{ formatTime(message.timestamp) }}
                         </div>
@@ -787,7 +808,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.chatService.sendMessage(messageToSend, history).subscribe({
         next: (resp: VoiceChatResponse) => {
           const text = resp?.data?.text || 'Respuesta invalida.';
-          this.simulateTyping(text);
+          const locations = resp?.data?.locations ?? [];
+          this.simulateTyping(text, locations);
         },
         error: (error) => {
           console.error('Error en la solicitud:', error);
@@ -807,12 +829,13 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
     }, 100);
   }
 
-  private simulateTyping(message: string) {
+  private simulateTyping(message: string, locations: ChatLocation[] = []) {
     const botMessage: Message = {
       sender: 'bot',
       content: '',
       timestamp: new Date(),
       id: this.generateMessageId(),
+      locations: locations.length ? locations : undefined,
     };
 
     this.messages.push(botMessage);

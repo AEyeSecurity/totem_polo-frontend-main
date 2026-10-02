@@ -124,14 +124,18 @@ export class LoginComponent implements OnInit {
             this.handleLoginError();
           }
         },
+        // Errores que no son de credenciales (el servicio ya resolvió 401/403
+        // como `false`): no cuentan como intento fallido ni marcan los campos.
         error: (err) => {
           console.error('Error de login:', err);
-          this.handleLoginError();
           if (err.status === 429)
             this.loginMessage = 'Demasiados intentos. Intenta más tarde.';
           else if (err.status === 0)
             this.loginMessage =
               'Error de conexión. Verifica tu conexión a internet.';
+          else
+            this.loginMessage =
+              'No pudimos iniciar sesión por un problema del servidor. Intentá de nuevo en unos minutos.';
         },
       });
   }
