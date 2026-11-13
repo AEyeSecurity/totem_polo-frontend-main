@@ -1,3 +1,4 @@
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:FILL@0..1&display=swap" rel="stylesheet" />
 <!-- Contenedor principal con imagen de fondo -->
 <div class="main-container">
   <!-- Modal de login centrado -->
@@ -16,22 +17,20 @@
 
       <div class="content-section">
         <h2>
-          Plataforma Empresarial<br /><span class="highlight">Integrada</span>
+          Plataforma empresarial<br /><span class="highlight">integrada</span>
         </h2>
         <p>
-          Accede a todos los servicios y herramientas necesarios para optimizar
-          las operaciones de tu empresa en el parque industrial más moderno de
-          Argentina.
+          Acceda a la plataforma para gestionar la información de su empresa dentro del Parque Industrial Polo 52.
         </p>
 
         <ul class="features">
           <li>
-            <i class="fas fa-chart-line"></i> Gestión integral de servicios
+            <i class="fas fa-building"></i> Datos y perfil comercial de su empresa
           </li>
-          <li><i class="fas fa-clock"></i> Monitoreo en tiempo real</li>
-          <li><i class="fas fa-headset"></i> Soporte técnico especializado</li>
+          <li><i class="fas fa-truck"></i> Vehículos, servicios y contactos</li>
+          <li><i class="fas fa-robot"></i> Asistente virtual del Polo</li>
           <li>
-            <i class="fas fa-chart-bar"></i> Reportes y analytics avanzados
+            <i class="fas fa-address-book"></i> Directorio de empresas del parque
           </li>
         </ul>
       </div>
@@ -48,21 +47,22 @@
         <div class="login-icon">
           <img src="assets/images/polologo-blanco.png" alt="Logo Polo 52" />
         </div>
-        <h2>Acceso Empresarial</h2>
-        <p>Ingresa con tus credenciales corporativas</p>
+        <h2>Iniciar sesión</h2>
+        <p>Ingrese con sus credenciales corporativas</p>
       </div>
 
       <form (ngSubmit)="onLogin()" #loginForm="ngForm">
         <div class="form-group">
           <label class="form-label" for="username">
             <i class="fas fa-envelope"></i>
-            Email Corporativo
+            Email o nombre de usuario
           </label>
           <div class="input-wrapper">
             <input
               type="text"
               class="form-input"
               id="username"
+                autocomplete="username"
               name="username"
               [(ngModel)]="username"
               placeholder="usuario@empresa.com"
@@ -89,8 +89,9 @@
                 id="password"
                 name="password"
                 [type]="showPassword ? 'text' : 'password'"
-                [(ngModel)]="password"
-                placeholder="••••••••"
+[(ngModel)]="password"
+autocomplete="current-password"
+placeholder="Ingrese su contraseña"
                 required
                 [ngClass]="{ error: passwordError }"
                 (input)="onPasswordChange()"
@@ -98,7 +99,8 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  (click)="togglePassword()"
+[attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+(click)="togglePassword()"
                   >
                   <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
@@ -113,7 +115,7 @@
             <div class="login-extra-row">
               <div class="forgot-password">
                 <a href="#" (click)="openResetModal(); $event.preventDefault()"
-                  >¿Olvidaste tu contraseña?</a
+                  >¿Olvidó su contraseña?</a
                   >
                 </div>
               </div>
@@ -124,7 +126,7 @@
                   [ngClass]="{ loading: loading }"
                   [disabled]="loginForm.invalid || loading"
                   >
-                  {{ loading ? "Verificando acceso..." : "Iniciar Sesión" }}
+                  {{ loading ? "Verificando acceso..." : "Iniciar sesión" }}
                 </button>
 
                 @if (successMessage) {
@@ -137,7 +139,7 @@
                 }
 
                 <div class="divider">
-                  <span>O ACCEDE CON</span>
+                  <span>O INGRESE CON</span>
                 </div>
 
                 <button type="button" class="google-button" (click)="loginWithGoogle()">
@@ -146,12 +148,11 @@
                 </button>
 
                 <div class="register-prompt">
-                  ¿No tenés cuenta? <a routerLink="/register">Registrá tu empresa</a>
+                  ¿No tiene cuenta? <a routerLink="/register">Registre su empresa</a>
                 </div>
 
                 <div class="footer-info">
-                  <i class="fas fa-shield-alt"></i>
-                  Conexión segura SSL<br />
+                  
                   © 2024 POLO - Parque Industrial de Córdoba<br />
                   <strong>UTM</strong>
                 </div>
@@ -180,9 +181,9 @@
                   </div>
                 </div>
                 <div class="reset-content-section">
-                  <h4>Restablecer Contraseña</h4>
+                  <h4>Restablecer contraseña</h4>
                   <p>
-                    Ingresa tu correo electrónico corporativo y te enviaremos las
+                    Ingrese su correo electrónico corporativo y le enviaremos las
                     instrucciones para crear una nueva contraseña de forma segura.
                   </p>
                   <ul class="reset-features">
@@ -204,14 +205,14 @@
                   <div class="reset-icon">
                     <i class="fas fa-envelope"></i>
                   </div>
-                  <h3>Recuperar Acceso</h3>
-                  <p>Ingresa tu email corporativo</p>
+                  <h3>Recuperar acceso</h3>
+                  <p>Ingrese su email corporativo</p>
                 </div>
                 <form (ngSubmit)="requestPasswordReset()" #resetForm="ngForm">
                   <div class="form-group">
                     <label class="form-label" for="reset-email">
                       <i class="fas fa-at"></i>
-                      Correo Electrónico
+                      Correo electrónico
                     </label>
                     <div class="input-wrapper">
                       <input
@@ -220,7 +221,7 @@
                         id="reset-email"
                         name="email"
                         [(ngModel)]="resetEmail"
-                        placeholder="tu-email@empresa.com"
+                        placeholder="nombre@empresa.com"
                         required
                         email
                         (input)="onResetEmailChange()"
@@ -234,8 +235,7 @@
                     <div class="reset-info-box">
                       <i class="fas fa-info-circle"></i>
                       <span
-                        >Recibirás un enlace de recuperación en tu bandeja de entrada. Si no
-                        lo encuentras, revisa la carpeta de spam.</span
+                        >Recibirá un enlace de recuperación en su bandeja de entrada. Si no lo encuentra, revise la carpeta de correo no deseado.</span
                         >
                       </div>
                       <button
@@ -247,7 +247,7 @@
                         {{
                         resetLoading
                         ? "Enviando enlace..."
-                        : "Enviar Enlace de Recuperación"
+                        : "Enviar enlace de recuperación"
                         }}
                       </button>
                       @if (resetMessage) {

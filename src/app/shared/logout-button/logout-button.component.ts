@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 
 import { AuthenticationService } from '../../auth/auth.service';
 
@@ -41,7 +41,7 @@ import { AuthenticationService } from '../../auth/auth.service';
             </button>
           </div>
           <div class="modal-body">
-            <p>¿Estás seguro de que querés cerrar tu sesión actual?</p>
+            <p>{{ confirmMessage }}</p>
           </div>
           <div class="modal-actions">
             <button class="btn ghost" type="button" (click)="cancelLogout()">
@@ -69,6 +69,9 @@ export class LogoutButtonComponent {
 
   loading = false;
   showModal = false;
+  /** Texto del dialogo de confirmacion. El valor por defecto es el original
+   *  (lo sigue usando el chat); los paneles pasan una version formal. */
+  @Input() confirmMessage = '¿Estás seguro de que querés cerrar tu sesión actual?';
 
   private doLogout(): void {
     if (this.loading) return;

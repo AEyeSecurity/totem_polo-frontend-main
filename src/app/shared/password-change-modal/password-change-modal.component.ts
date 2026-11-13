@@ -92,13 +92,13 @@ export class PasswordChangeModalComponent {
 
     // Validaciones del formulario
     if (form.invalid) {
-      this.error = 'Por favor, completa todos los campos correctamente.';
+      this.error = 'Por favor, complete todos los campos correctamente.';
       return;
     }
 
     // Validación contraseña actual obligatoria
     if (!this.currentPassword || this.currentPassword.trim() === '') {
-      this.currentPasswordError = 'Debes ingresar tu contraseña actual.';
+      this.currentPasswordError = 'Debe ingresar su contraseña actual.';
       this.error = 'La contraseña actual es obligatoria.';
       return;
     }
@@ -160,7 +160,7 @@ export class PasswordChangeModalComponent {
     });
   }
 
-  // Manejar errores específicos basados en tu backend
+  // Manejar errores específicos basados en su backend
   handleChangeError(errorResponse: any) {
     // Contraseña actual incorrecta
     if (
@@ -183,7 +183,7 @@ export class PasswordChangeModalComponent {
     ) {
       this.passwordReused = true;
       this.error =
-        'No puedes usar una contraseña que ya hayas utilizado anteriormente.';
+        'No puede usar una contraseña que ya haya utilizado anteriormente.';
     }
     // Contraseñas no coinciden
     else if (
@@ -200,7 +200,7 @@ export class PasswordChangeModalComponent {
     } else if (errorResponse.error) {
       this.error = errorResponse.error;
     } else {
-      this.error = 'Error al cambiar la contraseña. Inténtalo nuevamente.';
+      this.error = 'Error al cambiar la contraseña. Inténtelo nuevamente.';
     }
   }
 
@@ -215,7 +215,7 @@ export class PasswordChangeModalComponent {
     this.passwordsMismatch = false;
   }
 
-  // Validaciones de contraseña según tu backend
+  // Validaciones de contraseña según su backend
   validatePassword(password: string): PasswordValidationResult {
     return validatePassword(password);
   }

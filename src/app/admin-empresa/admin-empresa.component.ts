@@ -46,6 +46,7 @@ import {
   getItemTimestamp as getItemTimestampUtil,
 } from '../shared/activity-format.util';
 import { ChatbotFabComponent } from '../shared/chatbot-fab/chatbot-fab.component';
+import { ChartSegment, donutBackground, ringBackground, toSegments } from '../shared/dashboard-chart.util';
 import { MapLocationViewComponent } from '../shared/map-location-view/map-location-view.component';
 
 const EMPRESA_DATE_FIELDS = [
@@ -73,7 +74,7 @@ const EMPRESA_DATE_FIELDS = [
     MapLocationViewComponent
 ],
   templateUrl: './admin-empresa.component.html',
-  styleUrls: ['./admin-empresa.component.css'],
+  styleUrls: ['./admin-empresa.component.css', '../shared/styles/panel-forms.css', '../shared/styles/panel-ui.css', '../shared/styles/panel-layout.css'],
 })
 export class EmpresaMeComponent implements OnInit {
   private adminEmpresaService = inject(AdminEmpresaService);
@@ -89,6 +90,12 @@ export class EmpresaMeComponent implements OnInit {
     | 'empresas'
     | 'perfil'
     | 'config' = 'dashboard';
+  // Menu lateral en celular/tablet (solo presentacion)
+  mobileMenuOpen = false;
+  navMobile(tab: EmpresaMeComponent['activeTab']): void {
+    this.mobileMenuOpen = false;
+    this.goTo(tab);
+  }
 
   // Directorio de empresas del parque (networking entre inquilinos)
   empresasDirectorio: EmpresaDirectorio[] = [];
@@ -218,6 +225,32 @@ export class EmpresaMeComponent implements OnInit {
   readonly comercialRangoPreciosOpciones = ['Económico', 'Medio', 'Premium'];
   readonly comercialModalidadVentaOpciones = ['Presencial', 'Online', 'Ambas'];
 
+  // Solo presentacion: icono y resumen de los datos que pide cada tipo en los
+  // selectores visuales de "Nuevo vehiculo" y "Nuevo servicio". Los ids son
+  // los mismos que usan los @switch del template para mostrar los campos.
+  readonly iconoTipoVehiculo: Record<number, string> = {
+    1: 'local_shipping',
+    2: 'directions_car',
+    3: 'airport_shuttle',
+  };
+  readonly ayudaTipoVehiculo: Record<number, string> = {
+    1: 'Cantidad, patente y carga',
+    2: 'Cantidad y patente (opcional)',
+    3: 'Cantidad y carga',
+  };
+  readonly iconoTipoServicio: Record<number, string> = {
+    1: 'water_drop',
+    2: 'park',
+    3: 'wifi',
+    4: 'recycling',
+  };
+  readonly ayudaTipoServicio: Record<number, string> = {
+    1: 'Biofiltro y aguas grises',
+    2: 'Apertura al público y superficie',
+    3: 'Tipo de conexión y proveedor',
+    4: 'Tipo de residuo y cantidad',
+  };
+
   get comercialContactos(): Contacto[] {
     const tipoComercial = this.tiposContacto.find(
       (t) => t.tipo?.toLowerCase() === 'comercial'
@@ -259,10 +292,10 @@ export class EmpresaMeComponent implements OnInit {
       datos.cantidad !== null &&
       datos.cantidad !== ''
     ) {
-      parts.push(`Cant: ${datos.cantidad}`);
+      parts.push(`Cantidad: ${datos.cantidad}`);
     }
     if (datos.patente) {
-      parts.push(`Pat: ${datos.patente}`);
+      parts.push(`Patente: ${datos.patente}`);
     }
     if (
       datos.carga !== undefined &&
@@ -375,8 +408,8 @@ export class EmpresaMeComponent implements OnInit {
         this.loadingEmpresasDirectorio = false;
         this.empresasDirectorioError =
           error.status === 403
-            ? 'Tu cuenta no tiene permiso para ver el directorio de empresas del parque.'
-            : 'No se pudo cargar el directorio de empresas. Intenta nuevamente mas tarde.';
+            ? 'Su cuenta no tiene permiso para ver el directorio de empresas del parque.'
+            : 'No se pudo cargar el directorio de empresas. Intente nuevamente más tarde.';
       },
     });
   }
@@ -506,6 +539,83 @@ export class EmpresaMeComponent implements OnInit {
   }
   get desdeIngreso(): string {
     return this.formatMonthYear(this.empresaData?.fecha_ingreso);
+  }
+
+  // ===== Indicadores visuales del dashboard =====
+  // Solo presentacion: se calculan con los datos que el panel ya carga.
+  pct(parte: number, total: number): number {
+    return total ? Math.round((parte / total) * 100) : 0;
+  }
+  get unidadesVehiculos(): number {
+    return (this.empresaData?.vehiculos ?? []).reduce(
+      (acc, v) => acc + (Number(v?.datos?.cantidad) || 0),
+      0
+    );
+  }
+  get aniosEnParque(): number | null {
+    const f = this.empresaData?.fecha_ingreso;
+    if (!f) return null;
+    const d = new Date(f);
+    if (isNaN(d.getTime())) return null;
+    const hoy = new Date();
+    let anios = hoy.getFullYear() - d.getFullYear();
+    if (hoy.getMonth() < d.getMonth() || (hoy.getMonth() === d.getMonth() && hoy.getDate() < d.getDate())) anios--;
+    return Math.max(anios, 0);
+  }
+  private agrupar<T>(items: T[], idDe: (x: T) => number, nombreDe: (id: number) => string) {
+    const total = items.length;
+    const m = new Map<number, number>();
+    items.forEach((x) => m.set(idDe(x), (m.get(idDe(x)) ?? 0) + 1));
+    return [...m.entries()]
+      .map(([id, count]) => ({ label: nombreDe(id), count, pct: this.pct(count, total) }))
+      .sort((a, b) => b.count - a.count);
+  }
+  get vehiculosPorTipo(): { label: string; count: number; pct: number }[] {
+    return this.agrupar(this.empresaData?.vehiculos ?? [], (v) => v.id_tipo_vehiculo, (id) => this.getTipoVehiculoName(id));
+  }
+  get contactosPorTipo(): { label: string; count: number; pct: number }[] {
+    return this.agrupar(this.empresaData?.contactos ?? [], (c) => c.id_tipo_contacto, (id) => this.getTipoContactoName(id));
+  }
+  get perfilChecklist(): { label: string; ok: boolean }[] {
+    const e = this.empresaData;
+    const c = this.comercialInfo;
+    const lleno = (v: unknown) => v !== null && v !== undefined && String(v).trim() !== '';
+    return [
+      { label: 'Cantidad de empleados', ok: lleno(e?.cant_empleados) },
+      { label: 'Horario de trabajo', ok: lleno(e?.horario_trabajo) },
+      { label: 'Descripción de la empresa', ok: lleno(e?.observaciones) },
+      { label: 'Productos / servicios', ok: lleno(c?.productos_servicios) },
+      { label: 'Público objetivo', ok: lleno(c?.publico_objetivo) },
+      { label: 'Horario de atención comercial', ok: lleno(c?.horario_atencion_comercial) },
+      { label: 'Rango de precios', ok: lleno(c?.rango_precios) },
+      { label: 'Modalidad de venta', ok: lleno(c?.modalidad_venta) },
+      { label: 'Al menos un contacto', ok: (e?.contactos?.length ?? 0) > 0 },
+    ];
+  }
+  get pctPerfilCompleto(): number {
+    const items = this.perfilChecklist;
+    return this.pct(items.filter((i) => i.ok).length, items.length);
+  }
+  // Graficos de anillo del dashboard
+  donutBg(segs: ChartSegment[]): string {
+    return donutBackground(segs);
+  }
+  ringBg(pct: number, color = '#ffffff'): string {
+    return ringBackground(pct, color);
+  }
+  get vehiculosPorTipoChart(): ChartSegment[] {
+    return toSegments(this.vehiculosPorTipo);
+  }
+  get contactosPorTipoChart(): ChartSegment[] {
+    return toSegments(this.contactosPorTipo);
+  }
+  get serviciosPorTipoChart(): ChartSegment[] {
+    return toSegments(
+      this.agrupar(this.empresaData?.servicios ?? [], (x) => x.id_tipo_servicio, (id) => this.getTipoServicioName(id))
+    );
+  }
+  get perfilPendientes(): string[] {
+    return this.perfilChecklist.filter((i) => !i.ok).map((i) => i.label);
   }
 
   actividadReciente: {
@@ -868,7 +978,7 @@ export class EmpresaMeComponent implements OnInit {
     const hasChanges = this.changes.hasChanged(formName, currentFormData);
     if (hasChanges) {
       const shouldDiscard = confirm(
-        '¿Deseas descartar los cambios?\n\nSe perderan todos los cambios no guardados.'
+        '¿Desea descartar los cambios?\n\nSe perderán todos los cambios no guardados.'
       );
       if (!shouldDiscard) return;
       this.restoreOriginalFormData(formName);
@@ -1246,7 +1356,7 @@ export class EmpresaMeComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.handleError(error, 'comercial', 'procesar tu respuesta');
+        this.handleError(error, 'comercial', 'procesar su respuesta');
         this.comercialChatLoading = false;
       },
     });
@@ -1551,7 +1661,7 @@ export class EmpresaMeComponent implements OnInit {
   }
 
   deleteVehiculo(id: number): void {
-    if (!confirm('Estas seguro de que deseas eliminar este vehiculo?')) {
+    if (!confirm('¿Está seguro de que desea eliminar este vehículo?')) {
       return;
     }
 
@@ -1657,7 +1767,7 @@ export class EmpresaMeComponent implements OnInit {
   }
 
   deleteServicio(id: number): void {
-    if (!confirm('Estas seguro de que deseas eliminar este servicio?')) {
+    if (!confirm('¿Está seguro de que desea eliminar este servicio?')) {
       return;
     }
 
@@ -1853,7 +1963,7 @@ export class EmpresaMeComponent implements OnInit {
   }
 
   deleteContacto(id: number): void {
-    if (!confirm('Estas seguro de que deseas eliminar este contacto?')) {
+    if (!confirm('¿Está seguro de que desea eliminar este contacto?')) {
       return;
     }
 
@@ -2118,7 +2228,7 @@ export class EmpresaMeComponent implements OnInit {
     if (form.invalid) {
       return;
     } // muestra errores y no envia
-    this.onSubmitVehiculo(); // tu logica real de guardado
+    this.onSubmitVehiculo(); // su logica real de guardado
   }
 
   // dentro de la clase EmpresaMeComponent
@@ -2138,8 +2248,8 @@ export class EmpresaMeComponent implements OnInit {
     const verbos: Record<typeof kind, string> = {
       empresa: 'guardar cambios de la empresa',
       vehiculo: this.editingVehiculo
-        ? 'actualizar el vehiculo'
-        : 'agregar el vehiculo',
+        ? 'actualizar el vehículo'
+        : 'agregar el vehículo',
       servicio: this.editingServicio
         ? 'actualizar el servicio'
         : 'agregar el servicio',
@@ -2150,7 +2260,7 @@ export class EmpresaMeComponent implements OnInit {
     };
 
     const ok = window.confirm(
-      `¿Queres ${verbos[kind]} ahora?\n\n• Aceptar: agregar/guardar\n• Cancelar: seguir editando`
+      `¿Desea ${verbos[kind]} ahora?\n\n• Aceptar: confirmar\n• Cancelar: continuar editando`
     );
     if (!ok) return;
 

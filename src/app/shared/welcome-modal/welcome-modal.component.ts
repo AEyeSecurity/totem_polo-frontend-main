@@ -33,9 +33,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
               >waving_hand</span
             >
             <p>
-              Te recomendamos completar la información comercial de tu
-              empresa para que el asistente virtual del Polo pueda responder
-              consultas sobre vos.
+              Le recomendamos completar la información comercial de su empresa para que el asistente virtual del Polo pueda responder consultas sobre ella.
             </p>
           </div>
           <div class="modal-actions">

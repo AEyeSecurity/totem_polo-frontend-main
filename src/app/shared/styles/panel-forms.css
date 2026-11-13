@@ -1,0 +1,539 @@
+/* ==========================================================================
+   Formularios y modales de los paneles (admin_polo y admin_empresa)
+   --------------------------------------------------------------------------
+   Se agrega como segunda hoja de estilos (styleUrls) de AdminPoloComponent y
+   EmpresaMeComponent. Al estar encapsulada por Angular, NO llega al chat/bot.
+   Se carga despues de la hoja propia de cada panel, asi que estas reglas
+   ganan por orden de cascada sin tener que borrar las anteriores.
+   Solo cambia presentacion: no toca bindings, validaciones ni datos.
+   ========================================================================== */
+
+:host {
+  --pf-accent: #a20000;
+  --pf-accent-hover: #870000;
+  --pf-accent-soft: rgba(162, 0, 0, 0.14);
+  --pf-focus: #30406b;
+  --pf-focus-ring: rgba(48, 64, 107, 0.18);
+  --pf-text: #1a284b;
+  --pf-label: #2b3a62;
+  --pf-muted: #5b6785;
+  --pf-border: #d5dbe5;
+  --pf-border-hover: #b3bccb;
+  --pf-surface: #ffffff;
+  --pf-surface-muted: #f4f6f9;
+  --pf-danger: #c62828;
+  --pf-danger-soft: rgba(198, 40, 40, 0.12);
+  --pf-radius: 10px;
+}
+
+/* ---------- Overlay y modal ---------- */
+.overlay {
+  padding: 1rem;
+  background: rgba(17, 24, 39, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  padding: 0 1.5rem;
+  border-radius: 16px;
+  max-height: min(90vh, 900px);
+  max-height: min(90dvh, 900px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  box-shadow: 0 24px 48px -12px rgba(16, 24, 40, 0.28);
+}
+.modal-lg { width: min(900px, 96vw); } /* alias: el template usa "modal-lg" */
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0 -1.5rem 1rem;
+  padding: 1.1rem 1.5rem;
+  background: var(--pf-surface);
+  border-bottom: 1px solid #eef1f5;
+}
+.modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 650;
+  color: var(--pf-text);
+  line-height: 1.3;
+}
+.modal-header .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--pf-muted);
+  font-size: 1rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.modal-header .icon-btn:hover:not(:disabled) {
+  transform: none;
+  background: var(--pf-surface-muted);
+  color: var(--pf-text);
+}
+.modal-header .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Botonera fija abajo: Cancelar a la izquierda, accion principal a la derecha */
+.modal-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin: 1.25rem -1.5rem 0;
+  padding: 0.9rem 1.5rem;
+  background: var(--pf-surface);
+  border-top: 1px solid #eef1f5;
+}
+.modal-actions .btn {
+  min-height: 42px;
+  padding: 0.6rem 1.25rem;
+  justify-content: center;
+  font-weight: 600;
+}
+.modal-actions .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- Grilla de campos ---------- */
+.modal .modal-body {
+  gap: 1rem 1.1rem;
+  align-items: start;
+}
+/* col-2 / col-3 ocupan siempre la fila completa: evita columnas implicitas
+   (y scroll horizontal) cuando la grilla se reduce a 1 o 2 columnas. */
+.modal .col-2,
+.modal .col-3 { grid-column: 1 / -1; }
+
+.nice-form .field { margin-bottom: 0; gap: 0.35rem; }
+.modal .nice-form .modal-body > .field,
+.modal .sp-base-grid > .field,
+.modal .sp-extra > .field { margin-bottom: 0; }
+
+/* Titulo de seccion dentro de un formulario */
+.form-section {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-top: 0.35rem;
+}
+.form-section + .form-section,
+.modal-body > .form-section:not(:first-child) {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e3e7ee;
+}
+.form-section-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pf-muted);
+}
+.form-section-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--pf-muted);
+}
+
+/* Bloques de servicio del polo (sp-*) y grupos de 3 */
+.sp-base-grid,
+.sp-extra,
+.inline-3 { gap: 1rem 1.1rem; }
+.modal-body > .sp-base-grid,
+.modal-body > .sp-extra { grid-column: 1 / -1; }
+.sp-extra .form-section { padding-top: 1rem; border-top: 1px dashed #e3e7ee; }
+
+/* ---------- Etiquetas y controles ---------- */
+.nice-form label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--pf-label);
+  margin-bottom: 0;
+}
+.req { color: var(--pf-accent); margin-left: 2px; }
+
+.nice-form input,
+.nice-form select,
+.nice-form textarea {
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  color: var(--pf-text);
+  background-color: var(--pf-surface);
+  font-size: 0.92rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.nice-form input,
+.nice-form select { height: 44px; line-height: 1.25; }
+.nice-form textarea { min-height: 96px; padding: 0.7rem 0.8rem; line-height: 1.45; }
+
+.nice-form input:hover:not(:disabled):not([readonly]),
+.nice-form select:hover:not(:disabled),
+.nice-form textarea:hover:not(:disabled):not([readonly]) { border-color: var(--pf-border-hover); }
+
+.nice-form input:focus,
+.nice-form select:focus,
+.nice-form textarea:focus {
+  outline: none;
+  border-color: var(--pf-focus);
+  box-shadow: 0 0 0 3px var(--pf-focus-ring);
+}
+
+/* Select con flecha propia, igual en todos los navegadores */
+.nice-form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235b6785' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 18px;
+  cursor: pointer;
+}
+
+.nice-form input:disabled,
+.nice-form select:disabled,
+.nice-form textarea:disabled {
+  background-color: var(--pf-surface-muted);
+  color: var(--pf-muted);
+  border-color: #e3e7ee;
+  cursor: not-allowed;
+  -webkit-text-fill-color: var(--pf-muted);
+}
+
+/* Estado invalido (mismas condiciones que ya usaba el panel) */
+.nice-form input.ng-invalid.ng-touched,
+.nice-form select.ng-invalid.ng-touched,
+.nice-form textarea.ng-invalid.ng-touched,
+.ng-submitted .nice-form input.ng-invalid,
+.ng-submitted .nice-form select.ng-invalid,
+.ng-submitted .nice-form textarea.ng-invalid,
+form.ng-submitted input.ng-invalid,
+form.ng-submitted select.ng-invalid,
+form.ng-submitted textarea.ng-invalid {
+  border-color: var(--pf-danger) !important;
+  box-shadow: 0 0 0 3px var(--pf-danger-soft) !important;
+}
+/* El <form> en si nunca se pinta como invalido */
+form.ng-invalid,
+.nice-form.ng-invalid { border-color: transparent !important; box-shadow: none !important; }
+
+/* Mensajes de error bajo el campo */
+.nice-form .error,
+.modal .error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin-top: 0.1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--pf-danger);
+}
+.nice-form .error::before,
+.modal .error::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Texto de ayuda bajo el campo */
+.field-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--pf-muted);
+}
+
+/* Alertas dentro del modal */
+.modal .alert { margin-bottom: 1rem; }
+
+/* Coordenadas del mapa */
+.map-picker-coords {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--pf-surface-muted);
+  color: var(--pf-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visible para todos los botones del panel (teclado) */
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.tab:focus-visible,
+.quick-btn:focus-visible,
+.link-btn:focus-visible,
+.topbar-icon-btn:focus-visible {
+  outline: 2px solid var(--pf-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 900px) {
+  .sp-base-grid,
+  .sp-extra,
+  .inline-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- Celular: modal tipo "hoja" desde abajo ---------- */
+@media (max-width: 640px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal,
+  .modal--sm,
+  .modal--md,
+  .modal--lg,
+  .modal-lg {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    max-height: 92dvh;
+    padding: 0 1rem;
+    border-radius: 18px 18px 0 0;
+    animation: pfSheetIn 0.22s ease;
+  }
+  .modal-header {
+    margin: 0 -1rem 1rem;
+    padding: 0.9rem 1rem;
+  }
+  .modal-header h3 { font-size: 1.02rem; }
+
+  .modal .modal-body,
+  .modal .modal-body.grid-2,
+  .modal .modal-body.grid-3,
+  .sp-base-grid,
+  .sp-extra,
+  .inline-3 { grid-template-columns: minmax(0, 1fr); }
+
+  .modal-actions {
+    flex-direction: column;
+    margin: 1rem -1rem 0;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+  .modal-actions .btn { width: 100%; }
+
+  /* 16px evita el zoom automatico de iOS al enfocar un campo */
+  .nice-form input,
+  .nice-form select,
+  .nice-form textarea { font-size: 16px; }
+}
+
+@keyframes pfSheetIn {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .modal { animation: none !important; }
+  .nice-form input,
+  .nice-form select,
+  .nice-form textarea { transition: none; }
+}
+
+/* ==========================================================================
+   Controles de seleccion modernos
+   Radios nativos (accesibles con teclado y lectores de pantalla) ocultos
+   visualmente y presentados como tarjetas o control segmentado. Usan el
+   mismo ngModel/name/valores que los <select> que reemplazan.
+   ========================================================================== */
+
+/* Etiqueta de un grupo de opciones (equivale al <label> del select) */
+.field-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--pf-label);
+}
+
+/* El radio queda oculto pero sigue siendo el control real */
+.segmented-option input[type='radio'],
+.choice-card input[type='radio'] {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Control segmentado (2-4 opciones cortas) ---------- */
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--pf-surface-muted);
+  border: 1px solid #e3e7ee;
+}
+.nice-form label.segmented-option,
+.segmented-option {
+  position: relative;
+  flex: 1 1 0;
+  min-width: max-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--pf-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.segmented-option .material-symbols-outlined { font-size: 18px; }
+.segmented-option:hover { color: var(--pf-text); }
+.segmented-option:has(input:checked) {
+  background: var(--pf-surface);
+  color: var(--pf-text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(16, 24, 40, 0.1);
+}
+.segmented-option:has(input:focus-visible) {
+  outline: 2px solid var(--pf-focus);
+  outline-offset: 1px;
+}
+.segmented-option:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- Tarjetas seleccionables (tipos con icono) ---------- */
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.6rem;
+}
+.choice-grid--compact { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+
+.nice-form label.choice-card,
+.choice-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-height: 72px;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 12px;
+  background: var(--pf-surface);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.choice-card:hover { border-color: var(--pf-border-hover); }
+.choice-card .choice-icon {
+  font-size: 22px;
+  color: var(--pf-muted);
+  margin-bottom: 0.15rem;
+}
+.choice-card .choice-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--pf-text);
+  line-height: 1.25;
+}
+.choice-card .choice-desc {
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--pf-muted);
+  line-height: 1.3;
+}
+.choice-card:has(input:checked) {
+  border-color: var(--pf-accent);
+  background: #fff7f7;
+  box-shadow: 0 0 0 1px var(--pf-accent);
+}
+.choice-card:has(input:checked) .choice-icon { color: var(--pf-accent); }
+.choice-card:has(input:checked)::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--pf-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+.choice-card:has(input:focus-visible) {
+  outline: 2px solid var(--pf-focus);
+  outline-offset: 2px;
+}
+
+/* Grupo con error despues de intentar guardar */
+form.ng-submitted .segmented:has(input.ng-invalid),
+.segmented:has(input.ng-invalid.ng-touched) { border-color: var(--pf-danger); }
+form.ng-submitted .choice-grid:has(input.ng-invalid) .choice-card,
+.choice-grid:has(input.ng-invalid.ng-touched) .choice-card { border-color: #e9a6a6; }
+
+/* Confirmacion de empresa encontrada para el CUIL escrito */
+.field-hint--ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: flex-start;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #15803d;
+  font-weight: 600;
+}
+.field-hint--ok .material-symbols-outlined { font-size: 16px; }
+
+@media (max-width: 640px) {
+  .choice-grid,
+  .choice-grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .segmented-option { min-height: 40px; }
+}
+
+/* ---------- Ubicacion de campos en grillas de 3 columnas ---------- */
+.modal .span-2 { grid-column: span 2; }
+.modal .field--full { grid-column: 1 / -1; }
+.field--full > .segmented { align-self: flex-start; }
+.choice-grid--compact { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+/* El control segmentado nunca se parte en dos renglones */
+.segmented { flex-wrap: nowrap; }
+.nice-form label.segmented-option,
+.segmented-option { min-width: 0; white-space: nowrap; padding: 0.4rem 0.7rem; }
+@media (max-width: 900px) {
+  .choice-grid--compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .modal .span-2 { grid-column: 1 / -1; }
+  .choice-grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .field--full > .segmented { align-self: stretch; }
+}
+
+/* Cada opcion toma el ancho de su texto (sin recortes) y, si no entra,
+   el texto baja de renglon dentro de la misma opcion. */
+.nice-form label.segmented-option,
+.segmented-option {
+  flex: 1 1 auto;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+}

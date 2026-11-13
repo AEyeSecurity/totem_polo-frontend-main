@@ -7,36 +7,37 @@ import { ActivatedRoute, Router } from '@angular/router';
   standalone: true,
   imports: [],
   template: `
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:FILL@0..1&display=swap" rel="stylesheet" />
     <div class="admin-layout auth-pending">
       <div class="card auth-card">
         <div class="auth-icon">
           <span class="material-symbols-outlined info">person_add</span>
         </div>
 
-        <h2>Cuenta No Registrada</h2>
-        <p>Necesitas que te creen una cuenta para acceder al sistema.</p>
+        <h2>Cuenta no registrada</h2>
+        <p>Necesita que se le cree una cuenta para acceder al sistema.</p>
 
         <div class="alert alert--warning">
-          <strong>Tu email no está registrado:</strong> {{ userEmail }}
+          <strong>Su email no está registrado:</strong> {{ userEmail }}
         </div>
 
         <div class="suggestions">
-          <h4>¿Qué podés hacer?</h4>
+          <h4>¿Qué puede hacer?</h4>
           <ul>
             <li>Contactar al administrador del Polo 52</li>
             <li>Enviar un correo a <strong>admin&#64;polo52.com</strong></li>
-            <li>Esperar la confirmación de creación de tu cuenta</li>
+            <li>Esperar la confirmación de creación de su cuenta</li>
           </ul>
         </div>
 
         <button class="btn primary" (click)="contactAdmin()">
           <span class="material-symbols-outlined">send</span>
-          Enviar Email al Admin
+          Enviar email al administrador
         </button>
 
         <button class="btn ghost" (click)="goToLogin()">
           <span class="material-symbols-outlined">arrow_back</span>
-          Volver al Login
+          Volver al inicio de sesión
         </button>
       </div>
     </div>

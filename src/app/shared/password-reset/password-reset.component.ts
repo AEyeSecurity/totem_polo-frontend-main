@@ -16,7 +16,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './password-reset.component.html',
-  styleUrls: ['./password-reset.component.css'],
+  styleUrls: ['./password-reset.component.css', '../styles/auth-modern.css'],
 })
 export class PasswordResetComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -52,13 +52,13 @@ export class PasswordResetComponent implements OnInit {
 
     if (!this.token) {
       this.error =
-        'Token no válido o ausente. Por favor, verifica el enlace de recuperación.';
+        'Token no válido o ausente. Por favor, verifique el enlace de recuperación.';
     } else {
       this.verifyTokenValidity();
     }
   }
 
-  // Verificar validez del token usando tu endpoint
+  // Verificar validez del token usando su endpoint
   verifyTokenValidity() {
     this.verifyingToken = true;
     this.error = '';
@@ -84,7 +84,7 @@ export class PasswordResetComponent implements OnInit {
     });
   }
 
-  // Manejar errores específicos del token según tu backend
+  // Manejar errores específicos del token según su backend
   handleTokenError(response: any) {
     if (response.expired) {
       this.tokenExpired = true;
@@ -124,7 +124,7 @@ export class PasswordResetComponent implements OnInit {
 
     // Validaciones del formulario
     if (form.invalid) {
-      this.error = 'Por favor, completa todos los campos correctamente.';
+      this.error = 'Por favor, complete todos los campos correctamente.';
       return;
     }
 
@@ -143,7 +143,7 @@ export class PasswordResetComponent implements OnInit {
 
     if (!this.token) {
       this.error =
-        'Token no válido. Por favor, solicita un nuevo enlace de reset.';
+        'Token no válido. Por favor, solicite un nuevo enlace de reset.';
       return;
     }
 
@@ -151,13 +151,13 @@ export class PasswordResetComponent implements OnInit {
     if (!this.tokenValid || this.tokenExpired || this.tokenUsed) {
       if (this.tokenExpired) {
         this.error =
-          'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.';
+          'El enlace de recuperación ha expirado. Por favor, solicite uno nuevo.';
       } else if (this.tokenUsed) {
         this.error =
-          'Este enlace de recuperación ya fue utilizado. Por favor, solicita uno nuevo.';
+          'Este enlace de recuperación ya fue utilizado. Por favor, solicite uno nuevo.';
       } else {
         this.error =
-          'El enlace de recuperación no es válido. Por favor, solicita uno nuevo.';
+          'El enlace de recuperación no es válido. Por favor, solicite uno nuevo.';
       }
       return;
     }
@@ -195,7 +195,7 @@ export class PasswordResetComponent implements OnInit {
           this.successMessage =
             response.message ||
             response.error || // A veces el mensaje de éxito viene en "error"
-            'Contraseña restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.';
+            'Contraseña restablecida con éxito. Ya puede iniciar sesión con su nueva contraseña.';
           this.message = this.successMessage;
 
           // Limpiar formulario por seguridad
@@ -252,7 +252,7 @@ export class PasswordResetComponent implements OnInit {
     });
   }
 
-  // CORREGIDO: Manejar errores específicos del reset según tu backend
+  // CORREGIDO: Manejar errores específicos del reset según su backend
   handleResetError(errorResponse: any) {
     // Resetear estados antes de evaluar
     this.tokenExpired = false;
@@ -266,7 +266,7 @@ export class PasswordResetComponent implements OnInit {
     if (errorResponse.password_reused === true) {
       this.passwordReused = true;
       this.error =
-        'No puedes usar una contraseña que ya hayas utilizado anteriormente. Elige una diferente.';
+        'No puede usar una contraseña que ya haya utilizado anteriormente. Elija una diferente.';
       // Mantener el token como válido para permitir reintentos
       return;
     }
@@ -284,7 +284,7 @@ export class PasswordResetComponent implements OnInit {
     ) {
       this.passwordReused = true;
       this.error =
-        'No puedes usar una contraseña que ya hayas utilizado anteriormente. Elige una diferente.';
+        'No puede usar una contraseña que ya haya utilizado anteriormente. Elija una diferente.';
       // Token permanece válido para reintentar con otra contraseña
       return;
     }
@@ -298,7 +298,7 @@ export class PasswordResetComponent implements OnInit {
     ) {
       this.passwordsMismatch = true;
       this.error =
-        'Las contraseñas no coinciden. Verifica e intenta nuevamente.';
+        'Las contraseñas no coinciden. Verifique e intente nuevamente.';
       return;
     }
 
@@ -323,7 +323,7 @@ export class PasswordResetComponent implements OnInit {
       this.tokenExpired = true;
       this.tokenValid = false;
       this.error =
-        'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.';
+        'El enlace de recuperación ha expirado. Por favor, solicite uno nuevo.';
       return;
     }
 
@@ -346,7 +346,7 @@ export class PasswordResetComponent implements OnInit {
         // Mostrar mensaje de éxito tardío pero no redirigir automáticamente
         this.resetCompleted = true;
         this.successMessage =
-          'Contraseña restablecida exitosamente en intento anterior. Ya puedes iniciar sesión con tu nueva contraseña.';
+          'Contraseña restablecida exitosamente en intento anterior. Ya puede iniciar sesión con su nueva contraseña.';
         this.message = this.successMessage;
         this.tokenUsed = true;
         this.tokenValid = false;
@@ -362,7 +362,7 @@ export class PasswordResetComponent implements OnInit {
       this.tokenUsed = true;
       this.tokenValid = false;
       this.error =
-        'Este enlace de recuperación ya fue utilizado. Si no cambiaste tu contraseña exitosamente, solicita un nuevo enlace.';
+        'Este enlace de recuperación ya fue utilizado. Si no cambió su contraseña, solicite un nuevo enlace.';
       return;
     }
 
@@ -375,7 +375,7 @@ export class PasswordResetComponent implements OnInit {
     ) {
       this.tokenValid = false;
       this.error =
-        'El enlace de recuperación no es válido. Por favor, solicita uno nuevo.';
+        'El enlace de recuperación no es válido. Por favor, solicite uno nuevo.';
       return;
     }
 
@@ -387,7 +387,7 @@ export class PasswordResetComponent implements OnInit {
     } else if (errorResponse.message) {
       this.error = errorResponse.message;
     } else {
-      this.error = 'Error al restablecer la contraseña. Inténtalo nuevamente.';
+      this.error = 'Error al restablecer la contraseña. Inténtelo nuevamente.';
     }
   }
 

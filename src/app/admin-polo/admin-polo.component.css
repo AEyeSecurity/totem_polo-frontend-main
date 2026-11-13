@@ -4,10 +4,10 @@
    body" de abajo no alcanza esos elementos porque, con la encapsulación de
    estilos de Angular, nunca matchea el <html>/<body> real del documento. */
 :host {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -54,13 +54,13 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .topbar-title .app-title{
   font-weight:900;
   font-size:30px;
-  font-family:'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .topbar-title .app-sub{
   font-size:.85rem;
   color:#777;
   margin-top:-2px;
-  font-family:'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .topbar-right{
   display:flex;
@@ -76,7 +76,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   border-radius:12px;
   font-weight:600;
   font-size:.9rem;
-  font-family:'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   border:1px solid transparent;
   box-shadow:0 2px 8px rgba(16,24,40,.06);
   animation:alert-in .25s ease;
@@ -188,7 +188,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   transition:box-shadow .25s ease, transform .25s ease;
 }
 .card:hover { box-shadow:0 6px 16px rgba(16,24,40,.07); }
-.card h2 { font-size:1.1rem; font-weight:700; margin-bottom:1rem; font-family: 'Inter', sans-serif; }
+.card h2 { font-size:1.1rem; font-weight:700; margin-bottom:1rem; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 
 /* Grids */
 .card-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
@@ -295,7 +295,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .setting-card,
 .activity-list,
 .quick-list {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: inherit;
 }
 
@@ -324,7 +324,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   align-items:center;
   gap:.75rem;
 }
-.page-header h1 { font-size:1.2rem; font-weight:600; color:#1a284b;  font-family: 'Inter', sans-serif;}
+.page-header h1 { font-size:1.2rem; font-weight:600; color:#1a284b;  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
 
 /* Buscador inline */
 .inline-search { display:flex; gap:.5rem; align-items:center; }
@@ -341,10 +341,10 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 
 /* Formularios */
 .nice-form .field { display:flex; flex-direction:column; margin-bottom:1rem; min-width:0; }
-.nice-form label { font-size:.85rem; font-weight:500; margin-bottom:.3rem; color:#30406b;  font-family: 'Inter', sans-serif;}
+.nice-form label { font-size:.85rem; font-weight:500; margin-bottom:.3rem; color:#30406b;  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
 .nice-form input, .nice-form select, .nice-form textarea{
   width:100%; padding:.7rem .8rem; border:1px solid #ddd; border-radius:8px;
-  font-size:.95rem; background:#fff; transition:border-color .2s ease, box-shadow .2s ease; font-family: 'Inter', sans-serif;
+  font-size:.95rem; background:#fff; transition:border-color .2s ease, box-shadow .2s ease; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .nice-form input, .nice-form select { height:44px; line-height:44px; }
 .nice-form textarea { min-height:120px; line-height:1.35; resize:vertical; }
@@ -451,9 +451,9 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap:.5rem; padding:.8rem 0; border-bottom:1px solid #eee;
   align-items:center;
-  font-family: 'Inter', sans-serif; font-size:15px;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size:15px;
 }
-.table .thead{ font-weight:600; color:#2b3a62; font-family: 'Inter', sans-serif; }
+.table .thead{ font-weight:600; color:#2b3a62; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 
 /* 👉 Alinear "Acciones" a la derecha */
 .table .thead > div:last-child { justify-self:end; text-align:right; }
@@ -682,7 +682,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 /* Base */
 html, body {
   font-size: 18px;   /* 👈 Ajustá aquí el tamaño global (ej. 14px o 15px) */
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.4;
 }
 
@@ -1321,6 +1321,6 @@ html, body {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 0.95rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 

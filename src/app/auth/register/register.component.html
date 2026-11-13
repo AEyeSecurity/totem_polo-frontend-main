@@ -1,3 +1,4 @@
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:FILL@0..1&display=swap" rel="stylesheet" />
 <!-- Contenedor principal, mismo fondo e imagen que login -->
 <div class="main-container">
   <div class="login-modal register-modal">
@@ -15,21 +16,19 @@
 
       <div class="content-section">
         <h2>
-          Sumate al<br /><span class="highlight">Parque Industrial</span>
+          Súmese al<br /><span class="highlight">Parque Industrial Polo 52</span>
         </h2>
         <p>
-          Registrá tu empresa y su usuario administrador. Tu solicitud queda
-          pendiente de aprobación del administrador del Polo: te avisamos por
-          email apenas esté activa.
+          Registre su empresa y su usuario administrador. La solicitud quedará pendiente de aprobación por parte del administrador del Polo y le avisaremos por email cuando esté activa.
         </p>
 
         <ul class="features">
-          <li><i class="fas fa-building"></i> Gestión integral de tu empresa</li>
+          <li><i class="fas fa-building"></i> Gestión integral de su empresa</li>
           <li><i class="fas fa-user-shield"></i> Usuario administrador propio</li>
           <li>
             <i class="fas fa-envelope-circle-check"></i> Confirmación por email
           </li>
-          <li><i class="fas fa-headset"></i> Soporte técnico especializado</li>
+          <li><i class="fas fa-robot"></i> Asistente virtual del Polo</li>
         </ul>
       </div>
 
@@ -46,8 +45,8 @@
           <div class="login-icon">
             <img src="assets/images/polologo-blanco.png" alt="Logo Polo 52" />
           </div>
-          <h2>Registrá tu empresa</h2>
-          <p>Completá los datos para solicitar tu alta</p>
+          <h2>Registre su empresa</h2>
+          <p>Complete los datos para solicitar el alta</p>
         </div>
 
         <form
@@ -55,8 +54,12 @@
           (ngSubmit)="onSubmit(registerForm)"
           novalidate
           class="register-scroll"
-        >
-          <div class="form-group">
+>
+<div class="form-step">
+<span class="step-num" aria-hidden="true">1</span>
+<div><h3>Datos de la empresa</h3><p>Información que verá el administrador del Polo.</p></div>
+</div>
+<div class="form-group">
             <label class="form-label" for="r_cuil">
               <i class="fas fa-id-card"></i>
               CUIL
@@ -69,14 +72,17 @@
                 name="cuil"
                 [(ngModel)]="form.cuil"
                 placeholder="20304050607"
+                inputmode="numeric"
                 required
                 #rCuil="ngModel"
                 [ngClass]="{ error: rCuil.invalid && (rCuil.touched || registerForm.submitted) }"
               />
             </div>
             @if (rCuil.invalid && (rCuil.touched || registerForm.submitted)) {
-              <span class="field-error">Ingresá el CUIL de la empresa.</span>
-            }
+              <span class="field-error">Ingrese el CUIL de la empresa.</span>
+} @else {
+<span class="field-hint">Solo números, sin guiones.</span>
+}
           </div>
 
           <div class="form-group">
@@ -98,7 +104,7 @@
               />
             </div>
             @if (rNombre.invalid && (rNombre.touched || registerForm.submitted)) {
-              <span class="field-error">Ingresá el nombre de la empresa.</span>
+              <span class="field-error">Ingrese el nombre de la empresa.</span>
             }
           </div>
 
@@ -120,7 +126,7 @@
               />
             </div>
             @if (rRubro.invalid && (rRubro.touched || registerForm.submitted)) {
-              <span class="field-error">Ingresá el rubro de la empresa.</span>
+              <span class="field-error">Ingrese el rubro de la empresa.</span>
             }
           </div>
 
@@ -143,7 +149,7 @@
               />
             </div>
             @if (rEmpleados.invalid && (rEmpleados.touched || registerForm.submitted)) {
-              <span class="field-error">Ingresá la cantidad de empleados.</span>
+              <span class="field-error">Ingrese la cantidad de empleados.</span>
             }
           </div>
 
@@ -166,7 +172,7 @@
               />
             </div>
             @if (rHorario.invalid && (rHorario.touched || registerForm.submitted)) {
-              <span class="field-error">Ingresá el horario de trabajo.</span>
+              <span class="field-error">Ingrese el horario de trabajo.</span>
             }
           </div>
 
@@ -181,13 +187,16 @@
                 id="r_obs"
                 name="observaciones"
                 rows="2"
-                placeholder="Contanos de qué se trata tu empresa: a qué se dedica, cómo y cuándo se fundó, etc."
+                placeholder="Describa la empresa: a qué se dedica, cómo y cuándo se fundó, etc."
                 [(ngModel)]="form.observaciones"
               ></textarea>
             </div>
           </div>
 
-          <div class="divider"><span>TU USUARIO ADMINISTRADOR</span></div>
+          <div class="form-step">
+<span class="step-num" aria-hidden="true">2</span>
+<div><h3>Usuario administrador</h3><p>Con estos datos ingresará a la plataforma.</p></div>
+</div>
 
           <div class="form-group">
             <label class="form-label" for="r_usuario">
@@ -235,7 +244,7 @@
               />
             </div>
             @if (rEmail.invalid && (rEmail.touched || registerForm.submitted)) {
-              <span class="field-error">Ingresá un email válido.</span>
+              <span class="field-error">Ingrese un email válido.</span>
             }
           </div>
 
@@ -252,14 +261,15 @@
                 autocomplete="new-password"
                 [type]="showPassword ? 'text' : 'password'"
                 [(ngModel)]="form.password"
-                placeholder="••••••••"
+placeholder="Cree una contraseña"
                 required
                 #rPassword="ngModel"
               />
               <button
                 type="button"
                 class="password-toggle"
-                (click)="togglePassword()"
+[attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+(click)="togglePassword()"
                 tabindex="-1"
               >
                 <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
@@ -281,19 +291,23 @@
                 autocomplete="new-password"
                 [type]="showConfirmPassword ? 'text' : 'password'"
                 [(ngModel)]="confirmPassword"
-                placeholder="••••••••"
+placeholder="Repita la contraseña"
                 required
                 #rConfirm="ngModel"
               />
               <button
                 type="button"
                 class="password-toggle"
-                (click)="toggleConfirmPassword()"
+[attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+(click)="toggleConfirmPassword()"
                 tabindex="-1"
               >
                 <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-              </button>
-            </div>
+</button>
+</div>
+@if (confirmPassword && form.password !== confirmPassword) {
+<span class="field-error">Las contraseñas no coinciden.</span>
+}
           </div>
 
           <button
@@ -310,7 +324,7 @@
           }
 
           <div class="register-prompt">
-            ¿Ya tenés cuenta? <a routerLink="/login">Iniciar sesión</a>
+            ¿Ya tiene cuenta? <a routerLink="/login">Iniciar sesión</a>
           </div>
         </form>
       } @else {
@@ -319,13 +333,11 @@
             <i class="fas fa-envelope-circle-check"></i>
           </div>
           <h2>¡Solicitud enviada!</h2>
-          <p>Tu registro quedó pendiente de aprobación</p>
+          <p>Su registro quedó pendiente de aprobación</p>
         </div>
 
         <div class="success-message">
-          Recibimos la solicitud de registro de tu empresa. Te vamos a avisar
-          por email apenas el administrador del Polo la apruebe y puedas
-          iniciar sesión.
+          Recibimos la solicitud de registro de su empresa. Le avisaremos por email cuando el administrador del Polo la apruebe y pueda iniciar sesión.
         </div>
 
         <a routerLink="/login" class="login-button confirm-back-btn">
