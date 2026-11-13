@@ -10,3 +10,34 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+
+/* Los paneles (admin-polo, admin-empresa, login, etc.) miden casi todo en
+   rem: letra, padding de botones y de campos, gaps... Achicando el tamaño
+   de fuente de la raiz de forma fluida en pantallas angostas, todo eso se
+   va achicando junto y proporcional al ancho real de pantalla (igual que
+   el robot del chat), sin tener que retocar cada componente a mano. En
+   escritorio (min 768px) no cambia nada: sigue siendo el 16px de siempre. */
+@media (max-width: 768px) {
+  html {
+    font-size: clamp(12px, 3.2vw, 16px);
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: clamp(11px, 3vw, 14px);
+  }
+}
+
+/* Los campos de texto son la excepcion: siempre tienen que quedar en al
+   menos 16px reales, sin importar cuanto se haya achicado la raiz de mas
+   arriba (o lo que diga el CSS propio de cada componente, que suele fijar
+   1rem asumiendo los 16px de siempre), porque por debajo de eso
+   Safari/Chrome en iOS hacen zoom automatico al tocar el campo y no
+   vuelven a alejar la vista solos. Por eso el !important: tiene que ganarle
+   a cualquier regla de componente. */
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem) !important;
+}

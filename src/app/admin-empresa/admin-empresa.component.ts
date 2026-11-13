@@ -37,7 +37,7 @@ import {
   buildFormErrorsFromHttpError,
   getFieldErrors as getFieldErrorsUtil,
   hasFieldError as hasFieldErrorUtil,
-  GENERIC_FIELD_ERROR_TRANSLATIONS,
+  resolveFieldErrorMessage,
 } from '../shared/form-errors.util';
 import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
 import {
@@ -90,12 +90,15 @@ export class EmpresaMeComponent implements OnInit {
     | 'empresas'
     | 'perfil'
     | 'config' = 'dashboard';
-  // Menu lateral en celular/tablet (solo presentacion)
-  mobileMenuOpen = false;
+  // Menu lateral en celular/tablet (solo presentacion). La variable
+  // mobileMenuOpen se declara mas abajo (viene de main).
   navMobile(tab: EmpresaMeComponent['activeTab']): void {
     this.mobileMenuOpen = false;
     this.goTo(tab);
   }
+
+  // Menu lateral en mobile
+  mobileMenuOpen = false;
 
   // Directorio de empresas del parque (networking entre inquilinos)
   empresasDirectorio: EmpresaDirectorio[] = [];
@@ -186,6 +189,12 @@ export class EmpresaMeComponent implements OnInit {
     return !!this.submitting[formName];
   }
 
+  // Patentes argentinas (vieja ABC123 o Mercosur AB123CD), una o varias
+  // separadas por coma; espacios y guiones se toleran (el backend las normaliza).
+  readonly patentePattern =
+    '\\s*([A-Za-z]{3}[\\s-]?\\d{3}|[A-Za-z]{2}[\\s-]?\\d{3}[\\s-]?[A-Za-z]{2})(\\s*,\\s*([A-Za-z]{3}[\\s-]?\\d{3}|[A-Za-z]{2}[\\s-]?\\d{3}[\\s-]?[A-Za-z]{2}))*\\s*';
+  readonly patenteFormatoMsg = 'Formato de patente: ABC123 o AB123CD (varias, separadas por coma).';
+
   // Tipos desde la BD
   tiposVehiculo: TipoVehiculo[] = [];
   tiposServicio: TipoServicio[] = [];
@@ -228,16 +237,24 @@ export class EmpresaMeComponent implements OnInit {
   // Solo presentacion: icono y resumen de los datos que pide cada tipo en los
   // selectores visuales de "Nuevo vehiculo" y "Nuevo servicio". Los ids son
   // los mismos que usan los @switch del template para mostrar los campos.
-  readonly iconoTipoVehiculo: Record<number, string> = {
-    1: 'local_shipping',
-    2: 'directions_car',
-    3: 'airport_shuttle',
+  // Por clase (nombre del tipo), igual que los @switch del formulario:
+  // los ids de tipo_vehiculo no siguen un orden fijo.
+  private readonly iconoPorClaseVehiculo: Record<string, string> = {
+    corporativo: 'local_shipping',
+    personal: 'directions_car',
+    terceros: 'airport_shuttle',
   };
-  readonly ayudaTipoVehiculo: Record<number, string> = {
-    1: 'Cantidad, patente y carga',
-    2: 'Cantidad y patente (opcional)',
-    3: 'Cantidad y carga',
+  private readonly ayudaPorClaseVehiculo: Record<string, string> = {
+    corporativo: 'Cantidad, patente y carga',
+    personal: 'Cantidad y patente (opcional)',
+    terceros: 'Cantidad y carga',
   };
+  iconoVehiculo(id: number): string {
+    return this.iconoPorClaseVehiculo[this.getVehiculoClase(id) ?? ''] ?? 'directions_car';
+  }
+  ayudaVehiculo(id: number): string {
+    return this.ayudaPorClaseVehiculo[this.getVehiculoClase(id) ?? ''] ?? '';
+  }
   readonly iconoTipoServicio: Record<number, string> = {
     1: 'water_drop',
     2: 'park',
@@ -535,7 +552,7 @@ export class EmpresaMeComponent implements OnInit {
     return this.empresaData?.contactos?.length ?? 0;
   }
   get estaActiva(): boolean {
-    return !!this.empresaData;
+    return !!this.empresaData?.estado;
   }
   get desdeIngreso(): string {
     return this.formatMonthYear(this.empresaData?.fecha_ingreso);
@@ -1183,17 +1200,18 @@ export class EmpresaMeComponent implements OnInit {
       (field, message, form) => this.translateFieldError(field, message, form),
       (detail, form) => this.translateGenericError(detail, form)
     );
-    this.formErrors[formName] = errorMessages;
-
-    const generalError = errorMessages.find((e) => e.field === 'general');
-    if (generalError) {
-      this.showMessage(generalError.message, 'error');
-    } else {
-      this.showMessage(
-        `Error en ${operation}. Revise los campos marcados.`,
-        'error'
-      );
+    // Cada error se muestra en UN solo lugar: los de un formulario, en su
+    // propio bloque de errores; los generales, en el aviso de la página.
+    // Antes salían duplicados.
+    if (formName !== 'general') {
+      this.formErrors[formName] = errorMessages;
+      return;
     }
+    const generalError = errorMessages.find((e) => e.field === 'general');
+    this.showMessage(
+      generalError?.message || `Error en ${operation}. Intente de nuevo.`,
+      'error'
+    );
   }
 
   private translateFieldError(
@@ -1245,12 +1263,7 @@ export class EmpresaMeComponent implements OnInit {
       },
     };
 
-    const formTranslations = translations[formName];
-    if (formTranslations && formTranslations[field]) {
-      return formTranslations[field];
-    }
-
-    return GENERIC_FIELD_ERROR_TRANSLATIONS[message] || message;
+    return resolveFieldErrorMessage(message, translations[formName]?.[field]);
   }
 
   private translateGenericError(detail: string, _formName: string): string {
@@ -1352,6 +1365,9 @@ export class EmpresaMeComponent implements OnInit {
         this.comercialChatLoading = false;
         if (res.done) {
           this.pushActivity('ok', 'Informacion comercial completada');
+          // al terminar, el chat se reemplaza por la ficha guardada: sin este
+          // aviso el "¡Listo!" del asistente no llegaba a verse
+          this.showMessage(res.reply || 'Informacion comercial completada', 'success');
           this.loadComercialInfo();
         }
       },
@@ -1465,6 +1481,15 @@ export class EmpresaMeComponent implements OnInit {
   // accesos rapidos
   goTo(tab: EmpresaMeComponent['activeTab']) {
     this.setActiveTab(tab);
+    this.mobileMenuOpen = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
   quickAddVehiculo() {
     this.setActiveTab('vehiculos');
@@ -2075,6 +2100,23 @@ export class EmpresaMeComponent implements OnInit {
     return t?.tipo ?? '-';
   }
 
+  /**
+   * Clase de vehículo según el NOMBRE del tipo (no el id): los ids de la tabla
+   * tipo_vehiculo no siguen un orden fijo (hoy 2 = terceros y 3 = personales),
+   * así que elegir los campos por número mostraba los de otro tipo.
+   */
+  getVehiculoClase(id: any): 'corporativo' | 'personal' | 'terceros' | null {
+    const nombre = this.getTipoVehiculoName(id).toLowerCase();
+    if (nombre.startsWith('corporativ')) return 'corporativo';
+    if (nombre.startsWith('personal')) return 'personal';
+    if (nombre.startsWith('tercer')) return 'terceros';
+    return null;
+  }
+
+  get vehiculoFormClase(): 'corporativo' | 'personal' | 'terceros' | null {
+    return this.getVehiculoClase(this.vehiculoForm.id_tipo_vehiculo);
+  }
+
   getTipoServicioName(id: any): string {
     const nid = Number(id);
     const t = this.tiposServicio?.find(
@@ -2165,24 +2207,23 @@ export class EmpresaMeComponent implements OnInit {
   }
 
   onVehiculoTipoChange(): void {
-    const tipo = Number(this.vehiculoForm.id_tipo_vehiculo);
     const currentDatos = this.vehiculoForm.datos || {};
 
-    switch (tipo) {
-      case 1: // Corporativo
+    switch (this.vehiculoFormClase) {
+      case 'corporativo':
         this.vehiculoForm.datos = {
           cantidad: currentDatos.cantidad ?? null,
           patente: currentDatos.patente ?? '',
           carga: currentDatos.carga ?? null,
         };
         break;
-      case 2: // Personal
+      case 'personal':
         this.vehiculoForm.datos = {
           cantidad: currentDatos.cantidad ?? null,
           patente: currentDatos.patente ?? '',
         };
         break;
-      case 3: // Terceros
+      case 'terceros':
         this.vehiculoForm.datos = {
           cantidad: currentDatos.cantidad ?? null,
           carga: currentDatos.carga ?? null,

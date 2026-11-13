@@ -62,6 +62,31 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   margin-top:-2px;
   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
+.topbar-tabs{
+  display:flex;
+  align-items:center;
+  gap:.25rem;
+  flex-wrap:wrap;
+}
+.topbar .tab{
+  border:none;
+  background:transparent;
+  padding:.5rem .9rem;
+  border-radius:999px;
+  color:#555;
+  cursor:pointer;
+  transition:.2s ease;
+  white-space:nowrap;
+  font-weight:500;
+  font-size:.9rem;
+}
+.topbar .tab:hover{ background:#f5f5f5; }
+.topbar .tab.active{
+  background:#e9efff;
+  color:#1a284b;
+  font-weight:600;
+}
+
 .topbar-right{
   display:flex;
   align-items:center;
@@ -142,22 +167,128 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   line-height: 1;
 }
 
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #1a284b;
+  cursor: pointer;
+}
+.mobile-menu-btn:hover { background: #eaeaea; }
+
+.mobile-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1100;
+  animation: fadeIn 0.2s ease;
+}
+
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  bottom: 0;
+  width: min(300px, 82vw);
+  background: #fff;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  /* "left" en vez de "transform" a proposito: un transform en este
+     ancestro crearia un containing block nuevo y los modales fixed
+     que se abren desde dentro (ej. confirmar cierre de sesion) quedarian
+     encajonados en el ancho del sidebar en vez de centrarse en toda la
+     pantalla. */
+  transition: left 0.25s ease;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+}
+.mobile-sidebar.open { left: 0; }
+
+.mobile-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+.mobile-sidebar-header .app-title { font-weight: 900; font-size: 22px; }
+.mobile-sidebar-header .app-sub { font-size: 0.8rem; color: #777; }
+
+.mobile-sidebar-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem;
+}
+.mobile-sidebar-tabs .tab,
+.mobile-sidebar-footer .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  color: #555;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.mobile-sidebar-tabs .tab .material-symbols-outlined,
+.mobile-sidebar-footer .tab .material-symbols-outlined {
+  font-size: 20px;
+  color: inherit;
+}
+.mobile-sidebar-tabs .tab:hover,
+.mobile-sidebar-footer .tab:hover { background: #f5f5f5; }
+.mobile-sidebar-tabs .tab.active,
+.mobile-sidebar-footer .tab.active {
+  background: #e9efff;
+  color: #1a284b;
+  font-weight: 600;
+}
+
+.mobile-sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border-top: 1px solid #eee;
+}
+.mobile-sidebar-footer app-logout-button {
+  display: block;
+  margin-top: 0.5rem;
+}
+.mobile-sidebar-footer app-logout-button ::ng-deep .btn {
+  width: 100%;
+  justify-content: center;
+}
+
 @media (max-width: 860px) {
-  .topbar {
-    flex-wrap: wrap;
-    row-gap: 0.5rem;
-  }
-  .topbar-left {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
+  .topbar-tabs,
   .topbar-right {
-    flex: 0 0 auto;
+    display: none;
   }
-  .topbar-tabs {
-    order: 3;
-    width: 100%;
-    flex-wrap: wrap;
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 861px) {
+  .mobile-sidebar,
+  .mobile-sidebar-backdrop {
+    display: none;
   }
 }
 
@@ -1130,30 +1261,6 @@ html, body {
     column-gap: .7rem !important;
   }
 }
-.topbar-tabs{
-  display:flex;
-  align-items:center;
-  gap:.25rem;
-  flex-wrap:wrap;
-}
-.topbar .tab{
-  border:none;
-  background:transparent;
-  padding:.5rem .9rem;
-  border-radius:999px;
-  color:#555;
-  cursor:pointer;
-  transition:.2s ease;
-  white-space:nowrap;
-  font-weight:500;
-  font-size:.9rem;
-}
-.topbar .tab:hover{ background:#f5f5f5; }
-.topbar .tab.active{
-  background:#e9efff;
-  color:#1a284b;
-  font-weight:600;
-}
 .tab-badge{
   display:inline-flex;
   align-items:center;
@@ -1322,5 +1429,50 @@ html, body {
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================================
+   PANTALLAS ANGOSTAS: achicar tarjetas del dashboard, botones y tablas
+   La letra/padding en rem ya se achican con el font-size de la raiz
+   (styles.css), pero algunas cosas estan en px fijos (el icono de cada
+   tarjeta del dashboard) o quedaron redefinidas mas de una vez en este
+   archivo (el padding/font-size de las tablas), asi que este bloque va al
+   final a proposito: en un empate de especificidad gana el que aparece
+   despues en el archivo, y esto tiene que ganarle a todo lo de arriba.
+   ============================================================ */
+@media (max-width: 560px) {
+  .card {
+    padding: 1rem;
+  }
+  .card--table {
+    padding: 1rem;
+  }
+  .kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .kpi-icon .material-symbols-outlined {
+    font-size: 18px;
+  }
+  .kpi .kpi-number {
+    font-size: 1.7rem;
+  }
+  .btn {
+    padding: 0.5rem 0.9rem;
+  }
+  .btn.icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  .table .thead,
+  .table .row,
+  .card--table .table .thead,
+  .card--table .table .row {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.82rem;
+  }
 }
 

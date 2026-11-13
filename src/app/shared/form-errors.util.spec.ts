@@ -3,6 +3,7 @@ import {
   hasFieldError,
   buildFormErrorsFromHttpError,
   GENERIC_FIELD_ERROR_TRANSLATIONS,
+  resolveFieldErrorMessage,
 } from './form-errors.util';
 import { FormError } from './form-error.model';
 
@@ -148,6 +149,37 @@ describe('form-errors.util', () => {
     it('should expose translations for the common validation keys', () => {
       expect(GENERIC_FIELD_ERROR_TRANSLATIONS['required']).toBeTruthy();
       expect(GENERIC_FIELD_ERROR_TRANSLATIONS['email']).toBeTruthy();
+    });
+  });
+
+  describe('resolveFieldErrorMessage', () => {
+    it('muestra el mensaje real de un validador del backend, sin el prefijo "Value error,"', () => {
+      expect(
+        resolveFieldErrorMessage(
+          "Value error, El campo 'Dueño' solo puede contener letras y espacios (sin números ni símbolos).",
+          'El dueño del lote es requerido'
+        )
+      ).toBe("El campo 'Dueño' solo puede contener letras y espacios (sin números ni símbolos).");
+    });
+
+    it('reemplaza los mensajes genéricos de Pydantic por la traducción del campo', () => {
+      expect(resolveFieldErrorMessage('Field required', 'El dueño del lote es requerido')).toBe(
+        'El dueño del lote es requerido'
+      );
+      expect(resolveFieldErrorMessage('Input should be a valid integer', 'La manzana debe ser un número')).toBe(
+        'La manzana debe ser un número'
+      );
+    });
+
+    it('sin traducción de campo, usa la genérica o deja el mensaje', () => {
+      expect(resolveFieldErrorMessage('required')).toBe(GENERIC_FIELD_ERROR_TRANSLATIONS['required']);
+      expect(resolveFieldErrorMessage('Field required')).toBe('Field required');
+    });
+
+    it('deja pasar los mensajes propios del backend aunque el campo tenga traducción', () => {
+      expect(resolveFieldErrorMessage('Ya existe un usuario con ese nombre', 'El nombre de usuario es requerido')).toBe(
+        'Ya existe un usuario con ese nombre'
+      );
     });
   });
 });

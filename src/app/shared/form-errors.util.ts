@@ -47,6 +47,28 @@ export const GENERIC_FIELD_ERROR_TRANSLATIONS: Record<string, string> = {
   number: 'Debe ser un número válido',
 };
 
+// Mensajes genéricos (en inglés) que arma Pydantic por su cuenta: no le dicen
+// nada útil al usuario, así que se reemplazan por la traducción del campo.
+const PYDANTIC_GENERIC_MESSAGE =
+  /^(Field required|Input should|String should|List should|Value should|value is not a valid|Input is not|Extra inputs|Missing|Unable to parse)/i;
+
+/**
+ * Decide qué mensaje mostrar para un error de campo que mandó el backend.
+ * - "Value error, X" (validadores propios del backend): se muestra X.
+ * - Mensajes genéricos de Pydantic: se usa `fieldTranslation` (o la genérica).
+ * - Cualquier otro mensaje ya viene pensado para el usuario: se muestra tal cual.
+ * Antes la traducción del campo pisaba siempre al mensaje real, y p.ej. un
+ * dueño de lote con números se mostraba como "El dueño del lote es requerido".
+ */
+export function resolveFieldErrorMessage(message: string, fieldTranslation?: string): string {
+  const valueError = /^Value error,\s*/i;
+  if (valueError.test(message)) return message.replace(valueError, '');
+  if (PYDANTIC_GENERIC_MESSAGE.test(message) || GENERIC_FIELD_ERROR_TRANSLATIONS[message]) {
+    return fieldTranslation || GENERIC_FIELD_ERROR_TRANSLATIONS[message] || message;
+  }
+  return message;
+}
+
 export function getFieldErrors(
   formErrors: Partial<Record<string, FormError[]>>,
   formName: string,

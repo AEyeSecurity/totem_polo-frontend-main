@@ -320,3 +320,10 @@
   .drawer,
   .drawer-backdrop { animation: none !important; }
 }
+
+/* Integracion con main: su hoja oculta .topbar-right en celular; aca se
+   mantiene visible para mostrar el boton de menu (los demas hijos siguen
+   ocultos con la regla de arriba). */
+@media (max-width: 860px) {
+  .topbar-right { display: flex !important; margin-left: auto; }
+}

@@ -30,7 +30,7 @@ import {
   buildFormErrorsFromHttpError,
   getFieldErrors as getFieldErrorsUtil,
   hasFieldError as hasFieldErrorUtil,
-  GENERIC_FIELD_ERROR_TRANSLATIONS,
+  resolveFieldErrorMessage,
 } from '../shared/form-errors.util';
 import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
 import { formatActivityMoment as formatActivityMomentUtil } from '../shared/activity-format.util';
@@ -81,12 +81,15 @@ export class AdminPoloComponent implements OnInit {
   showPasswordModal = false;
 
   activeTab: AdminPoloTab = 'dashboard';
-  // Menu lateral en celular/tablet (solo presentacion)
-  mobileMenuOpen = false;
+  // Menu lateral en celular/tablet (solo presentacion). La variable
+  // mobileMenuOpen se declara mas abajo (viene de main).
   navMobile(tab: AdminPoloTab): void {
     this.mobileMenuOpen = false;
     this.setActiveTab(tab);
   }
+
+  // Menu lateral en mobile
+  mobileMenuOpen = false;
 
   // Sin tope real: se quiere ver el listado completo (una fila por
   // empresa/usuario/servicio/lote), la lista es scrolleable en el html.
@@ -192,6 +195,15 @@ export class AdminPoloComponent implements OnInit {
     id_rol: null as any,
   };
 
+  // Alta de un usuario para una empresa existente (botón en la tabla de empresas)
+  showAddUsuarioEmpresaForm = false;
+  addUsuarioEmpresaTarget: Empresa | null = null;
+  addUsuarioEmpresaForm: { nombre: string; email: string } = {
+    nombre: '',
+    email: '',
+  };
+  addUsuarioEmpresaSubmitting = false;
+
   // Servicios del Polo
   serviciosPolo: ServicioPolo[] = [];
   showServicioPoloForm = false;
@@ -241,7 +253,7 @@ export class AdminPoloComponent implements OnInit {
   // Estados
   loading = false;
   message = '';
-  messageType: 'success' | 'error' = 'success';
+  messageType: 'success' | 'error' | 'info' = 'success';
 
   // PROPIEDADES PARA BÚSQUEDA
   empresaSearchTerm = '';
@@ -268,6 +280,15 @@ export class AdminPoloComponent implements OnInit {
     // Cerrar formularios sin confirmación al cambiar de tab
     this.closeAllFormsWithoutConfirmation();
     this.loadData();
+    this.mobileMenuOpen = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 
   quickViewSolicitudes(): void {
@@ -284,12 +305,14 @@ export class AdminPoloComponent implements OnInit {
     this.openServicioPoloForm();
   }
 
+  // Un lote siempre pertenece a un servicio del Polo: en vez de asignarlo al
+  // primero de la lista sin preguntar, se lleva a la pestaña para elegirlo.
   quickAddLote(): void {
     this.setActiveTab('servicios');
-    if (this.serviciosPolo.length > 0) {
-      const servicio = this.serviciosPolo[0];
-      this.openLoteForm(servicio.id_servicio_polo, servicio.nombre);
-    }
+    this.showMessage(
+      'Elija el servicio del Polo al que pertenece el lote y utilice "Registrar lote para este servicio" en su fila.',
+      'info'
+    );
   }
 
   // MÉTODO PARA CERRAR TODOS LOS FORMULARIOS SIN CONFIRMACIÓN
@@ -306,6 +329,8 @@ export class AdminPoloComponent implements OnInit {
     this.editingUsuario = null;
     this.selectedEmpresa = null;
     this.creatingForEmpresa = false;
+    this.showAddUsuarioEmpresaForm = false;
+    this.addUsuarioEmpresaTarget = null;
 
     // Limpiar errores de todos los formularios
     this.formErrors = {};
@@ -748,18 +773,18 @@ export class AdminPoloComponent implements OnInit {
       (field, message, form) => this.translateFieldError(field, message, form),
       (detail, form) => this.translateGenericError(detail, form)
     );
-    this.formErrors[formName] = errorMessages;
-
-    // Mostrar mensaje general
-    const generalError = errorMessages.find((e) => e.field === 'general');
-    if (generalError) {
-      this.showMessage(generalError.message, 'error');
-    } else {
-      this.showMessage(
-        `Error en ${operation}. Revise los campos marcados.`,
-        'error'
-      );
+    // Cada error se muestra en UN solo lugar: los de un formulario con modal,
+    // adentro del modal (que tiene su propio bloque de errores); los generales,
+    // en el aviso de la página. Antes salían duplicados.
+    if (formName !== 'general') {
+      this.formErrors[formName] = errorMessages;
+      return;
     }
+    const generalError = errorMessages.find((e) => e.field === 'general');
+    this.showMessage(
+      generalError?.message || `Error en ${operation}. Intente de nuevo.`,
+      'error'
+    );
   }
 
   // Traductor de errores de campos específicos
@@ -807,12 +832,7 @@ export class AdminPoloComponent implements OnInit {
       },
     };
 
-    const formTranslations = translations[formName];
-    if (formTranslations && formTranslations[field]) {
-      return formTranslations[field];
-    }
-
-    return GENERIC_FIELD_ERROR_TRANSLATIONS[message] || message;
+    return resolveFieldErrorMessage(message, translations[formName]?.[field]);
   }
 
   // Traductor de errores genéricos
@@ -1218,7 +1238,9 @@ export class AdminPoloComponent implements OnInit {
     });
   }
 
-  aprobarSolicitud(solicitud: SolicitudRegistro): void {
+  // Se usa desde la pestaña Solicitudes y también desde Empresas, para
+  // aprobar después una solicitud rechazada (o pendiente).
+  aprobarSolicitud(solicitud: Pick<SolicitudRegistro, 'cuil' | 'nombre'>): void {
     if (!confirm(`¿Aprobar el registro de "${solicitud.nombre}"?`)) return;
     this.solicitudesBusy = true;
     this.adminPoloService.aprobarSolicitud(solicitud.cuil).subscribe({
@@ -1316,6 +1338,10 @@ export class AdminPoloComponent implements OnInit {
     this.editingUsuario = null;
     this.selectedEmpresa = null;
     this.creatingForEmpresa = false;
+    this.showAddUsuarioEmpresaForm = false;
+    this.addUsuarioEmpresaTarget = null;
+    this.addUsuarioEmpresaSubmitting = false;
+    this.addUsuarioEmpresaForm = { nombre: '', email: '' };
 
     this.submitting = {
       polo: false,
@@ -1378,7 +1404,7 @@ export class AdminPoloComponent implements OnInit {
     this.changes.clearAll();
   }
 
-  showMessage(message: string, type: 'success' | 'error'): void {
+  showMessage(message: string, type: 'success' | 'error' | 'info'): void {
     this.message = message;
     this.messageType = type;
     setTimeout(() => {
@@ -2068,6 +2094,68 @@ export class AdminPoloComponent implements OnInit {
     setTimeout(() => {
       this.changes.save('servicioPolo', this.servicioPoloForm);
     }, 0);
+  }
+
+  // Agregar un usuario a una empresa ya existente: solo pide nombre + email,
+  // la contraseña la genera y la manda el backend por email.
+  openAddUsuarioEmpresaForm(empresa: Empresa): void {
+    this.clearFormErrors('usuarioEmpresa');
+    this.addUsuarioEmpresaTarget = empresa;
+    this.addUsuarioEmpresaForm = { nombre: '', email: '' };
+    this.addUsuarioEmpresaSubmitting = false;
+    this.showAddUsuarioEmpresaForm = true;
+  }
+
+  cancelAddUsuarioEmpresaForm(): void {
+    if (this.addUsuarioEmpresaSubmitting) {
+      alert('Hay una operación en curso. Por favor, espere a que finalice.');
+      return;
+    }
+    this.showAddUsuarioEmpresaForm = false;
+    this.addUsuarioEmpresaTarget = null;
+    this.clearFormErrors('usuarioEmpresa');
+  }
+
+  onSubmitAddUsuarioEmpresa(form: NgForm): void {
+    if (!form || form.invalid) {
+      Object.values(form?.controls ?? {}).forEach((c: any) =>
+        c?.markAsTouched?.()
+      );
+      return;
+    }
+    if (!this.addUsuarioEmpresaTarget) return;
+
+    const cuil = this.addUsuarioEmpresaTarget.cuil;
+    const nombreEmpresa = this.addUsuarioEmpresaTarget.nombre;
+
+    this.clearFormErrors('usuarioEmpresa');
+    this.addUsuarioEmpresaSubmitting = true;
+
+    this.adminPoloService
+      .createUsuarioForEmpresa(cuil, {
+        nombre: this.addUsuarioEmpresaForm.nombre,
+        email: this.addUsuarioEmpresaForm.email,
+      })
+      .subscribe({
+        next: () => {
+          this.showMessage(
+            `Usuario creado para ${nombreEmpresa}. Le enviamos la contraseña generada por email.`,
+            'success'
+          );
+          this.pushActivity(
+            'ok',
+            `Usuario ${this.addUsuarioEmpresaForm.nombre} agregado a ${nombreEmpresa}`
+          );
+          this.loadUsuarios();
+          this.showAddUsuarioEmpresaForm = false;
+          this.addUsuarioEmpresaTarget = null;
+          this.addUsuarioEmpresaSubmitting = false;
+        },
+        error: (error) => {
+          this.handleError(error, 'usuarioEmpresa', 'agregar el usuario');
+          this.addUsuarioEmpresaSubmitting = false;
+        },
+      });
   }
 
   openPasswordModal() {

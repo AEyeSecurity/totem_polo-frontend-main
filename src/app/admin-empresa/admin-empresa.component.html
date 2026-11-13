@@ -160,6 +160,8 @@
 }
 
 
+  
+
   <!-- MAIN -->
   <main class="content">
     @if (message) {
@@ -254,13 +256,17 @@
           </div>
           <div class="kpi-body">
             <div class="kpi-title">Estado</div>
-            <span
-              class="status-badge"
-              [class.active]="estaActiva"
-              [class.inactive]="!estaActiva"
-            >
-              {{ estaActiva ? "Activo" : "Inactivo" }}
-            </span>
+            @if (empresaData) {
+              <span
+                class="status-badge"
+                [class.active]="estaActiva"
+                [class.inactive]="!estaActiva"
+              >
+                {{ estaActiva ? "Activo" : "Inactivo" }}
+              </span>
+            } @else {
+              <span class="status-badge">Cargando…</span>
+            }
             <div class="kpi-sub">desde {{ desdeIngreso }}@if (aniosEnParque !== null && aniosEnParque > 0) { · <strong>{{ aniosEnParque }}</strong> {{ aniosEnParque === 1 ? 'año' : 'años' }} en el parque}</div>
           </div>
         </div>
@@ -1093,7 +1099,7 @@
                 </div>
                 @for (e of filteredEmpresasDirectorio; track e) {
                   <div class="row row--empresa">
-                    @if (!e.contactos?.length) {
+                    @if (!e.contactos.length) {
                       <div class="contact-row">
                         <div>{{ e.nombre }}</div>
                         <div>-</div>
@@ -1552,9 +1558,9 @@ inputmode="numeric"
 <div class="choice-grid" role="radiogroup" aria-labelledby="v_tipo_label">
 @for (t of tiposVehiculo; track t) {
 <label class="choice-card"><input type="radio" name="v_tipo" [(ngModel)]="vehiculoForm.id_tipo_vehiculo" [value]="t.id_tipo_vehiculo" (ngModelChange)="onVehiculoTipoChange()" required />
-<span class="material-symbols-outlined choice-icon" aria-hidden="true">{{ iconoTipoVehiculo[t.id_tipo_vehiculo] || 'directions_car' }}</span>
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">{{ iconoVehiculo(t.id_tipo_vehiculo) }}</span>
 <span class="choice-title">{{ t.tipo }}</span>
-<span class="choice-desc">{{ ayudaTipoVehiculo[t.id_tipo_vehiculo] || '' }}</span>
+<span class="choice-desc">{{ ayudaVehiculo(t.id_tipo_vehiculo) }}</span>
 </label>
 }
 </div>
@@ -1599,15 +1605,16 @@ inputmode="numeric"
               <div class="error">Campo obligatorio.</div>
             }
           </div>
-          @if ([1, 2, 3].includes(vehiculoForm.id_tipo_vehiculo)) {
+@if (vehiculoFormClase) {
 <div class="form-section">
 <h4 class="form-section-title">Detalle</h4>
 </div>
 }
-<!-- Reglas por tipo -->
-@switch (vehiculoForm.id_tipo_vehiculo) {
-            <!-- 1: Corporativo (Cantidad, Patente, Carga) -->
-            @case (1) {
+          <!-- Reglas por tipo -->
+          <!-- Por nombre del tipo, no por id (ver getVehiculoClase) -->
+          @switch (vehiculoFormClase) {
+            <!-- Corporativo (Cantidad, Patente, Carga) -->
+            @case ('corporativo') {
               <div class="field">
                 <label for="v_cant_corp"
                   >Cantidad <span class="req">*</span></label
@@ -1638,11 +1645,15 @@ inputmode="numeric"
                   [(ngModel)]="vehiculoForm.datos.patente"
                   name="v_pat_corp"
                   required
+                  [pattern]="patentePattern"
                   #vPatCorp="ngModel"
                   placeholder="ABC123 / AA123AA"
                 />
-                @if (vPatCorp.invalid && (vPatCorp.touched || fVeh.submitted)) {
+                @if (vPatCorp.errors?.['required'] && (vPatCorp.touched || fVeh.submitted)) {
                   <div class="error">Campo obligatorio.</div>
+                }
+                @if (vPatCorp.errors?.['pattern'] && (vPatCorp.touched || fVeh.submitted)) {
+                  <div class="error">{{ patenteFormatoMsg }}</div>
                 }
               </div>
               <div class="field">
@@ -1657,8 +1668,8 @@ inputmode="numeric"
                 }
               </div>
             }
-            <!-- 2: Personal (Cantidad req, Patente opcional) -->
-            @case (2) {
+            <!-- Personal (Cantidad req, Patente opcional) -->
+            @case ('personal') {
               <div class="field">
                 <label for="v_cant_per"
                   >Cantidad <span class="req">*</span></label
@@ -1684,12 +1695,17 @@ inputmode="numeric"
                   id="v_pat_per"
                   [(ngModel)]="vehiculoForm.datos.patente"
                   name="v_pat_per"
+                  [pattern]="patentePattern"
+                  #vPatPer="ngModel"
                   placeholder="ABC123 / AA123AA"
                 />
+                @if (vPatPer.errors?.['pattern'] && (vPatPer.touched || fVeh.submitted)) {
+                  <div class="error">{{ patenteFormatoMsg }}</div>
+                }
               </div>
             }
-            <!-- 3: Terceros (Cantidad y Carga req) -->
-            @case (3) {
+            <!-- Terceros (Cantidad y Carga req) -->
+            @case ('terceros') {
               <div class="field">
                 <label for="v_cant_ter"
                   >Cantidad <span class="req">*</span></label
@@ -1870,6 +1886,7 @@ placeholder="https://empresa.com"
 <input
 id="c_mail"
 type="email"
+email
 [(ngModel)]="contactoForm.datos.correo"
 name="c_mail"
 placeholder="mail@empresa.com"

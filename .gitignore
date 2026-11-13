@@ -48,3 +48,7 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Suite E2E del sistema (e2e-sistema/): sesiones con tokens y reportes generados
+/e2e-sistema/.auth/
+/e2e-sistema/report/

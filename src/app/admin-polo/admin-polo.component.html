@@ -152,6 +152,8 @@
 }
 
 
+      
+
       <!-- Main -->
       <main class="content">
         @if (message) {
@@ -632,17 +634,29 @@
 }
 </div>
                           <div class="row-actions">
-                            <!-- Activar/Desactivar -->
-                            <button
-                              class="btn icon"
-                              [class.danger]="e.estado"
-                              [title]="e.estado ? 'Desactivar empresa' : 'Activar empresa'" [attr.aria-label]="e.estado ? 'Desactivar empresa' : 'Activar empresa'"
-                              (click)="toggleEmpresaEstado(e)"
-                              >
-                              <span class="material-symbols-outlined">
-                                {{ e.estado ? "block" : "check_circle" }}
-                              </span>
-                            </button>
+<!-- Activar/Desactivar, o Aprobar si la solicitud está rechazada/pendiente -->
+@if (!e.estado && e.estado_solicitud !== 'aprobada') {
+<button
+class="btn icon"
+[title]="'Aprobar solicitud (' + e.estado_solicitud + ')'"
+[attr.aria-label]="'Aprobar solicitud (' + e.estado_solicitud + ')'"
+(click)="aprobarSolicitud(e)"
+[disabled]="solicitudesBusy"
+>
+<span class="material-symbols-outlined">how_to_reg</span>
+</button>
+} @else {
+<button
+class="btn icon"
+[class.danger]="e.estado"
+[title]="e.estado ? 'Desactivar empresa' : 'Activar empresa'" [attr.aria-label]="e.estado ? 'Desactivar empresa' : 'Activar empresa'"
+(click)="toggleEmpresaEstado(e)"
+>
+<span class="material-symbols-outlined">
+{{ e.estado ? "block" : "check_circle" }}
+</span>
+</button>
+}
                             <!-- Editar -->
                             <button
                               class="btn icon"
@@ -659,6 +673,15 @@
                               [disabled]="!e.estado"
                               >
                               <span class="material-symbols-outlined">add_business</span>
+                            </button>
+                            <!-- Agregar usuario a la empresa -->
+                            <button
+                              class="btn icon"
+                              title="Agregar usuario a la empresa" aria-label="Agregar usuario a la empresa"
+                              (click)="openAddUsuarioEmpresaForm(e)"
+                              [disabled]="!e.estado"
+                              >
+                              <span class="material-symbols-outlined">person_add</span>
                             </button>
                           </div>
                         </div>
@@ -1631,6 +1654,7 @@ inputmode="numeric"
                                                 name="u_email"
                                                 [disabled]="!!editingUsuario || isModalBusy('usuario')"
                                                 required
+                                                email
                                                 #uEmail="ngModel"
                                                 />
                                                 @if (uEmail.invalid && (uEmail.touched || fUsr.submitted)) {
@@ -1746,7 +1770,115 @@ inputmode="numeric"
                                             </div>
                                           }
 
-                                          <!-- Servicio del Polo: crear -->
+                                          <!-- Agregar usuario a una empresa existente -->
+                                          @if (showAddUsuarioEmpresaForm) {
+                                            <div class="overlay" tabindex="-1" (keydown.escape)="!addUsuarioEmpresaSubmitting && cancelAddUsuarioEmpresaForm()">
+                                              <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-addusr-title" [attr.aria-busy]="addUsuarioEmpresaSubmitting">
+                                                <div class="modal-header">
+                                                  <h3 id="dlg-addusr-title">
+                                                    Agregar usuario
+                                                    @if (addUsuarioEmpresaTarget) {
+                                                      — {{ addUsuarioEmpresaTarget.nombre }}
+                                                    }
+                                                  </h3>
+                                                  <button
+                                                    type="button"
+                                                    class="icon-btn"
+                                                    (click)="cancelAddUsuarioEmpresaForm()"
+                                                    [disabled]="addUsuarioEmpresaSubmitting"
+                                                    aria-label="Cerrar"
+                                                    >
+                                                    ✕
+                                                  </button>
+                                                </div>
+                                                <form
+                                                  (ngSubmit)="onSubmitAddUsuarioEmpresa(fAddUsr)"
+                                                  class="nice-form"
+                                                  #fAddUsr="ngForm"
+                                                  novalidate
+                                                  >
+                                                  @if (addUsuarioEmpresaSubmitting) {
+                                                    <div class="alert alert--loading">
+                                                      <span class="alert-spinner" aria-hidden="true"></span>
+                                                      <span>
+                                                        Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
+                                                      </span>
+                                                    </div>
+                                                  }
+                                                  @if (formErrors['usuarioEmpresa']?.length) {
+                                                    <div class="alert alert--error">
+                                                      @for (err of formErrors['usuarioEmpresa']; track err) {
+                                                        <div>{{ err.message }}</div>
+                                                      }
+                                                    </div>
+                                                  }
+                                                  <p class="field-hint form-intro">
+                                                    Se genera una contraseña automáticamente y se envía por email junto
+                                                    con el nombre de usuario. La cuenta queda lista para el primer ingreso.
+                                                  </p>
+                                                  <div class="modal-body grid-2" [class.readonly]="addUsuarioEmpresaSubmitting">
+<div class="form-section">
+<h4 class="form-section-title">Datos del nuevo usuario</h4>
+</div>
+                                                    <div class="field">
+                                                      <label for="au_nombre">Nombre de usuario <span class="req">*</span></label>
+                                                      <input
+                                                        id="au_nombre"
+                                                        type="text"
+                                                        [(ngModel)]="addUsuarioEmpresaForm.nombre"
+                                                        name="au_nombre"
+                                                        [disabled]="addUsuarioEmpresaSubmitting"
+                                                        minlength="3"
+                                                        maxlength="50"
+                                                        required
+                                                        #auNombre="ngModel"
+                                                        />
+                                                        @if (auNombre.invalid && (auNombre.touched || fAddUsr.submitted)) {
+                                                          <div class="error">Ingrese entre 3 y 50 caracteres.</div>
+                                                        }
+                                                        @for (err of getFieldErrors('usuarioEmpresa', 'nombre'); track err) {
+                                                          <div class="error">{{ err.message }}</div>
+                                                        }
+                                                      </div>
+                                                      <div class="field">
+                                                        <label for="au_email">Email <span class="req">*</span></label>
+                                                        <input
+                                                          id="au_email"
+                                                          type="email"
+                                                          [(ngModel)]="addUsuarioEmpresaForm.email"
+                                                          name="au_email"
+                                                          [disabled]="addUsuarioEmpresaSubmitting"
+                                                          required
+                                                          email
+                                                          #auEmail="ngModel"
+                                                          />
+                                                          @if (auEmail.invalid && (auEmail.touched || fAddUsr.submitted)) {
+                                                            <div class="error">Ingrese un email válido.</div>
+                                                          }
+                                                          @for (err of getFieldErrors('usuarioEmpresa', 'email'); track err) {
+                                                            <div class="error">{{ err.message }}</div>
+                                                          }
+                                                        </div>
+                                                      </div>
+                                                      <div class="modal-actions">
+                                                        <button class="btn primary" type="submit" [disabled]="addUsuarioEmpresaSubmitting">
+                                                          Crear y enviar por email
+                                                        </button>
+                                                        <button
+                                                          class="btn ghost"
+                                                          type="button"
+                                                          (click)="cancelAddUsuarioEmpresaForm()"
+                                                          [disabled]="addUsuarioEmpresaSubmitting"
+                                                          >
+                                                          Cancelar
+                                                        </button>
+                                                      </div>
+                                                    </form>
+                                                  </div>
+                                                </div>
+                                              }
+
+                                                                                        <!-- Servicio del Polo: crear -->
                                           @if (showServicioPoloForm) {
                                             <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('servicioPolo')">
 <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="dlg-sp-title" [attr.aria-busy]="isModalBusy('servicioPolo')">

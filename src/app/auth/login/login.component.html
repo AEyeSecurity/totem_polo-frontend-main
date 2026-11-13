@@ -225,6 +225,7 @@ placeholder="Ingrese su contraseña"
                         required
                         email
                         (input)="onResetEmailChange()"
+                        [disabled]="resetLoading"
                         [ngClass]="{ error: resetError }"
                         />
                       </div>
@@ -255,14 +256,14 @@ placeholder="Ingrese su contraseña"
                           {{ resetMessage }}
                         </div>
                       }
-                      <button type="button" class="back-button" (click)="closeResetModal()">
+                      <button type="button" class="back-button" (click)="closeResetModal()" [disabled]="resetLoading">
                         <i class="fas fa-arrow-left"></i>
                         Volver al inicio de sesión
                       </button>
                     </form>
                   </div>
                   <!-- Botón de cerrar -->
-                  <button class="reset-close-btn" (click)="closeResetModal()">
+                  <button class="reset-close-btn" (click)="closeResetModal()" [disabled]="resetLoading" aria-label="Cerrar">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>

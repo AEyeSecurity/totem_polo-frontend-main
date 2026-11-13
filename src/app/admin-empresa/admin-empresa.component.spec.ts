@@ -133,4 +133,34 @@ describe('AdminEmpresaComponent', () => {
       expect(component.esTipoComercial()).toBeFalse();
     });
   });
+
+  describe('getVehiculoClase', () => {
+    it('elige la clase por el nombre del tipo, no por el id', () => {
+      // mismos ids que la tabla tipo_vehiculo real: 2 = terceros, 3 = personales
+      component.tiposVehiculo = [
+        { id_tipo_vehiculo: 1, tipo: 'corporativos' },
+        { id_tipo_vehiculo: 2, tipo: 'terceros' },
+        { id_tipo_vehiculo: 3, tipo: 'personales' },
+      ] as any;
+      expect(component.getVehiculoClase(1)).toBe('corporativo');
+      expect(component.getVehiculoClase(2)).toBe('terceros');
+      expect(component.getVehiculoClase(3)).toBe('personal');
+      expect(component.getVehiculoClase(99)).toBeNull();
+    });
+
+    it('onVehiculoTipoChange arma los datos del tipo elegido', () => {
+      component.tiposVehiculo = [
+        { id_tipo_vehiculo: 2, tipo: 'terceros' },
+        { id_tipo_vehiculo: 3, tipo: 'personales' },
+      ] as any;
+      component.vehiculoForm.id_tipo_vehiculo = 3;
+      component.vehiculoForm.datos = {};
+      component.onVehiculoTipoChange();
+      expect(Object.keys(component.vehiculoForm.datos).sort()).toEqual(['cantidad', 'patente']);
+
+      component.vehiculoForm.id_tipo_vehiculo = 2;
+      component.onVehiculoTipoChange();
+      expect(Object.keys(component.vehiculoForm.datos).sort()).toEqual(['cantidad', 'carga']);
+    });
+  });
 });

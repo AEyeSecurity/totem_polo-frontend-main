@@ -9,6 +9,14 @@ export interface HistoryPair {
   assistant: string;
 }
 
+export interface ChatLocation {
+  empresa_nombre: string;
+  lote: number;
+  manzana: number;
+  latitud: number;
+  longitud: number;
+}
+
 export interface VoiceChatResponse {
   success: boolean;
   data: {
@@ -17,6 +25,7 @@ export interface VoiceChatResponse {
     transcript?: string;
     db_results?: unknown[];
     corrected_entity?: string;
+    locations?: ChatLocation[];
   };
   error?: boolean;
   message?: string;

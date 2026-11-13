@@ -107,3 +107,30 @@
 .map-view-close:hover {
   background: rgba(20, 20, 30, 0.8);
 }
+
+.map-view-directions {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: #a20000;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: background 0.15s ease;
+}
+
+.map-view-directions:hover {
+  background: #870000;
+}
+
+.map-view-directions .material-symbols-outlined {
+  font-size: 18px;
+}
