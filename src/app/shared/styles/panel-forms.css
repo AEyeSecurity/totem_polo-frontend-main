@@ -537,3 +537,8 @@ form.ng-submitted .choice-grid:has(input.ng-invalid) .choice-card,
   text-align: center;
   line-height: 1.2;
 }
+
+/* El dialogo recibe el foco al abrirse (para que Escape funcione):
+   sin contorno alrededor de todo el modal */
+.modal:focus,
+.drawer:focus { outline: none; }

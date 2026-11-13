@@ -1,9 +1,10 @@
+import { DialogFocusDirective } from '../dialog-focus.directive';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-update-reminder-modal',
   standalone: true,
-  imports: [],
+  imports: [DialogFocusDirective],
   template: `
     @if (showModal) {
       <div
@@ -15,6 +16,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
         <div
           class="modal modal--sm"
           role="presentation"
+          appDialogFocus
           (click)="$event.stopPropagation()"
         >
           <div class="modal-header">

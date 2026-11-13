@@ -1,4 +1,5 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+﻿import { DialogFocusDirective } from '../shared/dialog-focus.directive';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
@@ -62,7 +63,7 @@ const EMPRESA_DATE_FIELDS = [
 @Component({
   selector: 'app-empresa-me',
   standalone: true,
-  imports: [
+  imports: [DialogFocusDirective, 
     FormsModule,
     RouterModule,
     LogoutButtonComponent,

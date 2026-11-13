@@ -1,3 +1,4 @@
+import { DialogFocusDirective } from '../shared/dialog-focus.directive';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -62,7 +63,7 @@ interface EmpresaEditForm {
 @Component({
   selector: 'app-empresas',
   standalone: true,
-  imports: [
+  imports: [DialogFocusDirective, 
     CommonModule,
     FormsModule,
     RouterModule,

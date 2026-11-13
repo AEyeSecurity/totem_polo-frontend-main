@@ -103,7 +103,7 @@
 <!-- Menu lateral (celular y tablet) -->
 @if (mobileMenuOpen) {
 <div class="drawer-backdrop" (click)="mobileMenuOpen = false" aria-hidden="true"></div>
-<aside class="drawer" role="dialog" aria-modal="true" aria-label="Menú principal" tabindex="-1" (keydown.escape)="mobileMenuOpen = false">
+<aside class="drawer" role="dialog" appDialogFocus aria-modal="true" aria-label="Menú principal" tabindex="-1" (keydown.escape)="mobileMenuOpen = false">
 <div class="drawer-head">
 <img class="drawer-logo" src="../../assets/images/polologo-blanco.png" alt="" />
 <div class="drawer-brand">
@@ -998,7 +998,7 @@ class="btn icon"
                         <!-- Editar ubicacion de un lote -->
                         @if (showEditLoteUbicacionForm) {
                           <div class="overlay" tabindex="-1" (keydown.escape)="!savingLoteUbicacion && cancelEditLoteUbicacion()">
-                            <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-lote-ubicacion-title">
+                            <div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-lote-ubicacion-title">
                               <div class="modal-header">
                                 <h3 id="dlg-lote-ubicacion-title">Ubicación del lote {{ editingLoteLabel }}</h3>
                                 <button
@@ -1112,7 +1112,7 @@ class="btn icon"
                   <!-- Editar Polo (todos opcionales) -->
                   @if (showPoloEditForm) {
                     <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('polo')">
-                      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-polo-title" [attr.aria-busy]="isModalBusy('polo')">
+                      <div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-polo-title" [attr.aria-busy]="isModalBusy('polo')">
                         <div class="modal-header">
                           <h3 id="dlg-polo-title">Editar datos del Polo</h3>
                           <button
@@ -1228,7 +1228,7 @@ inputmode="numeric"
                       <!-- Informacion comercial del Polo: editar -->
                       @if (showComercialEditForm) {
                         <div class="overlay" tabindex="-1" (keydown.escape)="!comercialSaving && cancelComercialEditForm()">
-<div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-comercial-title" [attr.aria-busy]="comercialSaving">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-comercial-title" [attr.aria-busy]="comercialSaving">
 <div class="modal-header">
 <h3 id="dlg-comercial-title">Editar información comercial</h3>
                               <button
@@ -1376,7 +1376,7 @@ inputmode="numeric"
                       <!-- Empresa: crear/editar -->
                       @if (showEmpresaForm) {
                         <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('empresa')">
-<div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-empresa-title" [attr.aria-busy]="isModalBusy('empresa')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-empresa-title" [attr.aria-busy]="isModalBusy('empresa')">
 <div class="modal-header">
 <h3 id="dlg-empresa-title">{{ editingEmpresa ? "Editar empresa" : "Nueva empresa" }}</h3>
                               <button
@@ -1595,7 +1595,7 @@ inputmode="numeric"
                                 <!-- Usuario: crear/editar -->
                                 @if (showUsuarioForm) {
                                   <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('usuario')">
-<div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-usuario-title" [attr.aria-busy]="isModalBusy('usuario')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-usuario-title" [attr.aria-busy]="isModalBusy('usuario')">
 <div class="modal-header">
 <h3 id="dlg-usuario-title">{{ editingUsuario ? "Editar usuario" : "Nuevo usuario" }}</h3>
                                         <button
@@ -1774,7 +1774,7 @@ inputmode="numeric"
                                           <!-- Agregar usuario a una empresa existente -->
                                           @if (showAddUsuarioEmpresaForm) {
                                             <div class="overlay" tabindex="-1" (keydown.escape)="!addUsuarioEmpresaSubmitting && cancelAddUsuarioEmpresaForm()">
-                                              <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-addusr-title" [attr.aria-busy]="addUsuarioEmpresaSubmitting">
+                                              <div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-addusr-title" [attr.aria-busy]="addUsuarioEmpresaSubmitting">
                                                 <div class="modal-header">
                                                   <h3 id="dlg-addusr-title">
                                                     Agregar usuario
@@ -1882,7 +1882,7 @@ inputmode="numeric"
                                                                                         <!-- Servicio del Polo: crear -->
                                           @if (showServicioPoloForm) {
                                             <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('servicioPolo')">
-<div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="dlg-sp-title" [attr.aria-busy]="isModalBusy('servicioPolo')">
+<div class="modal modal--lg" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-sp-title" [attr.aria-busy]="isModalBusy('servicioPolo')">
 <div class="modal-header">
 <h3 id="dlg-sp-title">Nuevo servicio del Polo</h3>
                                                   <button
@@ -2239,7 +2239,7 @@ placeholder="Teléfono o email"
                                                                 <!-- Lote: crear -->
                                                                 @if (showLoteForm) {
                                                                   <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('lote')">
-<div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="dlg-lote-title" [attr.aria-busy]="isModalBusy('lote')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-lote-title" [attr.aria-busy]="isModalBusy('lote')">
 <div class="modal-header">
 <h3 id="dlg-lote-title">
                                                                           Nuevo lote
