@@ -1,8 +1,9 @@
 ﻿<!-- admin-empresa.component.html -->
 <link
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:FILL@0..1"
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
   rel="stylesheet"
 />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block" rel="stylesheet" />
 
 <div class="admin-layout">
   <app-update-reminder-modal
@@ -52,7 +53,7 @@
         [class.active]="activeTab === 'vehiculos'"
         (click)="goTo('vehiculos')"
       >
-        Vehiculos
+        Vehículos
       </button>
       <button
         class="tab"
@@ -90,126 +91,77 @@
         class="ghost topbar-icon-btn"
         [class.active]="activeTab === 'perfil'"
         (click)="goTo('perfil')"
-        aria-label="Ver informacion de la empresa"
+        aria-label="Ver información de la empresa"
       >
         <span class="material-symbols-outlined">account_circle</span>
       </button>
       <button
         class="ghost topbar-icon-btn"
         (click)="goTo('config')"
-        aria-label="Abrir configuracion"
+        aria-label="Abrir configuración"
       >
         <span class="material-symbols-outlined">settings</span>
       </button>
-      <app-logout-button></app-logout-button>
+      <app-logout-button confirmMessage="¿Está seguro de que desea cerrar la sesión?"></app-logout-button>
+<button type="button" class="menu-toggle" (click)="mobileMenuOpen = true" aria-label="Abrir menú" [attr.aria-expanded]="mobileMenuOpen">
+<span class="material-symbols-outlined" aria-hidden="true">menu</span>
+</button>
     </div>
-
-    <button
-      type="button"
-      class="mobile-menu-btn"
-      (click)="toggleMobileMenu()"
-      aria-label="Abrir menu"
-    >
-      <span class="material-symbols-outlined">menu</span>
-    </button>
   </nav>
+<!-- Menu lateral (celular y tablet) -->
+@if (mobileMenuOpen) {
+<div class="drawer-backdrop" (click)="mobileMenuOpen = false" aria-hidden="true"></div>
+<aside class="drawer" role="dialog" appDialogFocus aria-modal="true" aria-label="Menú principal" tabindex="-1" (keydown.escape)="mobileMenuOpen = false">
+<div class="drawer-head">
+<img class="drawer-logo" src="../../assets/images/polologo-blanco.png" alt="" />
+<div class="drawer-brand">
+<span class="drawer-title">POLO 52</span>
+<span class="drawer-sub">{{ empresaData?.nombre || 'Panel de empresa' }}</span>
+</div>
+<button type="button" class="drawer-close" (click)="mobileMenuOpen = false" aria-label="Cerrar menú">
+<span class="material-symbols-outlined" aria-hidden="true">close</span>
+</button>
+</div>
+<nav class="drawer-nav" aria-label="Secciones">
+<span class="drawer-section-label">Secciones</span>
+<ul>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'dashboard'" [attr.aria-current]="activeTab === 'dashboard' ? 'page' : null" (click)="navMobile('dashboard')">
+<span class="material-symbols-outlined" aria-hidden="true">space_dashboard</span><span class="drawer-link-label">Dashboard</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'vehiculos'" [attr.aria-current]="activeTab === 'vehiculos' ? 'page' : null" (click)="navMobile('vehiculos')">
+<span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><span class="drawer-link-label">Vehículos</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'servicios'" [attr.aria-current]="activeTab === 'servicios' ? 'page' : null" (click)="navMobile('servicios')">
+<span class="material-symbols-outlined" aria-hidden="true">build</span><span class="drawer-link-label">Servicios</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'contactos'" [attr.aria-current]="activeTab === 'contactos' ? 'page' : null" (click)="navMobile('contactos')">
+<span class="material-symbols-outlined" aria-hidden="true">contacts</span><span class="drawer-link-label">Contactos</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'serviciosPolo'" [attr.aria-current]="activeTab === 'serviciosPolo' ? 'page' : null" (click)="navMobile('serviciosPolo')">
+<span class="material-symbols-outlined" aria-hidden="true">warehouse</span><span class="drawer-link-label">Servicios del Polo</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'empresas'" [attr.aria-current]="activeTab === 'empresas' ? 'page' : null" (click)="navMobile('empresas')">
+<span class="material-symbols-outlined" aria-hidden="true">apartment</span><span class="drawer-link-label">Empresas del parque</span>
+</button></li>
+</ul>
+</nav>
+<div class="drawer-foot">
+<span class="drawer-section-label">Cuenta</span>
+<button type="button" class="drawer-link drawer-link--sm" [class.active]="activeTab === 'perfil'" (click)="navMobile('perfil')">
+<span class="material-symbols-outlined" aria-hidden="true">account_circle</span><span class="drawer-link-label">Perfil</span>
+</button>
+<button type="button" class="drawer-link drawer-link--sm" [class.active]="activeTab === 'config'" (click)="navMobile('config')">
+<span class="material-symbols-outlined" aria-hidden="true">settings</span><span class="drawer-link-label">Configuración</span>
+</button>
+<div class="drawer-logout">
+<app-logout-button confirmMessage="¿Está seguro de que desea cerrar la sesión?"></app-logout-button>
+</div>
+</div>
+</aside>
+}
 
-  <!-- SIDEBAR MOBILE -->
-  @if (mobileMenuOpen) {
-    <div
-      class="mobile-sidebar-backdrop"
-      (click)="closeMobileMenu()"
-      role="button"
-      tabindex="0"
-      aria-label="Cerrar menu"
-      (keyup.enter)="closeMobileMenu()"
-    ></div>
-  }
-  <aside class="mobile-sidebar" [class.open]="mobileMenuOpen">
-    <div class="mobile-sidebar-header">
-      <div class="topbar-title">
-        <div class="app-title">POLO 52</div>
-        <div class="app-sub">
-          {{ empresaData?.nombre || "Parque Industrial" }}
-        </div>
-      </div>
-      <button
-        type="button"
-        class="icon-btn"
-        (click)="closeMobileMenu()"
-        aria-label="Cerrar menu"
-      >
-        ✕
-      </button>
-    </div>
-    <nav class="mobile-sidebar-tabs">
-      <button
-        class="tab"
-        [class.active]="activeTab === 'dashboard'"
-        (click)="goTo('dashboard')"
-      >
-        Dashboard
-      </button>
-      <button
-        class="tab"
-        [class.active]="activeTab === 'vehiculos'"
-        (click)="goTo('vehiculos')"
-      >
-        Vehiculos
-      </button>
-      <button
-        class="tab"
-        [class.active]="activeTab === 'servicios'"
-        (click)="goTo('servicios')"
-      >
-        Servicios
-      </button>
-      <button
-        class="tab"
-        [class.active]="activeTab === 'contactos'"
-        (click)="goTo('contactos')"
-      >
-        Contactos
-      </button>
-      <button
-        class="tab"
-        [class.active]="activeTab === 'serviciosPolo'"
-        (click)="goTo('serviciosPolo')"
-      >
-        Servicios del Polo
-      </button>
-      <button
-        class="tab"
-        [class.active]="activeTab === 'empresas'"
-        (click)="goTo('empresas')"
-      >
-        Empresas
-      </button>
-    </nav>
-    <div class="mobile-sidebar-footer">
-      <button
-        type="button"
-        class="tab"
-        [class.active]="activeTab === 'perfil'"
-        (click)="goTo('perfil')"
-        aria-label="Ver informacion de la empresa"
-      >
-        <span class="material-symbols-outlined">account_circle</span>
-        <span>Perfil</span>
-      </button>
-      <button
-        type="button"
-        class="tab"
-        [class.active]="activeTab === 'config'"
-        (click)="goTo('config')"
-        aria-label="Abrir configuracion"
-      >
-        <span class="material-symbols-outlined">settings</span>
-        <span>Configuracion</span>
-      </button>
-      <app-logout-button></app-logout-button>
-    </div>
-  </aside>
+
+  
 
   <!-- MAIN -->
   <main class="content">
@@ -235,15 +187,48 @@
     <!-- DASHBOARD -->
     @if (activeTab === "dashboard") {
       <section class="resume-grid">
-        <!-- Metricas -->
-        <div class="kpi card">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Resumen</h1>
+<p class="page-desc">Estado de su empresa y accesos rápidos.</p>
+</div>
+</header>
+<!-- Portada del dashboard -->
+<div class="dash-hero">
+<div class="dash-hero-main">
+<span class="dash-hero-eyebrow">Panel de empresa</span>
+<h2 class="dash-hero-title">{{ empresaData?.nombre || 'Su empresa' }}</h2>
+<p class="dash-hero-sub">{{ empresaData?.rubro || 'Parque Industrial Polo 52' }}@if (empresaData?.cuil) { · CUIL {{ empresaData?.cuil }}}</p>
+<div class="hero-chips">
+<span class="hero-chip"><span class="hero-dot" [class.hero-dot--ok]="estaActiva"></span>{{ estaActiva ? 'Activa' : 'Inactiva' }}</span>
+@if (empresaData?.fecha_ingreso) {
+<span class="hero-chip">En el parque desde {{ desdeIngreso }}</span>
+}
+@if (aniosEnParque) {
+<span class="hero-chip">{{ aniosEnParque }} {{ aniosEnParque === 1 ? 'año' : 'años' }} de trayectoria</span>
+}
+</div>
+</div>
+<div class="dash-hero-ring">
+<div class="ring" [style.background]="ringBg(pctPerfilCompleto)" role="img" [attr.aria-label]="'Perfil completo al ' + pctPerfilCompleto + '%'">
+<div class="ring-hole"><span class="ring-value">{{ pctPerfilCompleto }}%</span><span class="ring-caption">perfil completo</span></div>
+</div>
+@if (perfilPendientes.length) {
+<p class="ring-note">{{ perfilPendientes.length === 1 ? 'Falta 1 dato' : 'Faltan ' + perfilPendientes.length + ' datos' }} para completar el perfil.</p>
+<button class="btn hero-cta" type="button" (click)="goTo('perfil')">Completar perfil</button>
+} @else {
+<p class="ring-note">El perfil de su empresa está completo.</p>
+}
+</div>
+</div>
+<div class="kpi card">
           <div class="kpi-icon kpi-icon--blue">
             <span class="material-symbols-outlined">local_shipping</span>
           </div>
           <div class="kpi-body">
-            <div class="kpi-title">Vehiculos Activos</div>
+            <div class="kpi-title">Vehículos registrados</div>
             <div class="kpi-number">{{ vehiculosActivos }}</div>
-            <div class="kpi-sub">de {{ vehiculosActivos }} total</div>
+            <div class="kpi-sub">@if (unidadesVehiculos) {<strong>{{ unidadesVehiculos }}</strong> unidades en total} @else {vehículos cargados}</div>
           </div>
         </div>
         <div class="kpi card">
@@ -263,7 +248,7 @@
           <div class="kpi-body">
             <div class="kpi-title">Contactos</div>
             <div class="kpi-number">{{ totalContactos }}</div>
-            <div class="kpi-sub">contacto/s</div>
+            <div class="kpi-sub">contactos registrados</div>
           </div>
         </div>
         <div class="kpi card">
@@ -283,10 +268,62 @@
             } @else {
               <span class="status-badge">Cargando…</span>
             }
-            <div class="kpi-sub">desde {{ desdeIngreso }}</div>
+            <div class="kpi-sub">desde {{ desdeIngreso }}@if (aniosEnParque !== null && aniosEnParque > 0) { · <strong>{{ aniosEnParque }}</strong> {{ aniosEnParque === 1 ? 'año' : 'años' }} en el parque}</div>
           </div>
         </div>
-        <!-- Actividad reciente -->
+        <!-- Graficos (derivados de los datos ya cargados) -->
+<div class="card chart-card">
+<h2>Vehículos por tipo</h2>
+@if (vehiculosPorTipoChart.length) {
+<div class="donut-wrap">
+<div class="donut" [style.background]="donutBg(vehiculosPorTipoChart)" role="img" [attr.aria-label]="'Distribución de vehículos por tipo'">
+<div class="donut-hole"><span class="donut-value">{{ vehiculosActivos }}</span><span class="donut-caption">vehículos</span></div>
+</div>
+<ul class="legend">
+@for (seg of vehiculosPorTipoChart; track seg.label) {
+<li><span class="legend-dot" [style.background]="seg.color"></span><span class="legend-label">{{ seg.label }}</span><strong>{{ seg.count }}</strong><span class="legend-pct">{{ seg.pct }}%</span></li>
+}
+</ul>
+</div>
+} @else {
+<p class="chart-empty">Todavía no hay vehículos cargados.</p>
+}
+</div>
+<div class="card chart-card">
+<h2>Servicios por tipo</h2>
+@if (serviciosPorTipoChart.length) {
+<div class="donut-wrap">
+<div class="donut" [style.background]="donutBg(serviciosPorTipoChart)" role="img" [attr.aria-label]="'Distribución de servicios por tipo'">
+<div class="donut-hole"><span class="donut-value">{{ totalServicios }}</span><span class="donut-caption">servicios</span></div>
+</div>
+<ul class="legend">
+@for (seg of serviciosPorTipoChart; track seg.label) {
+<li><span class="legend-dot" [style.background]="seg.color"></span><span class="legend-label">{{ seg.label }}</span><strong>{{ seg.count }}</strong><span class="legend-pct">{{ seg.pct }}%</span></li>
+}
+</ul>
+</div>
+} @else {
+<p class="chart-empty">Todavía no hay servicios cargados.</p>
+}
+</div>
+<div class="card chart-card">
+<h2>Contactos por tipo</h2>
+@if (contactosPorTipoChart.length) {
+<div class="donut-wrap">
+<div class="donut" [style.background]="donutBg(contactosPorTipoChart)" role="img" [attr.aria-label]="'Distribución de contactos por tipo'">
+<div class="donut-hole"><span class="donut-value">{{ totalContactos }}</span><span class="donut-caption">contactos</span></div>
+</div>
+<ul class="legend">
+@for (seg of contactosPorTipoChart; track seg.label) {
+<li><span class="legend-dot" [style.background]="seg.color"></span><span class="legend-label">{{ seg.label }}</span><strong>{{ seg.count }}</strong><span class="legend-pct">{{ seg.pct }}%</span></li>
+}
+</ul>
+</div>
+} @else {
+<p class="chart-empty">Todavía no hay contactos cargados.</p>
+}
+</div>
+<!-- Actividad reciente -->
         <div class="card activity">
           <h2>Actividad reciente</h2>
           @if (actividadReciente.length) {
@@ -307,24 +344,24 @@
               }
             </ul>
           } @else {
-            <div class="muted">Sin actividad registrada todavia.</div>
+            <div class="muted">Sin actividad registrada todavía.</div>
           }
         </div>
         <!-- Accesos rapidos -->
         <div class="card quick">
-          <h2>Accesos Rapidos</h2>
+          <h2>Accesos rápidos</h2>
           <div class="quick-list">
             <button class="quick-btn" (click)="quickAddVehiculo()">
               <span class="material-symbols-outlined">add</span>
-              <span class="quick-btn-label">Agregar Vehiculo</span>
+              <span class="quick-btn-label">Agregar vehículo</span>
             </button>
             <button class="quick-btn" (click)="quickAddServicio()">
               <span class="material-symbols-outlined">add</span>
-              <span class="quick-btn-label">Nuevo Servicio</span>
+              <span class="quick-btn-label">Nuevo servicio</span>
             </button>
             <button class="quick-btn" (click)="quickAddContacto()">
               <span class="material-symbols-outlined">add</span>
-              <span class="quick-btn-label">Agregar Contacto</span>
+              <span class="quick-btn-label">Agregar contacto</span>
             </button>
           </div>
         </div>
@@ -334,6 +371,13 @@
     <!-- PERFIL -->
     @if (activeTab === "perfil") {
       <section class="card-grid">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Perfil de la empresa</h1>
+<p class="page-desc">Datos de la empresa e información comercial que utiliza el asistente virtual del Polo.</p>
+</div>
+</header>
+
         <div class="card">
           <div class="company-info-head">
             <div>
@@ -431,7 +475,7 @@
             </div>
           } @else {
             <div class="muted">
-              Aun no hay informacion disponible de la empresa.
+              Aún no hay información disponible de la empresa.
             </div>
           }
         </div>
@@ -440,7 +484,7 @@
         <div class="card comercial-card">
           <div class="company-info-head">
             <div>
-              <h2>Informacion comercial</h2>
+              <h2>Información comercial</h2>
             </div>
             @if (comercialDone && comercialInfo) {
               <button
@@ -463,7 +507,7 @@
           }
 
           @if (comercialLoadingInfo) {
-            <div class="muted">Cargando informacion comercial...</div>
+            <div class="muted">Cargando información comercial...</div>
           } @else {
             @if (comercialDone && comercialInfo) {
               <div class="grid-2 nice-form profile-readout-grid">
@@ -477,7 +521,7 @@
                   ></textarea>
                 </div>
                 <div class="field">
-                  <label for="co-publico">Publico objetivo</label>
+                  <label for="co-publico">Público objetivo</label>
                   <input
                     id="co-publico"
                     class="readout"
@@ -487,7 +531,7 @@
                   />
                 </div>
                 <div class="field">
-                  <label for="co-atiende">Atiende al publico</label>
+                  <label for="co-atiende">Atiende al público</label>
                   <input
                     id="co-atiende"
                     class="readout"
@@ -497,7 +541,7 @@
                   />
                 </div>
                 <div class="field">
-                  <label for="co-horario">Horario de atencion comercial</label>
+                  <label for="co-horario">Horario de atención comercial</label>
                   <input
                     id="co-horario"
                     class="readout"
@@ -563,7 +607,7 @@
                 (click)="startComercialChat()"
               >
                 <span class="material-symbols-outlined">chat</span>
-                <span>Completar informacion comercial</span>
+                <span>Completar información comercial</span>
               </button>
             } @else {
               <div class="comercial-chat">
@@ -597,7 +641,7 @@
                     type="text"
                     name="comercialInput"
                     [(ngModel)]="comercialInput"
-                    placeholder="Escribi tu respuesta..."
+                    placeholder="Escriba su respuesta..."
                     [disabled]="comercialChatLoading"
                     autocomplete="off"
                   />
@@ -605,9 +649,7 @@
                     class="btn primary"
                     type="submit"
                     [disabled]="comercialChatLoading || !comercialInput.trim()"
-                  >
-                    Enviar
-                  </button>
+                  >Enviar respuesta</button>
                 </form>
               </div>
             }
@@ -619,19 +661,26 @@
     <!-- VEHICULOS ============================================================ -->
     @if (activeTab === "vehiculos") {
       <section class="card-stack">
-        <div class="header-actions">
-          <button
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Vehículos <span class="count-chip">{{ filteredVehiculos.length }}</span></h1>
+<p class="page-desc">Vehículos de la empresa, con sus horarios y frecuencia dentro del parque.</p>
+</div>
+<div class="page-head-actions">
+<button
             class="btn primary"
             type="button"
             (click)="openVehiculoForm()"
           >
             <span class="material-symbols-outlined">add_circle</span>
-            <span>Nuevo vehiculo</span>
+            <span>Nuevo vehículo</span>
           </button>
-        </div>
+</div>
+</header>
+
         <!-- Listado -->
         <div class="card card--table">
-          <h2>Listado</h2>
+          
           <div class="header-search">
             <input
               type="text"
@@ -643,9 +692,7 @@
               class="btn ghost"
               type="button"
               (click)="clearVehiculoSearch()"
-            >
-              Limpiar
-            </button>
+            >Limpiar búsqueda</button>
           </div>
           <div class="table">
             <div class="thead">
@@ -666,76 +713,49 @@
                 </div>
                 <div>{{ v.horarios || "-" }}</div>
                 <div>{{ v.frecuencia || "-" }}</div>
-                <div class="details-cell">
-                  @if (v.datos && hasKeys(v.datos)) {
-                    @if (isVehiculoExpanded(v.id_vehiculo)) {
-                      @if (
-                        v.datos.cantidad !== undefined &&
-                        v.datos.cantidad !== null &&
-                        v.datos.cantidad !== ""
-                      ) {
-                        <div class="det-row">
-                          Cantidad: {{ v.datos.cantidad }}
-                        </div>
-                      }
-                      @if (v.datos.patente) {
-                        <div class="det-row">
-                          Patente: {{ v.datos.patente }}
-                        </div>
-                      }
-                      @if (
-                        v.datos.carga !== undefined &&
-                        v.datos.carga !== null &&
-                        v.datos.carga !== ""
-                      ) {
-                        <div class="det-row">Carga: {{ v.datos.carga }}</div>
-                      }
-                      @if (v.datos.descripcion) {
-                        <div class="det-row">
-                          {{ v.datos.descripcion }}
-                        </div>
-                      }
-                      <button
-                        class="link-btn small vermenos"
-                        type="button"
-                        (click)="toggleVehiculoDatos(v.id_vehiculo)"
-                      >
-                        Ocultar
-                      </button>
-                    } @else {
-                      <span class="clamped">{{
-                        getVehiculoDatosResumen(v.datos)
-                      }}</span>
-                      <button
-                        class="link-btn"
-                        type="button"
-                        (click)="toggleVehiculoDatos(v.id_vehiculo)"
-                      >
-                        Ver mas
-                      </button>
-                    }
-                  } @else {
-                    -
-                  }
-                </div>
+                <div class="details-cell" [class.is-open]="isVehiculoExpanded(v.id_vehiculo)">
+@if (v.datos && hasKeys(v.datos)) {
+@if (isVehiculoExpanded(v.id_vehiculo)) {
+<dl class="det-list">
+@if (v.datos.cantidad !== undefined && v.datos.cantidad !== null && v.datos.cantidad !== "") {
+<div class="det-item"><dt>Cantidad</dt><dd>{{ v.datos.cantidad }}</dd></div>
+}
+@if (v.datos.patente) {
+<div class="det-item"><dt>Patente</dt><dd class="det-mono">{{ v.datos.patente }}</dd></div>
+}
+@if (v.datos.carga !== undefined && v.datos.carga !== null && v.datos.carga !== "") {
+<div class="det-item"><dt>Carga</dt><dd class="det-cap">{{ v.datos.carga }}</dd></div>
+}
+@if (v.datos.descripcion) {
+<div class="det-item det-item--wide"><dt>Descripción</dt><dd>{{ v.datos.descripcion }}</dd></div>
+}
+</dl>
+} @else {
+<span class="det-summary" [title]="getVehiculoDatosResumen(v.datos)">{{ getVehiculoDatosResumen(v.datos) }}</span>
+}
+<button class="toggle-btn" type="button" (click)="toggleVehiculoDatos(v.id_vehiculo)" [attr.aria-expanded]="isVehiculoExpanded(v.id_vehiculo)">{{ isVehiculoExpanded(v.id_vehiculo) ? 'Ocultar detalle' : 'Ver detalle' }}<span class="material-symbols-outlined" aria-hidden="true">{{ isVehiculoExpanded(v.id_vehiculo) ? 'expand_less' : 'expand_more' }}</span></button>
+} @else {
+<span class="muted">—</span>
+}
+</div>
                 <div class="row-actions">
                   <button
                     class="btn icon"
-                    title="Editar"
-                    (click)="openVehiculoForm(v)"
+                    title="Editar vehículo" aria-label="Editar vehículo" (click)="openVehiculoForm(v)"
                   >
                     <span class="material-symbols-outlined">edit</span>
                   </button>
                   <button
                     class="btn icon danger"
-                    title="Eliminar"
-                    (click)="deleteVehiculo(v.id_vehiculo)"
+                    title="Eliminar vehículo" aria-label="Eliminar vehículo" (click)="deleteVehiculo(v.id_vehiculo)"
                   >
                     <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>
               </div>
-            }
+            } @empty {
+<div class="empty-row">No se encontraron vehículos.</div>
+}
           </div>
         </div>
       </section>
@@ -744,8 +764,13 @@
     <!-- CONTACTOS ===================================================================================-->
     @if (activeTab === "contactos") {
       <section class="card-stack">
-        <div class="header-actions">
-          <button
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Contactos <span class="count-chip">{{ filteredContactos.length }}</span></h1>
+<p class="page-desc">Personas y canales de contacto de la empresa.</p>
+</div>
+<div class="page-head-actions">
+<button
             class="btn primary"
             type="button"
             (click)="openContactoForm()"
@@ -753,13 +778,15 @@
             <span class="material-symbols-outlined">add_circle</span>
             <span>Nuevo contacto</span>
           </button>
-        </div>
+</div>
+</header>
+
         <div class="card card--table">
-          <h2>Listado</h2>
+          
           <div class="header-search">
             <input
               type="text"
-              placeholder="Buscar por nombre, telefono o datos..."
+              placeholder="Buscar por nombre, teléfono o datos..."
               [(ngModel)]="contactoSearchTerm"
               (input)="filterContactos()"
             />
@@ -767,17 +794,15 @@
               class="btn ghost"
               type="button"
               (click)="clearContactoSearch()"
-            >
-              Limpiar
-            </button>
+            >Limpiar búsqueda</button>
           </div>
           <!-- tabla contactos con layout propio -->
           <div class="table table--contactos">
             <div class="thead">
               <div>Tipo</div>
               <div>Nombre</div>
-              <div>Telefono</div>
-              <div>Direccion</div>
+              <div>Teléfono</div>
+              <div>Dirección</div>
               <div>Datos</div>
               <div>Acciones</div>
             </div>
@@ -866,21 +891,21 @@
                 <div class="row-actions">
                   <button
                     class="btn icon"
-                    title="Editar"
-                    (click)="openContactoForm(c)"
+                    title="Editar contacto" aria-label="Editar contacto" (click)="openContactoForm(c)"
                   >
                     <span class="material-symbols-outlined">edit</span>
                   </button>
                   <button
                     class="btn icon danger"
-                    title="Eliminar"
-                    (click)="deleteContacto(c.id_contacto)"
+                    title="Eliminar contacto" aria-label="Eliminar contacto" (click)="deleteContacto(c.id_contacto)"
                   >
                     <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>
               </div>
-            }
+            } @empty {
+<div class="empty-row">No se encontraron contactos.</div>
+}
           </div>
         </div>
       </section>
@@ -889,8 +914,13 @@
     <!-- SERVICIOS PROPIOS ==============================================================================-->
     @if (activeTab === "servicios") {
       <section class="card-stack">
-        <div class="header-actions">
-          <button
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Servicios <span class="count-chip">{{ filteredServicios.length }}</span></h1>
+<p class="page-desc">Servicios propios de la empresa.</p>
+</div>
+<div class="page-head-actions">
+<button
             class="btn primary"
             type="button"
             (click)="openServicioForm()"
@@ -898,9 +928,11 @@
             <span class="material-symbols-outlined">add_circle</span>
             <span>Nuevo servicio</span>
           </button>
-        </div>
+</div>
+</header>
+
         <div class="card card--table">
-          <h2>Listado</h2>
+          
           <div class="header-search">
             <input
               type="text"
@@ -912,9 +944,7 @@
               class="btn ghost"
               type="button"
               (click)="clearServicioSearch()"
-            >
-              Limpiar
-            </button>
+            >Limpiar búsqueda</button>
           </div>
           <div class="table">
             <div class="thead">
@@ -941,21 +971,21 @@
                 <div class="row-actions">
                   <button
                     class="btn icon"
-                    title="Editar"
-                    (click)="openServicioForm(s)"
+                    title="Editar servicio" aria-label="Editar servicio" (click)="openServicioForm(s)"
                   >
                     <span class="material-symbols-outlined">edit</span>
                   </button>
                   <button
                     class="btn icon danger"
-                    title="Eliminar"
-                    (click)="deleteServicio(s.id_servicio)"
+                    title="Eliminar servicio" aria-label="Eliminar servicio" (click)="deleteServicio(s.id_servicio)"
                   >
                     <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>
               </div>
-            }
+            } @empty {
+<div class="empty-row">No se encontraron servicios.</div>
+}
           </div>
         </div>
       </section>
@@ -964,8 +994,15 @@
     <!-- SERVICIOS POLO (solo lectura) ==================================================================-->
     @if (activeTab === "serviciosPolo") {
       <section class="card-stack">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Servicios del Polo <span class="count-chip">{{ filteredServiciosPolo.length }}</span></h1>
+<p class="page-desc">Espacios del Polo asociados a su empresa. Esta información es de solo lectura.</p>
+</div>
+</header>
+
         <div class="card card--table">
-          <h2>Servicios del Polo asociados</h2>
+          
           <div class="header-search">
             <input
               type="text"
@@ -977,9 +1014,7 @@
               class="btn ghost"
               type="button"
               (click)="clearServicioPoloSearch()"
-            >
-              Limpiar
-            </button>
+            >Limpiar búsqueda</button>
           </div>
           <div class="table table--serviciosPolo">
             <div class="thead">
@@ -1007,7 +1042,9 @@
                   }
                 </div>
               </div>
-            }
+            } @empty {
+<div class="empty-row">No hay servicios del Polo asociados.</div>
+}
           </div>
         </div>
       </section>
@@ -1016,12 +1053,15 @@
     <!-- EMPRESAS DEL PARQUE (directorio para networking) ============================================-->
     @if (activeTab === "empresas") {
       <section class="card-stack">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Empresas del parque</h1>
+<p class="page-desc">Directorio de las empresas instaladas en el Parque Industrial Polo 52, para facilitar el contacto entre empresas.</p>
+</div>
+</header>
+
         <div class="card card--table">
-          <h2>Empresas del parque</h2>
-          <p class="muted">
-            Directorio de las empresas instaladas en el Parque Industrial
-            Polo 52, para facilitar contacto y networking entre inquilinos.
-          </p>
+          
           @if (loadingEmpresasDirectorio) {
             <div class="alert alert--loading">
               <span class="alert-spinner" aria-hidden="true"></span>
@@ -1045,9 +1085,7 @@
                 class="btn ghost"
                 type="button"
                 (click)="clearEmpresasDirectorioSearch()"
-              >
-                Limpiar
-              </button>
+              >Limpiar búsqueda</button>
             </div>
             @if (!filteredEmpresasDirectorio.length) {
               <div class="muted">No se encontraron empresas.</div>
@@ -1056,7 +1094,7 @@
                 <div class="thead">
                   <div>Nombre</div>
                   <div>Contacto</div>
-                  <div>Telefono</div>
+                  <div>Teléfono</div>
                   <div>Datos comerciales</div>
                   <div>Ubicación</div>
                 </div>
@@ -1162,13 +1200,20 @@
     <!-- CONFIGURACION  ==============================================================================-->
     @if (activeTab === "config") {
       <section class="card-grid">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Configuración</h1>
+<p class="page-desc">Seguridad de la cuenta y sesión.</p>
+</div>
+</header>
+
         <!-- Contraseña -->
         <div class="card setting-card">
           <div class="setting-header">
             <span class="material-symbols-outlined setting-icon">vpn_key</span>
             <div>
               <h2>Contraseña</h2>
-              <p class="muted">Actualiza tu contraseña de acceso</p>
+              <p class="muted">Actualice su contraseña de acceso</p>
             </div>
           </div>
           <button
@@ -1194,11 +1239,11 @@
               >logout</span
             >
             <div>
-              <h2>Sesion</h2>
+              <h2>Sesión</h2>
               <p class="muted">Salir de la cuenta de empresa</p>
             </div>
           </div>
-          <app-logout-button></app-logout-button>
+          <app-logout-button confirmMessage="¿Está seguro de que desea cerrar la sesión?"></app-logout-button>
         </div>
       </section>
     }
@@ -1213,10 +1258,10 @@
 
 <!-- Empresa: editar propios -->
 @if (showEmpresaEditForm) {
-  <div class="overlay">
-    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('empresa')">
-      <div class="modal-header">
-        <h3>Editar datos de la empresa</h3>
+  <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('empresa')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-empresa-title" [attr.aria-busy]="isModalBusy('empresa')">
+<div class="modal-header">
+<h3 id="dlg-empresa-title">Editar datos de la empresa</h3>
         <button
           type="button"
           class="icon-btn"
@@ -1237,8 +1282,7 @@
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres
-              esta ventana ni navegues fuera.
+              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
             </span>
           </div>
         }
@@ -1258,17 +1302,21 @@
           </div>
         }
         <div class="modal-body grid-3">
-          <div class="field">
-            <label for="empresa_cant_empleados">Cant. empleados</label>
+<div class="form-section">
+<h4 class="form-section-title">Datos operativos</h4>
+</div>
+<div class="field">
+<label for="empresa_cant_empleados">Cantidad de empleados</label>
             <input
               id="empresa_cant_empleados"
+inputmode="numeric"
               type="number"
               [(ngModel)]="empresaEditForm.cant_empleados"
               name="cant_empleados"
             />
           </div>
           <div class="field">
-            <label for="empresa_horario_trabajo">Horario trabajo</label>
+            <label for="empresa_horario_trabajo">Horario de trabajo</label>
             <input
               id="empresa_horario_trabajo"
               type="text"
@@ -1277,12 +1325,15 @@
               placeholder="Lun-Vie 8-17"
             />
           </div>
-          <div class="field col-3">
-            <label for="empresa_observaciones">Sobre la empresa</label>
+          <div class="form-section">
+<h4 class="form-section-title">Descripción</h4>
+</div>
+<div class="field col-3">
+<label for="empresa_observaciones">Sobre la empresa</label>
             <textarea
               id="empresa_observaciones"
               rows="4"
-              placeholder="Contanos de qué se trata tu empresa: a qué se dedica, qué hace, cómo y cuándo se fundó, etc."
+              placeholder="Describa la empresa: a qué se dedica, cómo y cuándo se fundó, etc."
               [(ngModel)]="empresaEditForm.observaciones"
               name="observaciones"
             ></textarea>
@@ -1305,10 +1356,10 @@
 
 <!-- Informacion comercial: editar -->
 @if (showComercialEditForm) {
-  <div class="overlay">
-    <div class="modal modal--md" [attr.aria-busy]="comercialChatLoading">
-      <div class="modal-header">
-        <h3>Editar informacion comercial</h3>
+  <div class="overlay" tabindex="-1" (keydown.escape)="!comercialChatLoading && cancelComercialEditForm()">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-comercial-title" [attr.aria-busy]="comercialChatLoading">
+<div class="modal-header">
+<h3 id="dlg-comercial-title">Editar información comercial</h3>
         <button
           type="button"
           class="icon-btn"
@@ -1329,8 +1380,7 @@
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres
-              esta ventana ni navegues fuera.
+              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
             </span>
           </div>
         }
@@ -1342,8 +1392,11 @@
           </div>
         }
         <div class="modal-body grid-2">
-          <div class="field col-2">
-            <label for="ce-productos">Productos / servicios</label>
+<div class="form-section">
+<h4 class="form-section-title">Qué ofrece</h4>
+</div>
+<div class="field col-2">
+<label for="ce-productos">Productos / servicios</label>
             <textarea
               id="ce-productos"
               rows="3"
@@ -1351,31 +1404,26 @@
               name="productos_servicios"
             ></textarea>
           </div>
-          <div class="field">
-            <label for="ce-publico">Publico objetivo</label>
-            <select
-              id="ce-publico"
-              [(ngModel)]="comercialEditForm.publico_objetivo"
-              name="publico_objetivo"
-            >
-              @for (op of comercialPublicoOpciones; track op) {
-                <option [value]="op">{{ op }}</option>
-              }
-            </select>
+          <div class="form-section">
+<h4 class="form-section-title">Atención al público</h4>
+</div>
+<div class="field">
+<span class="field-label" id="ce-publico-label">Público objetivo</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-publico-label">
+@for (op of comercialPublicoOpciones; track op) {
+<label class="segmented-option"><input type="radio" name="publico_objetivo" [(ngModel)]="comercialEditForm.publico_objetivo" [value]="op" /><span>{{ op }}</span></label>
+}
+</div>
           </div>
           <div class="field">
-            <label for="ce-atiende">Atiende al publico</label>
-            <select
-              id="ce-atiende"
-              [(ngModel)]="comercialEditForm.atiende_publico"
-              name="atiende_publico"
-            >
-              <option [ngValue]="true">Si</option>
-              <option [ngValue]="false">No</option>
-            </select>
+            <span class="field-label" id="ce-atiende-label">¿Atiende al público?</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-atiende-label">
+<label class="segmented-option"><input type="radio" name="atiende_publico" [(ngModel)]="comercialEditForm.atiende_publico" [value]="true" /><span>Sí</span></label>
+<label class="segmented-option"><input type="radio" name="atiende_publico" [(ngModel)]="comercialEditForm.atiende_publico" [value]="false" /><span>No</span></label>
+</div>
           </div>
           <div class="field">
-            <label for="ce-horario">Horario de atencion comercial</label>
+            <label for="ce-horario">Horario de atención comercial</label>
             <input
               id="ce-horario"
               type="text"
@@ -1383,29 +1431,24 @@
               name="horario_atencion_comercial"
             />
           </div>
-          <div class="field">
-            <label for="ce-precios">Rango de precios</label>
-            <select
-              id="ce-precios"
-              [(ngModel)]="comercialEditForm.rango_precios"
-              name="rango_precios"
-            >
-              @for (op of comercialRangoPreciosOpciones; track op) {
-                <option [value]="op">{{ op }}</option>
-              }
-            </select>
+          <div class="form-section">
+<h4 class="form-section-title">Condiciones comerciales</h4>
+</div>
+<div class="field">
+<span class="field-label" id="ce-precios-label">Rango de precios</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-precios-label">
+@for (op of comercialRangoPreciosOpciones; track op) {
+<label class="segmented-option"><input type="radio" name="rango_precios" [(ngModel)]="comercialEditForm.rango_precios" [value]="op" /><span>{{ op }}</span></label>
+}
+</div>
           </div>
           <div class="field">
-            <label for="ce-modalidad">Modalidad de venta</label>
-            <select
-              id="ce-modalidad"
-              [(ngModel)]="comercialEditForm.modalidad_venta"
-              name="modalidad_venta"
-            >
-              @for (op of comercialModalidadVentaOpciones; track op) {
-                <option [value]="op">{{ op }}</option>
-              }
-            </select>
+            <span class="field-label" id="ce-modalidad-label">Modalidad de venta</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-modalidad-label">
+@for (op of comercialModalidadVentaOpciones; track op) {
+<label class="segmented-option"><input type="radio" name="modalidad_venta" [(ngModel)]="comercialEditForm.modalidad_venta" [value]="op" /><span>{{ op }}</span></label>
+}
+</div>
           </div>
           <div class="field">
             <label for="ce-marcas">Marcas representadas</label>
@@ -1425,8 +1468,11 @@
               name="certificaciones"
             />
           </div>
-          <div class="field col-2">
-            <label for="ce-obs">Observaciones</label>
+          <div class="form-section">
+<h4 class="form-section-title">Notas</h4>
+</div>
+<div class="field col-2">
+<label for="ce-obs">Observaciones</label>
             <textarea
               id="ce-obs"
               rows="3"
@@ -1458,10 +1504,10 @@
 
 <!-- Vehiculo: crear/editar -->
 @if (showVehiculoForm) {
-  <div class="overlay">
-    <div class="modal modal--lg" [attr.aria-busy]="isModalBusy('vehiculo')">
-      <div class="modal-header">
-        <h3>{{ editingVehiculo ? "Editar vehiculo" : "Nuevo vehiculo" }}</h3>
+  <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('vehiculo')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-vehiculo-title" [attr.aria-busy]="isModalBusy('vehiculo')">
+<div class="modal-header">
+<h3 id="dlg-vehiculo-title">{{ editingVehiculo ? "Editar vehículo" : "Nuevo vehículo" }}</h3>
         <button
           type="button"
           class="icon-btn"
@@ -1472,7 +1518,7 @@
           ✕
         </button>
       </div>
-      <!-- 👇 usa tu helper markAllAndSubmit(fVeh) -->
+      <!-- 👇 usa su helper markAllAndSubmit(fVeh) -->
       <form
         (ngSubmit)="confirmAndSubmit('vehiculo', fVeh)"
         #fVeh="ngForm"
@@ -1483,8 +1529,7 @@
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres
-              esta ventana ni navegues fuera.
+              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
             </span>
           </div>
         }
@@ -1504,30 +1549,31 @@
           </div>
         }
         <div class="modal-body grid-3">
-          <!-- Tipo (req) -->
-          <div class="field col-3">
-            <label for="v_tipo">Tipo <span class="req">*</span></label>
-            <select
-              id="v_tipo"
-              [(ngModel)]="vehiculoForm.id_tipo_vehiculo"
-              name="v_tipo"
-              (ngModelChange)="onVehiculoTipoChange()"
-              required
-              #vTipo="ngModel"
-            >
-              <option [ngValue]="null">—</option>
-              @for (t of tiposVehiculo; track t) {
-                <option [ngValue]="t.id_tipo_vehiculo">
-                  {{ t.tipo }}
-                </option>
-              }
-            </select>
-            @if (vTipo.invalid && (vTipo.touched || fVeh.submitted)) {
-              <div class="error">Selecciona un tipo.</div>
+<div class="form-section">
+<h4 class="form-section-title">Tipo de vehículo</h4>
+<p class="form-section-desc">Según el tipo elegido se piden distintos datos.</p>
+</div>
+<!-- Tipo (req) -->
+<div class="field col-3">
+<span class="field-label" id="v_tipo_label">Tipo <span class="req">*</span></span>
+<div class="choice-grid" role="radiogroup" aria-labelledby="v_tipo_label">
+@for (t of tiposVehiculo; track t) {
+<label class="choice-card"><input type="radio" name="v_tipo" [(ngModel)]="vehiculoForm.id_tipo_vehiculo" [value]="t.id_tipo_vehiculo" (ngModelChange)="onVehiculoTipoChange()" required />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">{{ iconoVehiculo(t.id_tipo_vehiculo) }}</span>
+<span class="choice-title">{{ t.tipo }}</span>
+<span class="choice-desc">{{ ayudaVehiculo(t.id_tipo_vehiculo) }}</span>
+</label>
+}
+</div>
+@if (fVeh.form.get('v_tipo')?.invalid && (fVeh.form.get('v_tipo')?.touched || fVeh.submitted)) {
+              <div class="error">Seleccione un tipo.</div>
             }
           </div>
-          <!-- Horarios (req) -->
-          <div class="field">
+          <div class="form-section">
+<h4 class="form-section-title">Uso dentro del parque</h4>
+</div>
+<!-- Horarios (req) -->
+<div class="field">
             <label for="v_horarios">Horarios <span class="req">*</span></label>
             <input
               type="text"
@@ -1560,6 +1606,11 @@
               <div class="error">Campo obligatorio.</div>
             }
           </div>
+@if (vehiculoFormClase) {
+<div class="form-section">
+<h4 class="form-section-title">Detalle</h4>
+</div>
+}
           <!-- Reglas por tipo -->
           <!-- Por nombre del tipo, no por id (ver getVehiculoClase) -->
           @switch (vehiculoFormClase) {
@@ -1572,6 +1623,7 @@
                 <input
                   type="number"
                   id="v_cant_corp"
+inputmode="numeric"
                   [(ngModel)]="vehiculoForm.datos.cantidad"
                   name="v_cant_corp"
                   min="1"
@@ -1581,7 +1633,7 @@
                 @if (
                   vCantCorp.invalid && (vCantCorp.touched || fVeh.submitted)
                 ) {
-                  <div class="error">Ingresa una cantidad ≥ 1.</div>
+                  <div class="error">Ingrese una cantidad mayor o igual a 1.</div>
                 }
               </div>
               <div class="field">
@@ -1606,23 +1658,14 @@
                 }
               </div>
               <div class="field">
-                <label for="v_carga_corp"
-                  >Carga <span class="req">*</span></label
-                >
-                <select
-                  id="v_carga_corp"
-                  [(ngModel)]="vehiculoForm.datos.carga"
-                  name="v_carga_corp"
-                  required
-                  #vCarCorp="ngModel"
-                >
-                  <option [ngValue]="null">—</option>
-                  <option value="baja">Baja</option>
-                  <option value="mediana">Mediana</option>
-                  <option value="alta">Alta</option>
-                </select>
+                <span class="field-label" id="v_carga_corp_label">Carga <span class="req">*</span></span>
+<div class="segmented" role="radiogroup" aria-labelledby="v_carga_corp_label">
+<label class="segmented-option"><input type="radio" name="v_carga_corp" [(ngModel)]="vehiculoForm.datos.carga" [value]="'baja'" required #vCarCorp="ngModel" /><span>Baja</span></label>
+<label class="segmented-option"><input type="radio" name="v_carga_corp" [(ngModel)]="vehiculoForm.datos.carga" [value]="'mediana'" required /><span>Mediana</span></label>
+<label class="segmented-option"><input type="radio" name="v_carga_corp" [(ngModel)]="vehiculoForm.datos.carga" [value]="'alta'" required /><span>Alta</span></label>
+</div>
                 @if (vCarCorp.invalid && (vCarCorp.touched || fVeh.submitted)) {
-                  <div class="error">Selecciona la carga.</div>
+                  <div class="error">Seleccione la carga.</div>
                 }
               </div>
             }
@@ -1635,6 +1678,7 @@
                 <input
                   type="number"
                   id="v_cant_per"
+inputmode="numeric"
                   [(ngModel)]="vehiculoForm.datos.cantidad"
                   name="v_cant_per"
                   min="1"
@@ -1642,7 +1686,7 @@
                   #vCantPer="ngModel"
                 />
                 @if (vCantPer.invalid && (vCantPer.touched || fVeh.submitted)) {
-                  <div class="error">Ingresa una cantidad ≥ 1.</div>
+                  <div class="error">Ingrese una cantidad mayor o igual a 1.</div>
                 }
               </div>
               <div class="field">
@@ -1670,6 +1714,7 @@
                 <input
                   type="number"
                   id="v_cant_ter"
+inputmode="numeric"
                   [(ngModel)]="vehiculoForm.datos.cantidad"
                   name="v_cant_ter"
                   min="1"
@@ -1677,27 +1722,18 @@
                   #vCantTer="ngModel"
                 />
                 @if (vCantTer.invalid && (vCantTer.touched || fVeh.submitted)) {
-                  <div class="error">Ingresa una cantidad ≥ 1.</div>
+                  <div class="error">Ingrese una cantidad mayor o igual a 1.</div>
                 }
               </div>
               <div class="field">
-                <label for="v_carga_ter"
-                  >Carga <span class="req">*</span></label
-                >
-                <select
-                  id="v_carga_ter"
-                  [(ngModel)]="vehiculoForm.datos.carga"
-                  name="v_carga_ter"
-                  required
-                  #vCarTer="ngModel"
-                >
-                  <option [ngValue]="null">—</option>
-                  <option value="baja">Baja</option>
-                  <option value="mediana">Mediana</option>
-                  <option value="alta">Alta</option>
-                </select>
+                <span class="field-label" id="v_carga_ter_label">Carga <span class="req">*</span></span>
+<div class="segmented" role="radiogroup" aria-labelledby="v_carga_ter_label">
+<label class="segmented-option"><input type="radio" name="v_carga_ter" [(ngModel)]="vehiculoForm.datos.carga" [value]="'baja'" required #vCarTer="ngModel" /><span>Baja</span></label>
+<label class="segmented-option"><input type="radio" name="v_carga_ter" [(ngModel)]="vehiculoForm.datos.carga" [value]="'mediana'" required /><span>Mediana</span></label>
+<label class="segmented-option"><input type="radio" name="v_carga_ter" [(ngModel)]="vehiculoForm.datos.carga" [value]="'alta'" required /><span>Alta</span></label>
+</div>
                 @if (vCarTer.invalid && (vCarTer.touched || fVeh.submitted)) {
-                  <div class="error">Selecciona la carga.</div>
+                  <div class="error">Seleccione la carga.</div>
                 }
               </div>
             }
@@ -1705,7 +1741,7 @@
         </div>
         <div class="modal-actions">
           <button class="btn primary" type="submit">
-            {{ editingVehiculo ? "Actualizar" : "Agregar" }}
+            {{ editingVehiculo ? "Guardar cambios" : "Agregar vehículo" }}
           </button>
           <button
             class="btn ghost"
@@ -1722,10 +1758,10 @@
 
 <!-- Contacto: crear/editar -->
 @if (showContactoForm) {
-  <div class="overlay">
-    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('contacto')">
-      <div class="modal-header">
-        <h3>
+  <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('contacto')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-contacto-title" [attr.aria-busy]="isModalBusy('contacto')">
+<div class="modal-header">
+<h3 id="dlg-contacto-title">
           {{ editingContacto ? "Editar contacto" : "Nuevo contacto" }}
         </h3>
         <button
@@ -1748,8 +1784,7 @@
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres
-              esta ventana ni navegues fuera.
+              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
             </span>
           </div>
         }
@@ -1769,25 +1804,18 @@
           </div>
         }
         <div class="modal-body grid-3">
-          <div class="field">
-            <label for="c_tipo">Tipo <span class="req">*</span></label>
-            <select
-              id="c_tipo"
-              [(ngModel)]="contactoForm.id_tipo_contacto"
-              name="c_tipo"
-              required
-              #cTipo="ngModel"
-              (ngModelChange)="onTipoContactoChange()"
-            >
-              <option [ngValue]="null">—</option>
-              @for (t of tiposContacto; track t) {
-                <option [ngValue]="t.id_tipo_contacto">
-                  {{ t.tipo }}
-                </option>
-              }
-            </select>
-            @if (cTipo.invalid && (cTipo.touched || fCont.submitted)) {
-              <div class="error">Selecciona un tipo.</div>
+<div class="form-section">
+<h4 class="form-section-title">Datos del contacto</h4>
+</div>
+<div class="field col-3">
+<span class="field-label" id="c_tipo_label">Tipo <span class="req">*</span></span>
+<div class="segmented" role="radiogroup" aria-labelledby="c_tipo_label">
+@for (t of tiposContacto; track t) {
+<label class="segmented-option"><input type="radio" name="c_tipo" [(ngModel)]="contactoForm.id_tipo_contacto" [value]="t.id_tipo_contacto" required (ngModelChange)="onTipoContactoChange()" /><span>{{ t.tipo }}</span></label>
+}
+</div>
+@if (fCont.form.get('c_tipo')?.invalid && (fCont.form.get('c_tipo')?.touched || fCont.submitted)) {
+              <div class="error">Seleccione un tipo.</div>
             }
           </div>
           <div class="field">
@@ -1801,13 +1829,15 @@
               #cNom="ngModel"
             />
             @if (cNom.invalid && (cNom.touched || fCont.submitted)) {
-              <div class="error">Ingresa un nombre.</div>
+              <div class="error">Ingrese un nombre.</div>
             }
           </div>
           <div class="field">
-            <label for="c_telefono">telefono <span class="req">*</span></label>
+            <label for="c_telefono">Teléfono <span class="req">*</span></label>
             <input
               id="c_telefono"
+inputmode="tel"
+autocomplete="tel"
               type="text"
               [(ngModel)]="contactoForm.telefono"
               name="c_telefono"
@@ -1816,12 +1846,12 @@
               placeholder="Ej: +54 9 11 1234-5678"
             />
             @if (cTel.invalid && (cTel.touched || fCont.submitted)) {
-              <div class="error">Ingresa un telefono.</div>
+              <div class="error">Ingrese un teléfono.</div>
             }
           </div>
           <div class="field col-3">
             <label for="c_direccion"
-              >Direccion <span class="req">*</span></label
+>Dirección <span class="req">*</span></label
             >
             <input
               id="c_direccion"
@@ -1833,48 +1863,51 @@
               placeholder="Calle 123, Ciudad"
             />
             @if (cDir.invalid && (cDir.touched || fCont.submitted)) {
-              <div class="error">Ingresa una direccion.</div>
+              <div class="error">Ingrese una dirección.</div>
             }
           </div>
           <!-- Comerciales (id=1) -->
           @if (contactoForm.id_tipo_contacto === 1) {
-            <div class="field col-3">
-              <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de grupo, no de un unico control -->
-              <label id="c_datos_comerciales">Datos comerciales</label>
-              <div
-                class="inline-3"
-                role="group"
-                aria-labelledby="c_datos_comerciales"
-              >
-                <input
-                  type="url"
-                  [(ngModel)]="contactoForm.datos.pagina_web"
-                  name="c_web"
-                  aria-label="Pagina web"
-                  placeholder="https://empresa.com"
-                />
-                <input
-                  type="email"
-                  email
-                  [(ngModel)]="contactoForm.datos.correo"
-                  name="c_mail"
-                  aria-label="Correo"
-                  placeholder="mail@empresa.com"
-                />
-                <input
-                  type="text"
-                  [(ngModel)]="contactoForm.datos.redes_sociales"
-                  name="c_rrss"
-                  aria-label="Redes sociales"
-                  placeholder="@empresa"
-                />
-              </div>
-            </div>
+            <div class="form-section">
+<h4 class="form-section-title" id="c_datos_comerciales">Canales digitales</h4>
+<p class="form-section-desc">Opcionales.</p>
+</div>
+<div class="field">
+<label for="c_web">Página web</label>
+<input
+id="c_web"
+type="url"
+[(ngModel)]="contactoForm.datos.pagina_web"
+name="c_web"
+placeholder="https://empresa.com"
+/>
+</div>
+<div class="field">
+<label for="c_mail">Correo</label>
+<input
+id="c_mail"
+type="email"
+email
+[(ngModel)]="contactoForm.datos.correo"
+name="c_mail"
+placeholder="mail@empresa.com"
+/>
+</div>
+<div class="field">
+<label for="c_rrss">Redes sociales</label>
+<input
+id="c_rrss"
+type="text"
+[(ngModel)]="contactoForm.datos.redes_sociales"
+name="c_rrss"
+placeholder="@empresa"
+/>
+</div>
           }
         </div>
         <div class="modal-actions">
           <button class="btn primary" type="submit">
-            {{ editingContacto ? "Actualizar" : "Agregar" }}
+            {{ editingContacto ? "Guardar cambios" : "Agregar contacto" }}
           </button>
           <button
             class="btn ghost"
@@ -1891,10 +1924,10 @@
 
 <!-- Servicio propio: crear/editar -->
 @if (showServicioForm) {
-  <div class="overlay">
-    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('servicio')">
-      <div class="modal-header">
-        <h3>
+  <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('servicio')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-servicio-title" [attr.aria-busy]="isModalBusy('servicio')">
+<div class="modal-header">
+<h3 id="dlg-servicio-title">
           {{ editingServicio ? "Editar servicio" : "Nuevo servicio" }}
         </h3>
         <button
@@ -1917,8 +1950,7 @@
           <div class="alert alert--loading">
             <span class="alert-spinner" aria-hidden="true"></span>
             <span>
-              Procesando tu solicitud, puede demorar unos segundos. No cierres
-              esta ventana ni navegues fuera.
+              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
             </span>
           </div>
         }
@@ -1938,32 +1970,27 @@
           </div>
         }
         <div class="modal-body grid-3">
-          <div class="field">
-            <label for="s_tipo">Tipo <span class="req">*</span></label>
-            <select
-              id="s_tipo"
-              [(ngModel)]="servicioForm.id_tipo_servicio"
-              (ngModelChange)="onTipoServicioChange()"
-              name="s_tipo"
-              required
-              #sTipo="ngModel"
-            >
-              <option [ngValue]="null">—</option>
-              @for (t of tiposServicio; track t) {
-                <option [ngValue]="t.id_tipo_servicio">
-                  {{ t.tipo }}
-                </option>
-              }
-            </select>
-            @if (sTipo.invalid && (sTipo.touched || fServ.submitted)) {
-              <div class="error">Selecciona un tipo.</div>
+          <div class="field col-3">
+<span class="field-label" id="s_tipo_label">Tipo <span class="req">*</span></span>
+<div class="choice-grid" role="radiogroup" aria-labelledby="s_tipo_label">
+@for (t of tiposServicio; track t) {
+<label class="choice-card"><input type="radio" name="s_tipo" [(ngModel)]="servicioForm.id_tipo_servicio" [value]="t.id_tipo_servicio" (ngModelChange)="onTipoServicioChange()" required />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">{{ iconoTipoServicio[t.id_tipo_servicio] || 'build' }}</span>
+<span class="choice-title">{{ t.tipo }}</span>
+<span class="choice-desc">{{ ayudaTipoServicio[t.id_tipo_servicio] || '' }}</span>
+</label>
+}
+</div>
+@if (fServ.form.get('s_tipo')?.invalid && (fServ.form.get('s_tipo')?.touched || fServ.submitted)) {
+              <div class="error">Seleccione un tipo.</div>
             }
           </div>
           @switch (servicioForm.id_tipo_servicio) {
             <!-- 1: Agua -->
             @case (1) {
-              <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de seccion, no de un unico control -->
-              <div class="field col-3"><label>Servicio de Agua</label></div>
+              <div class="form-section">
+<h4 class="form-section-title">Servicio de agua</h4>
+</div>
               <div class="field col-3">
                 <label for="s_biofiltro"
                   >Biofiltro <span class="req">*</span></label
@@ -1999,13 +2026,12 @@
             }
             <!-- 2: Espacios Verdes -->
             @case (2) {
-              <div class="field col-3">
-                <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de seccion, no de un unico control -->
-                <label>Servicio de Espacios Verdes</label>
-              </div>
+              <div class="form-section">
+<h4 class="form-section-title">Servicio de espacios verdes</h4>
+</div>
               <div class="field col-3">
                 <label for="s_abierto"
-                  >Abierto al publico <span class="req">*</span></label
+                  >Abierto al público <span class="req">*</span></label
                 >
                 <input
                   id="s_abierto"
@@ -2027,6 +2053,7 @@
                 >
                 <input
                   id="s_m2"
+inputmode="numeric"
                   type="number"
                   [(ngModel)]="servicioForm.datos.m2"
                   name="s_m2"
@@ -2035,14 +2062,15 @@
                   #sM2="ngModel"
                 />
                 @if (sM2.invalid && (sM2.touched || fServ.submitted)) {
-                  <div class="error">Ingresa un valor ≥ 1.</div>
+                  <div class="error">Ingrese un valor mayor o igual a 1.</div>
                 }
               </div>
             }
             <!-- 3: Internet -->
             @case (3) {
-              <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de seccion, no de un unico control -->
-              <div class="field col-3"><label>Servicio de Internet</label></div>
+              <div class="form-section">
+<h4 class="form-section-title">Servicio de internet</h4>
+</div>
               <div class="field col-3">
                 <label for="s_tipo_con">Tipo <span class="req">*</span></label>
                 <input
@@ -2078,11 +2106,12 @@
             }
             <!-- 4: Residuos -->
             @case (4) {
-              <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de seccion, no de un unico control -->
-              <div class="field col-3"><label>Servicio de Residuos</label></div>
+              <div class="form-section">
+<h4 class="form-section-title">Servicio de residuos</h4>
+</div>
               <div class="field col-3">
                 <label for="s_tipo_e"
-                  >Tipo residuo <span class="req">*</span></label
+>Tipo de residuo <span class="req">*</span></label
                 >
                 <input
                   id="s_tipo_e"
@@ -2104,6 +2133,7 @@
                 >
                 <input
                   id="s_cantidad"
+inputmode="numeric"
                   type="number"
                   [(ngModel)]="servicioForm.datos.cantidad"
                   name="s_cantidad"
@@ -2112,7 +2142,7 @@
                   #sCant="ngModel"
                 />
                 @if (sCant.invalid && (sCant.touched || fServ.submitted)) {
-                  <div class="error">Ingresa un valor ≥ 1.</div>
+                  <div class="error">Ingrese un valor mayor o igual a 1.</div>
                 }
               </div>
             }
@@ -2120,7 +2150,7 @@
         </div>
         <div class="modal-actions">
           <button class="btn primary" type="submit">
-            {{ editingServicio ? "Actualizar" : "Agregar" }}
+            {{ editingServicio ? "Guardar cambios" : "Agregar servicio" }}
           </button>
           <button
             class="btn ghost"

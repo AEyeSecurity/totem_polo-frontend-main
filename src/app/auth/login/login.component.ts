@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+  styleUrls: ['./login.component.css', '../../shared/styles/auth-modern.css'],
 })
 export class LoginComponent implements OnInit {
   private authService = inject(AuthenticationService);
@@ -96,7 +96,7 @@ export class LoginComponent implements OnInit {
 
   onLogin(): void {
     if (this.isBlocked) {
-      this.loginMessage = `Demasiados intentos fallidos. Intenta en ${this.blockTimeRemaining} segundos.`;
+      this.loginMessage = `Demasiados intentos fallidos. Intente nuevamente en ${this.blockTimeRemaining} segundos.`;
       return;
     }
 
@@ -105,7 +105,7 @@ export class LoginComponent implements OnInit {
     this.loginMessage = '';
     this.successMessage = '';
     if (this.usernameError || this.passwordError) {
-      this.loginMessage = 'Por favor, corrige los errores antes de continuar.';
+      this.loginMessage = 'Por favor, corrija los errores antes de continuar.';
       return;
     }
 
@@ -129,13 +129,13 @@ export class LoginComponent implements OnInit {
         error: (err) => {
           console.error('Error de login:', err);
           if (err.status === 429)
-            this.loginMessage = 'Demasiados intentos. Intenta más tarde.';
+            this.loginMessage = 'Demasiados intentos. Intente más tarde.';
           else if (err.status === 0)
             this.loginMessage =
-              'Error de conexión. Verifica tu conexión a internet.';
+              'Error de conexión. Verifique su conexión a internet.';
           else
             this.loginMessage =
-              'No pudimos iniciar sesión por un problema del servidor. Intentá de nuevo en unos minutos.';
+              'No pudimos iniciar sesión por un problema del servidor. Intente nuevamente en unos minutos.';
         },
       });
   }
@@ -158,20 +158,20 @@ export class LoginComponent implements OnInit {
     const remaining = this.maxAttempts - this.loginAttempts;
     if (remaining <= 0) this.blockUser();
     else
-      this.loginMessage = `Usuario o contraseña incorrectos. Te quedan ${remaining} intentos.`;
+      this.loginMessage = `Usuario o contraseña incorrectos. Le quedan ${remaining} intentos.`;
   }
 
   private blockUser(): void {
     this.isBlocked = true;
     this.blockTimeRemaining = 300;
-    this.loginMessage = `Demasiados intentos fallidos. Intenta en ${this.blockTimeRemaining} segundos.`;
+    this.loginMessage = `Demasiados intentos fallidos. Intente nuevamente en ${this.blockTimeRemaining} segundos.`;
     localStorage.setItem(
       'loginBlock',
       (Date.now() + this.blockTimeRemaining * 1000).toString()
     );
     const timer = setInterval(() => {
       this.blockTimeRemaining--;
-      this.loginMessage = `Demasiados intentos fallidos. Intenta en ${this.blockTimeRemaining} segundos.`;
+      this.loginMessage = `Demasiados intentos fallidos. Intente nuevamente en ${this.blockTimeRemaining} segundos.`;
       if (this.blockTimeRemaining <= 0) {
         this.isBlocked = false;
         this.loginAttempts = 0;
@@ -206,7 +206,7 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/chat']);
         break;
       default:
-        this.loginMessage = 'Rol no reconocido. Contacta al administrador.';
+        this.loginMessage = 'Rol no reconocido. Contacte al administrador.';
         this.authService.logoutLocal();
         break;
     }
@@ -256,7 +256,7 @@ export class LoginComponent implements OnInit {
           // Backend (FastAPI) devuelve message y expires_in_minutes
           this.resetMessage =
             res?.message ||
-            'Te enviamos un email con el enlace de recuperación.';
+            'Le enviamos un email con el enlace de recuperación.';
           // Si querés, podés cerrar el modal después de unos segundos
           // setTimeout(() => this.closeResetModal(), 3000);
         },
@@ -267,13 +267,13 @@ export class LoginComponent implements OnInit {
             this.resetError = 'Ese email no está registrado.';
           } else if (err.status === 403) {
             this.resetError =
-              'La cuenta está deshabilitada. Contactá al administrador.';
+              'La cuenta está deshabilitada. Contacte al administrador.';
           } else if (err.status === 500) {
             // El back puede devolver "Error enviando email: ..."
             this.resetError = err.error?.detail || 'Error enviando el email.';
           } else {
             this.resetError =
-              'No pudimos procesar tu solicitud. Intentá nuevamente.';
+              'No pudimos procesar su solicitud. Intente nuevamente.';
           }
         },
       });

@@ -1,9 +1,10 @@
+import { DialogFocusDirective } from '../dialog-focus.directive';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-welcome-modal',
   standalone: true,
-  imports: [],
+  imports: [DialogFocusDirective],
   template: `
     @if (showModal) {
       <div
@@ -15,6 +16,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
         <div
           class="modal modal--sm"
           role="presentation"
+          appDialogFocus
           (click)="$event.stopPropagation()"
         >
           <div class="modal-header">
@@ -33,9 +35,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
               >waving_hand</span
             >
             <p>
-              Te recomendamos completar la información comercial de tu
-              empresa para que el asistente virtual del Polo pueda responder
-              consultas sobre vos.
+              Le recomendamos completar la información comercial de su empresa para que el asistente virtual del Polo pueda responder consultas sobre ella.
             </p>
           </div>
           <div class="modal-actions">

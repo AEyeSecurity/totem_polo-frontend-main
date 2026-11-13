@@ -10,7 +10,7 @@
   border: none;
   font-size: 0.9rem;
   transition: all 0.3s ease;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .btn .material-symbols-outlined {
   font-size: 20px;
@@ -90,7 +90,7 @@
   font-size: 1.15rem;
   font-weight: 600;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: #1a284b;
 }
 
@@ -110,7 +110,7 @@
 .modal-body p {
   margin: 0 0 1rem;
   color: #333;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.95rem;
   line-height: 1.4;
   text-align: center;
@@ -141,3 +141,5 @@
     opacity: 1;
   }
 }
+
+.modal:focus { outline: none; }

@@ -1,3 +1,5 @@
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block" rel="stylesheet" />
 <!-- Contenedor principal con imagen de fondo -->
 <div class="main-container">
   <!-- Modal de login centrado -->
@@ -16,22 +18,20 @@
 
       <div class="content-section">
         <h2>
-          Plataforma Empresarial<br /><span class="highlight">Integrada</span>
+          Plataforma empresarial<br /><span class="highlight">integrada</span>
         </h2>
         <p>
-          Accede a todos los servicios y herramientas necesarios para optimizar
-          las operaciones de tu empresa en el parque industrial más moderno de
-          Argentina.
+          Acceda a la plataforma para gestionar la información de su empresa dentro del Parque Industrial Polo 52.
         </p>
 
         <ul class="features">
           <li>
-            <i class="fas fa-chart-line"></i> Gestión integral de servicios
+            <i class="fas fa-building"></i> Datos y perfil comercial de su empresa
           </li>
-          <li><i class="fas fa-clock"></i> Monitoreo en tiempo real</li>
-          <li><i class="fas fa-headset"></i> Soporte técnico especializado</li>
+          <li><i class="fas fa-truck"></i> Vehículos, servicios y contactos</li>
+          <li><i class="fas fa-robot"></i> Asistente virtual del Polo</li>
           <li>
-            <i class="fas fa-chart-bar"></i> Reportes y analytics avanzados
+            <i class="fas fa-address-book"></i> Directorio de empresas del parque
           </li>
         </ul>
       </div>
@@ -48,21 +48,22 @@
         <div class="login-icon">
           <img src="assets/images/polologo-blanco.png" alt="Logo Polo 52" />
         </div>
-        <h2>Acceso Empresarial</h2>
-        <p>Ingresa con tus credenciales corporativas</p>
+        <h2>Iniciar sesión</h2>
+        <p>Ingrese con sus credenciales corporativas</p>
       </div>
 
       <form (ngSubmit)="onLogin()" #loginForm="ngForm">
         <div class="form-group">
           <label class="form-label" for="username">
             <i class="fas fa-envelope"></i>
-            Email Corporativo
+            Email o nombre de usuario
           </label>
           <div class="input-wrapper">
             <input
               type="text"
               class="form-input"
               id="username"
+                autocomplete="username"
               name="username"
               [(ngModel)]="username"
               placeholder="usuario@empresa.com"
@@ -89,8 +90,9 @@
                 id="password"
                 name="password"
                 [type]="showPassword ? 'text' : 'password'"
-                [(ngModel)]="password"
-                placeholder="••••••••"
+[(ngModel)]="password"
+autocomplete="current-password"
+placeholder="Ingrese su contraseña"
                 required
                 [ngClass]="{ error: passwordError }"
                 (input)="onPasswordChange()"
@@ -98,7 +100,8 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  (click)="togglePassword()"
+[attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+(click)="togglePassword()"
                   >
                   <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
@@ -113,7 +116,7 @@
             <div class="login-extra-row">
               <div class="forgot-password">
                 <a href="#" (click)="openResetModal(); $event.preventDefault()"
-                  >¿Olvidaste tu contraseña?</a
+                  >¿Olvidó su contraseña?</a
                   >
                 </div>
               </div>
@@ -124,7 +127,7 @@
                   [ngClass]="{ loading: loading }"
                   [disabled]="loginForm.invalid || loading"
                   >
-                  {{ loading ? "Verificando acceso..." : "Iniciar Sesión" }}
+                  {{ loading ? "Verificando acceso..." : "Iniciar sesión" }}
                 </button>
 
                 @if (successMessage) {
@@ -137,7 +140,7 @@
                 }
 
                 <div class="divider">
-                  <span>O ACCEDE CON</span>
+                  <span>O INGRESE CON</span>
                 </div>
 
                 <button type="button" class="google-button" (click)="loginWithGoogle()">
@@ -146,12 +149,11 @@
                 </button>
 
                 <div class="register-prompt">
-                  ¿No tenés cuenta? <a routerLink="/register">Registrá tu empresa</a>
+                  ¿No tiene cuenta? <a routerLink="/register">Registre su empresa</a>
                 </div>
 
                 <div class="footer-info">
-                  <i class="fas fa-shield-alt"></i>
-                  Conexión segura SSL<br />
+                  
                   © 2024 POLO - Parque Industrial de Córdoba<br />
                   <strong>UTM</strong>
                 </div>
@@ -160,128 +162,111 @@
           </div>
         </div>
 
-        <!-- Modal de recuperación de contraseña -->
+        <!-- Modal de recuperación de contraseña con nuevo diseño -->
         @if (showResetPassword) {
           <div
-            class="overlay"
+            class="reset-modal-overlay"
             tabindex="-1"
             (click)="closeResetModal()"
             (keydown.escape)="closeResetModal()"
             >
-            <div
-              class="modal modal--lg"
-              role="presentation"
-              [attr.aria-busy]="resetLoading"
-              (click)="$event.stopPropagation()"
-              >
-              <div class="modal-header">
-                <h3>Recuperar acceso</h3>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  (click)="closeResetModal()"
-                  [disabled]="resetLoading"
-                  aria-label="Cerrar"
-                  >
-                  ✕
-                </button>
-              </div>
-
-              <form (ngSubmit)="requestPasswordReset()" #resetForm="ngForm" class="nice-form">
-                <div class="modal-split">
-                  <!-- Izquierda: info de seguridad -->
-                  <div class="modal-split-left">
-                    <div class="security-info">
-                      <div class="security-info-head">
-                        <span class="material-symbols-outlined security-info-icon">key</span>
-                        <div>
-                          <h4>Recuperación segura</h4>
-                          <p>
-                            Ingresá tu correo electrónico corporativo y te enviamos las
-                            instrucciones para crear una nueva contraseña de forma segura.
-                          </p>
-                        </div>
-                      </div>
-                      <ul class="security-features">
-                        <li>
-                          <span class="material-symbols-outlined">shield</span>
-                          Proceso seguro y encriptado
-                        </li>
-                        <li>
-                          <span class="material-symbols-outlined">schedule</span>
-                          Enlace válido por 30 minutos
-                        </li>
-                        <li>
-                          <span class="material-symbols-outlined">mark_email_read</span>
-                          Confirmación por email
-                        </li>
-                      </ul>
-                      <div class="security-ssl">
-                        <span class="material-symbols-outlined">lock</span>
-                        Conexión SSL segura
-                      </div>
-                    </div>
+            <div class="reset-modal" role="presentation" (click)="$event.stopPropagation()">
+              <!-- Panel Izquierdo - Info -->
+              <div class="reset-left-panel">
+                <div class="reset-logo-section">
+                  <div class="reset-logo-icon">
+                    <i class="fas fa-key"></i>
                   </div>
-
-                  <!-- Derecha: formulario -->
-                  <div class="modal-split-right">
-                    @if (resetLoading) {
-                      <div class="alert alert--loading">
-                        <span class="alert-spinner" aria-hidden="true"></span>
-                        <span>
-                          Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
-                        </span>
-                      </div>
-                    }
-                    @if (resetMessage) {
-                      <div class="alert alert--success">{{ resetMessage }}</div>
-                    }
-
-                    <div class="modal-body" [class.readonly]="resetLoading">
-                      <div class="field">
-                        <label for="reset-email">Correo electrónico <span class="req">*</span></label>
-                        <input
-                          type="email"
-                          id="reset-email"
-                          name="email"
-                          [(ngModel)]="resetEmail"
-                          placeholder="tu-email@empresa.com"
-                          required
-                          email
-                          (input)="onResetEmailChange()"
-                          [class.field-invalid]="resetError"
-                          [disabled]="resetLoading"
-                          />
-                          @if (resetError) {
-                            <div class="error">{{ resetError }}</div>
-                          }
-                        </div>
-
-                        <p class="hint">
-                          Vas a recibir un enlace de recuperación en tu bandeja de entrada. Si no lo encontrás, revisá la carpeta de spam.
-                        </p>
-                      </div>
-
-                      <div class="modal-actions">
-                        <button
-                          type="submit"
-                          class="btn primary"
-                          [disabled]="resetForm.invalid || resetLoading"
-                          >
-                          {{ resetLoading ? "Enviando enlace..." : "Enviar enlace de recuperación" }}
-                        </button>
-                        <button
-                          type="button"
-                          class="btn ghost"
-                          (click)="closeResetModal()"
-                          [disabled]="resetLoading"
-                          >
-                          Volver al inicio de sesión
-                        </button>
-                      </div>
-                    </div>
+                  <div class="reset-logo-text">
+                    <h3>Recuperación<br /><span class="highlight">Segura</span></h3>
                   </div>
-                </form>
+                </div>
+                <div class="reset-content-section">
+                  <h4>Restablecer contraseña</h4>
+                  <p>
+                    Ingrese su correo electrónico corporativo y le enviaremos las
+                    instrucciones para crear una nueva contraseña de forma segura.
+                  </p>
+                  <ul class="reset-features">
+                    <li><i class="fas fa-shield-alt"></i> Proceso seguro y encriptado</li>
+                    <li><i class="fas fa-clock"></i> Enlace válido por 30 minutos</li>
+                    <li>
+                      <i class="fas fa-envelope-circle-check"></i> Confirmación por email
+                    </li>
+                  </ul>
+                </div>
+                <div class="reset-security-info">
+                  <i class="fas fa-lock"></i>
+                  <span>Conexión SSL Segura</span>
+                </div>
               </div>
-            </div>
-          }
+              <!-- Panel Derecho - Formulario -->
+              <div class="reset-right-panel">
+                <div class="reset-header">
+                  <div class="reset-icon">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <h3>Recuperar acceso</h3>
+                  <p>Ingrese su email corporativo</p>
+                </div>
+                <form (ngSubmit)="requestPasswordReset()" #resetForm="ngForm">
+                  <div class="form-group">
+                    <label class="form-label" for="reset-email">
+                      <i class="fas fa-at"></i>
+                      Correo electrónico
+                    </label>
+                    <div class="input-wrapper">
+                      <input
+                        type="email"
+                        class="form-input"
+                        id="reset-email"
+                        name="email"
+                        [(ngModel)]="resetEmail"
+                        placeholder="nombre@empresa.com"
+                        required
+                        email
+                        (input)="onResetEmailChange()"
+                        [disabled]="resetLoading"
+                        [ngClass]="{ error: resetError }"
+                        />
+                      </div>
+                      @if (resetError) {
+                        <span class="field-error">{{ resetError }}</span>
+                      }
+                    </div>
+                    <div class="reset-info-box">
+                      <i class="fas fa-info-circle"></i>
+                      <span
+                        >Recibirá un enlace de recuperación en su bandeja de entrada. Si no lo encuentra, revise la carpeta de correo no deseado.</span
+                        >
+                      </div>
+                      <button
+                        type="submit"
+                        class="reset-button"
+                        [disabled]="resetForm.invalid || resetLoading"
+                        [ngClass]="{ loading: resetLoading }"
+                        >
+                        {{
+                        resetLoading
+                        ? "Enviando enlace..."
+                        : "Enviar enlace de recuperación"
+                        }}
+                      </button>
+                      @if (resetMessage) {
+                        <div class="success-message">
+                          {{ resetMessage }}
+                        </div>
+                      }
+                      <button type="button" class="back-button" (click)="closeResetModal()" [disabled]="resetLoading">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al inicio de sesión
+                      </button>
+                    </form>
+                  </div>
+                  <!-- Botón de cerrar -->
+                  <button class="reset-close-btn" (click)="closeResetModal()" [disabled]="resetLoading" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            }

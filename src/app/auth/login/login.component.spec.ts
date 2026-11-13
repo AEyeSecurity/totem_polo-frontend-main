@@ -127,7 +127,7 @@ describe('LoginComponent', () => {
       component.username = '';
       component.onLogin();
       expect(authServiceSpy.login).not.toHaveBeenCalled();
-      expect(component.loginMessage).toContain('corrige los errores');
+      expect(component.loginMessage).toContain('corrija los errores');
     });
 
     it('should redirect according to the role on a successful login', fakeAsync(() => {
@@ -152,7 +152,7 @@ describe('LoginComponent', () => {
 
       expect(component.usernameError).toBeTrue();
       expect(component.passwordError).toBeTrue();
-      expect(component.loginMessage).toContain('Te quedan 4 intentos');
+      expect(component.loginMessage).toContain('Le quedan 4 intentos');
     });
 
     it('should block the user after 5 failed attempts', fakeAsync(() => {
@@ -194,7 +194,7 @@ describe('LoginComponent', () => {
 
       for (let i = 0; i < 5; i++) component.onLogin();
 
-      expect(component.loginMessage).toBe('Demasiados intentos. Intenta más tarde.');
+      expect(component.loginMessage).toBe('Demasiados intentos. Intente más tarde.');
       expect(component.isBlocked).toBeFalse();
       expect(component.loginAttempts).toBe(0);
     });

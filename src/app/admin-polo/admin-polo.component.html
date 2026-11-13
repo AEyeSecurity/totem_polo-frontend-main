@@ -1,8 +1,9 @@
 ﻿<!-- admin-polo.component.html -->
 <link
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:FILL@0..1"
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
   rel="stylesheet"
   />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block" rel="stylesheet" />
 
   <div class="admin-layout">
     <!-- Topbar -->
@@ -64,7 +65,7 @@
             [class.active]="activeTab === 'servicios'"
             (click)="setActiveTab('servicios')"
             >
-            Servicios Polo
+            Servicios del Polo
           </button>
           <button
             class="tab"
@@ -92,116 +93,67 @@
             >
             <span class="material-symbols-outlined">settings</span>
           </button>
-          <app-logout-button></app-logout-button>
+          <app-logout-button confirmMessage="¿Está seguro de que desea cerrar la sesión?"></app-logout-button>
+<button type="button" class="menu-toggle" (click)="mobileMenuOpen = true" aria-label="Abrir menú" [attr.aria-expanded]="mobileMenuOpen">
+<span class="material-symbols-outlined" aria-hidden="true">menu</span>
+@if (solicitudes.length) {<span class="menu-toggle-dot" aria-hidden="true"></span>}
+</button>
         </div>
-
-        <button
-          type="button"
-          class="mobile-menu-btn"
-          (click)="toggleMobileMenu()"
-          aria-label="Abrir menu"
-          >
-          <span class="material-symbols-outlined">menu</span>
-        </button>
       </nav>
+<!-- Menu lateral (celular y tablet) -->
+@if (mobileMenuOpen) {
+<div class="drawer-backdrop" (click)="mobileMenuOpen = false" aria-hidden="true"></div>
+<aside class="drawer" role="dialog" appDialogFocus aria-modal="true" aria-label="Menú principal" tabindex="-1" (keydown.escape)="mobileMenuOpen = false">
+<div class="drawer-head">
+<img class="drawer-logo" src="../../assets/images/polologo-blanco.png" alt="" />
+<div class="drawer-brand">
+<span class="drawer-title">POLO 52</span>
+<span class="drawer-sub">Administración</span>
+</div>
+<button type="button" class="drawer-close" (click)="mobileMenuOpen = false" aria-label="Cerrar menú">
+<span class="material-symbols-outlined" aria-hidden="true">close</span>
+</button>
+</div>
+<nav class="drawer-nav" aria-label="Secciones">
+<span class="drawer-section-label">Secciones</span>
+<ul>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'dashboard'" [attr.aria-current]="activeTab === 'dashboard' ? 'page' : null" (click)="navMobile('dashboard')">
+<span class="material-symbols-outlined" aria-hidden="true">space_dashboard</span><span class="drawer-link-label">Dashboard</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'empresas'" [attr.aria-current]="activeTab === 'empresas' ? 'page' : null" (click)="navMobile('empresas')">
+<span class="material-symbols-outlined" aria-hidden="true">apartment</span><span class="drawer-link-label">Empresas</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'solicitudes'" [attr.aria-current]="activeTab === 'solicitudes' ? 'page' : null" (click)="navMobile('solicitudes')">
+<span class="material-symbols-outlined" aria-hidden="true">fact_check</span><span class="drawer-link-label">Solicitudes</span>@if (solicitudes.length) {<span class="drawer-badge">{{ solicitudes.length }}</span>}
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'usuarios'" [attr.aria-current]="activeTab === 'usuarios' ? 'page' : null" (click)="navMobile('usuarios')">
+<span class="material-symbols-outlined" aria-hidden="true">group</span><span class="drawer-link-label">Usuarios</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'servicios'" [attr.aria-current]="activeTab === 'servicios' ? 'page' : null" (click)="navMobile('servicios')">
+<span class="material-symbols-outlined" aria-hidden="true">warehouse</span><span class="drawer-link-label">Servicios del Polo</span>
+</button></li>
+<li><button type="button" class="drawer-link" [class.active]="activeTab === 'lotes'" [attr.aria-current]="activeTab === 'lotes' ? 'page' : null" (click)="navMobile('lotes')">
+<span class="material-symbols-outlined" aria-hidden="true">grid_view</span><span class="drawer-link-label">Lotes</span>
+</button></li>
+</ul>
+</nav>
+<div class="drawer-foot">
+<span class="drawer-section-label">Cuenta</span>
+<button type="button" class="drawer-link drawer-link--sm" [class.active]="activeTab === 'perfil'" (click)="navMobile('perfil')">
+<span class="material-symbols-outlined" aria-hidden="true">account_circle</span><span class="drawer-link-label">Perfil</span>
+</button>
+<button type="button" class="drawer-link drawer-link--sm" [class.active]="activeTab === 'config'" (click)="navMobile('config')">
+<span class="material-symbols-outlined" aria-hidden="true">settings</span><span class="drawer-link-label">Configuración</span>
+</button>
+<div class="drawer-logout">
+<app-logout-button confirmMessage="¿Está seguro de que desea cerrar la sesión?"></app-logout-button>
+</div>
+</div>
+</aside>
+}
 
-      <!-- SIDEBAR MOBILE -->
-      @if (mobileMenuOpen) {
-        <div
-          class="mobile-sidebar-backdrop"
-          (click)="closeMobileMenu()"
-          role="button"
-          tabindex="0"
-          aria-label="Cerrar menu"
-          (keyup.enter)="closeMobileMenu()"
-          ></div>
-      }
-      <aside class="mobile-sidebar" [class.open]="mobileMenuOpen">
-        <div class="mobile-sidebar-header">
-          <div class="topbar-title">
-            <div class="app-title">POLO 52</div>
-            <div class="app-sub">Administración</div>
-          </div>
-          <button
-            type="button"
-            class="icon-btn"
-            (click)="closeMobileMenu()"
-            aria-label="Cerrar menu"
-            >
-            ✕
-          </button>
-        </div>
-        <nav class="mobile-sidebar-tabs">
-          <button
-            class="tab"
-            [class.active]="activeTab === 'dashboard'"
-            (click)="setActiveTab('dashboard')"
-            >
-            Dashboard
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab === 'empresas'"
-            (click)="setActiveTab('empresas')"
-            >
-            Empresas
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab === 'solicitudes'"
-            (click)="setActiveTab('solicitudes')"
-            >
-            Solicitudes
-            @if (solicitudes.length) {
-              <span class="tab-badge">{{ solicitudes.length }}</span>
-            }
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab === 'usuarios'"
-            (click)="setActiveTab('usuarios')"
-            >
-            Usuarios
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab === 'servicios'"
-            (click)="setActiveTab('servicios')"
-            >
-            Servicios Polo
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab === 'lotes'"
-            (click)="setActiveTab('lotes')"
-            >
-            Lotes
-          </button>
-        </nav>
-        <div class="mobile-sidebar-footer">
-          <button
-            type="button"
-            class="tab"
-            [class.active]="activeTab === 'perfil'"
-            (click)="setActiveTab('perfil')"
-            aria-label="Ver información del polo"
-            >
-            <span class="material-symbols-outlined">account_circle</span>
-            <span>Perfil</span>
-          </button>
-          <button
-            type="button"
-            class="tab"
-            [class.active]="activeTab === 'config'"
-            (click)="setActiveTab('config')"
-            aria-label="Abrir configuración"
-            >
-            <span class="material-symbols-outlined">settings</span>
-            <span>Configuración</span>
-          </button>
-          <app-logout-button></app-logout-button>
-        </div>
-      </aside>
+
+      
 
       <!-- Main -->
       <main class="content">
@@ -226,14 +178,45 @@
         <!-- DASHBOARD -->
         @if (activeTab === 'dashboard') {
           <section class="resume-grid">
-            <div class="kpi card">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Resumen</h1>
+<p class="page-desc">Estado general del parque y accesos rápidos.</p>
+</div>
+</header>
+<!-- Portada del dashboard -->
+<div class="dash-hero">
+<div class="dash-hero-main">
+<span class="dash-hero-eyebrow">Panel de administración</span>
+<h2 class="dash-hero-title">{{ poloData?.nombre || 'Polo 52' }}</h2>
+<p class="dash-hero-sub">Parque Industrial · {{ totalEmpresas }} empresas · {{ totalUsuarios }} usuarios · {{ totalLotes }} lotes</p>
+<div class="hero-chips">
+<span class="hero-chip">{{ totalServiciosPolo }} servicios del Polo</span>
+<span class="hero-chip">{{ pctLotesConUbicacion }}% de lotes ubicados en el mapa</span>
+</div>
+@if (solicitudes.length) {
+<button class="btn hero-cta" type="button" (click)="quickViewSolicitudes()">
+<span class="material-symbols-outlined" aria-hidden="true">notifications_active</span>
+{{ solicitudes.length === 1 ? 'Revisar 1 solicitud pendiente' : 'Revisar ' + solicitudes.length + ' solicitudes pendientes' }}
+</button>
+}
+</div>
+<div class="dash-hero-ring">
+<div class="ring" [style.background]="ringBg(pctEmpresasActivas)" role="img" [attr.aria-label]="pctEmpresasActivas + '% de las empresas están activas'">
+<div class="ring-hole"><span class="ring-value">{{ pctEmpresasActivas }}%</span><span class="ring-caption">empresas activas</span></div>
+</div>
+<p class="ring-note">{{ empresasActivas }} de {{ totalEmpresas }} empresas operando</p>
+</div>
+</div>
+<div class="kpi card">
               <div class="kpi-icon kpi-icon--red">
                 <span class="material-symbols-outlined">apartment</span>
               </div>
               <div class="kpi-body">
                 <div class="kpi-title">Empresas activas</div>
                 <div class="kpi-number">{{ empresasActivas }}</div>
-                <div class="kpi-sub">de {{ totalEmpresas }} registradas</div>
+                <div class="kpi-sub"><strong>{{ pctEmpresasActivas }}%</strong> de {{ totalEmpresas }} registradas</div>
+<div class="kpi-progress" role="progressbar" aria-label="Empresas activas" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pctEmpresasActivas"><span [style.width.%]="pctEmpresasActivas"></span></div>
               </div>
             </div>
             <div class="kpi card">
@@ -243,7 +226,8 @@
               <div class="kpi-body">
                 <div class="kpi-title">Usuarios habilitados</div>
                 <div class="kpi-number">{{ usuariosActivos }}</div>
-                <div class="kpi-sub">de {{ totalUsuarios }} usuarios</div>
+                <div class="kpi-sub"><strong>{{ pctUsuariosActivos }}%</strong> de {{ totalUsuarios }} usuarios</div>
+<div class="kpi-progress" role="progressbar" aria-label="Usuarios habilitados" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pctUsuariosActivos"><span [style.width.%]="pctUsuariosActivos"></span></div>
               </div>
             </div>
             <div class="kpi card">
@@ -253,7 +237,8 @@
               <div class="kpi-body">
                 <div class="kpi-title">Servicios del polo</div>
                 <div class="kpi-number">{{ totalServiciosPolo }}</div>
-                <div class="kpi-sub">servicios disponibles</div>
+                <div class="kpi-sub"><strong>{{ serviciosConLote }}</strong> con lote asignado · {{ pctServiciosConLote }}%</div>
+<div class="kpi-progress" role="progressbar" aria-label="Servicios con lote asignado" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pctServiciosConLote"><span [style.width.%]="pctServiciosConLote"></span></div>
               </div>
             </div>
             <div class="kpi card">
@@ -263,10 +248,63 @@
               <div class="kpi-body">
                 <div class="kpi-title">Lotes registrados</div>
                 <div class="kpi-number">{{ totalLotes }}</div>
-                <div class="kpi-sub">lotes asociados</div>
+                <div class="kpi-sub"><strong>{{ lotesConUbicacion }}</strong> con ubicación en el mapa · {{ pctLotesConUbicacion }}%</div>
+<div class="kpi-progress" role="progressbar" aria-label="Lotes con ubicación" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pctLotesConUbicacion"><span [style.width.%]="pctLotesConUbicacion"></span></div>
               </div>
             </div>
-            <div class="card activity">
+            <!-- Graficos (derivados de los datos ya cargados) -->
+<div class="card chart-card">
+<h2>Servicios del Polo por tipo</h2>
+@if (serviciosPorTipoChart.length) {
+<div class="donut-wrap">
+<div class="donut" [style.background]="donutBg(serviciosPorTipoChart)" role="img" [attr.aria-label]="'Distribución de servicios del Polo por tipo'">
+<div class="donut-hole"><span class="donut-value">{{ totalServiciosPolo }}</span><span class="donut-caption">servicios</span></div>
+</div>
+<ul class="legend">
+@for (seg of serviciosPorTipoChart; track seg.label) {
+<li><span class="legend-dot" [style.background]="seg.color"></span><span class="legend-label">{{ seg.label }}</span><strong>{{ seg.count }}</strong><span class="legend-pct">{{ seg.pct }}%</span></li>
+}
+</ul>
+</div>
+} @else {
+<p class="chart-empty">Todavía no hay servicios del Polo cargados.</p>
+}
+</div>
+<div class="card chart-card">
+<h2>Usuarios por rol</h2>
+@if (usuariosPorRolChart.length) {
+<div class="donut-wrap">
+<div class="donut" [style.background]="donutBg(usuariosPorRolChart)" role="img" [attr.aria-label]="'Distribución de usuarios por rol'">
+<div class="donut-hole"><span class="donut-value">{{ totalUsuarios }}</span><span class="donut-caption">usuarios</span></div>
+</div>
+<ul class="legend">
+@for (seg of usuariosPorRolChart; track seg.label) {
+<li><span class="legend-dot" [style.background]="seg.color"></span><span class="legend-label">{{ seg.label }}</span><strong>{{ seg.count }}</strong><span class="legend-pct">{{ seg.pct }}%</span></li>
+}
+</ul>
+</div>
+} @else {
+<p class="chart-empty">Todavía no hay usuarios cargados.</p>
+}
+</div>
+<div class="card chart-card">
+<h2>Ubicación de los lotes</h2>
+@if (totalLotes) {
+<div class="donut-wrap">
+<div class="donut" [style.background]="donutBg(lotesUbicacionChart)" role="img" [attr.aria-label]="'Lotes con y sin ubicación en el mapa'">
+<div class="donut-hole"><span class="donut-value">{{ totalLotes }}</span><span class="donut-caption">lotes</span></div>
+</div>
+<ul class="legend">
+@for (seg of lotesUbicacionChart; track seg.label) {
+<li><span class="legend-dot" [style.background]="seg.color"></span><span class="legend-label">{{ seg.label }}</span><strong>{{ seg.count }}</strong><span class="legend-pct">{{ seg.pct }}%</span></li>
+}
+</ul>
+</div>
+} @else {
+<p class="chart-empty">Todavía no hay lotes registrados.</p>
+}
+</div>
+<div class="card activity">
               <h2>Actividad reciente</h2>
               @if (actividadReciente.length) {
                 <ul
@@ -322,6 +360,13 @@
         <!-- PERFIL POLO -->
         @if (activeTab === 'perfil') {
           <section class="card-grid">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Perfil del Polo</h1>
+<p class="page-desc">Datos institucionales e información comercial del Polo.</p>
+</div>
+</header>
+
             <div class="card card--table">
               <div class="company-info-head">
                 <h2>Datos del Polo</h2>
@@ -372,7 +417,7 @@
                       />
                     </div>
                     <div class="field col-3">
-                      <label for="ro-polo-obs">Sobre la empresa</label>
+                      <label for="ro-polo-obs">Sobre el Polo</label>
                       <textarea
                         id="ro-polo-obs"
                         class="readout"
@@ -388,7 +433,7 @@
                 <div class="card comercial-card">
                   <div class="company-info-head">
                     <div>
-                      <h2>Informacion comercial</h2>
+                      <h2>Información comercial</h2>
                     </div>
                     @if (comercialInfo) {
                       <button
@@ -411,7 +456,7 @@
                   }
 
                   @if (comercialLoadingInfo) {
-                    <div class="muted">Cargando informacion comercial...</div>
+                    <div class="muted">Cargando información comercial...</div>
                   } @else if (comercialInfo) {
                     <div class="grid-2 nice-form profile-readout-grid">
                       <div class="field col-2">
@@ -424,7 +469,7 @@
                         ></textarea>
                       </div>
                       <div class="field">
-                        <label for="co-publico">Publico objetivo</label>
+                        <label for="co-publico">Público objetivo</label>
                         <input
                           id="co-publico"
                           class="readout"
@@ -434,7 +479,7 @@
                           />
                         </div>
                         <div class="field">
-                          <label for="co-atiende">Atiende al publico</label>
+                          <label for="co-atiende">Atiende al público</label>
                           <input
                             id="co-atiende"
                             class="readout"
@@ -444,7 +489,7 @@
                             />
                           </div>
                           <div class="field">
-                            <label for="co-horario">Horario de atencion comercial</label>
+                            <label for="co-horario">Horario de atención comercial</label>
                             <input
                               id="co-horario"
                               class="readout"
@@ -505,7 +550,7 @@
                                   </div>
                                 } @else {
                                   <div class="muted">
-                                    Todavia no se cargo informacion comercial del Polo.
+                                    Todavía no se cargó información comercial del Polo.
                                   </div>
                                   <button
                                     class="btn primary"
@@ -513,7 +558,7 @@
                                     (click)="openComercialEditForm()"
                                     >
                                     <span class="material-symbols-outlined">edit</span>
-                                    <span>Cargar informacion comercial</span>
+                                    <span>Cargar información comercial</span>
                                   </button>
                                 }
                               </div>
@@ -523,13 +568,19 @@
             <!-- EMPRESAS -->
             @if (activeTab === 'empresas') {
               <section class="card-stack">
-                <!-- Las empresas nuevas se dan de alta por autoregistro público + aprobación -->
-                <div class="header-actions">
-                  <button class="btn ghost" type="button" (click)="setActiveTab('solicitudes')">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Empresas <span class="count-chip">{{ filteredEmpresas.length }}</span></h1>
+<p class="page-desc">Empresas registradas en el parque. Las nuevas empresas se incorporan mediante solicitudes de registro.</p>
+</div>
+
+<div class="page-head-actions">
+<button class="btn ghost" type="button" (click)="setActiveTab('solicitudes')">
                     <span class="material-symbols-outlined">fact_check</span>
                     <span>Ver solicitudes de registro</span>
                   </button>
-                </div>
+</div>
+</header>
                 <div class="card card--table">
                   <!-- Buscador -->
                   <div class="header-search">
@@ -543,9 +594,7 @@
                         class="btn ghost"
                         type="button"
                         (click)="clearEmpresaSearch()"
-                        >
-                        Limpiar
-                      </button>
+                        >Limpiar búsqueda</button>
                     </div>
                     <!-- Empresas -->
                     <div class="table table--empresas">
@@ -573,58 +622,46 @@
                               {{ e.estado ? "Activa" : "Inactiva" }}
                             </span>
                           </div>
-                          <div class="horario-cell">
-                            @if (isHorarioEmpExpanded(e.cuil)) {
-                              <div class="horario-full">{{ e.horario_trabajo }}</div>
-                              <button
-                                type="button"
-                                class="link-btn small vermenos"
-                                (click)="toggleHorarioEmp(e.cuil)"
-                                >
-                                Ocultar
-                              </button>
-                            } @else {
-                              @if (e.horario_trabajo) {
-                                <button
-                                  type="button"
-                                  class="link-btn"
-                                  (click)="toggleHorarioEmp(e.cuil)"
-                                  >
-                                  Ver mas
-                                </button>
-                              } @else {
-                                —
-                              }
-                            }
-                          </div>
+                          <div class="horario-cell" [class.is-open]="isHorarioEmpExpanded(e.cuil)">
+@if (e.horario_trabajo) {
+@if (isHorarioEmpExpanded(e.cuil)) {
+<div class="horario-full">{{ e.horario_trabajo }}</div>
+} @else {
+<span class="horario-preview" [title]="e.horario_trabajo">{{ e.horario_trabajo }}</span>
+}
+<button class="toggle-btn" type="button" (click)="toggleHorarioEmp(e.cuil)" [attr.aria-expanded]="isHorarioEmpExpanded(e.cuil)">{{ isHorarioEmpExpanded(e.cuil) ? 'Ocultar detalle' : 'Ver detalle' }}<span class="material-symbols-outlined" aria-hidden="true">{{ isHorarioEmpExpanded(e.cuil) ? 'expand_less' : 'expand_more' }}</span></button>
+} @else {
+<span class="muted">—</span>
+}
+</div>
                           <div class="row-actions">
-                            <!-- Activar/Desactivar, o Aprobar si la solicitud está rechazada/pendiente -->
-                            @if (!e.estado && e.estado_solicitud !== 'aprobada') {
-                              <button
-                                class="btn icon"
-                                [title]="'Aprobar solicitud (' + e.estado_solicitud + ')'"
-                                (click)="aprobarSolicitud(e)"
-                                [disabled]="solicitudesBusy"
-                                >
-                                <span class="material-symbols-outlined">how_to_reg</span>
-                              </button>
-                            } @else {
-                              <button
-                                class="btn icon"
-                                [class.danger]="e.estado"
-                                [title]="e.estado ? 'Desactivar empresa' : 'Activar empresa'"
-                                (click)="toggleEmpresaEstado(e)"
-                                >
-                                <span class="material-symbols-outlined">
-                                  {{ e.estado ? "block" : "check_circle" }}
-                                </span>
-                              </button>
-                            }
+<!-- Activar/Desactivar, o Aprobar si la solicitud está rechazada/pendiente -->
+@if (!e.estado && e.estado_solicitud !== 'aprobada') {
+<button
+class="btn icon"
+[title]="'Aprobar solicitud (' + e.estado_solicitud + ')'"
+[attr.aria-label]="'Aprobar solicitud (' + e.estado_solicitud + ')'"
+(click)="aprobarSolicitud(e)"
+[disabled]="solicitudesBusy"
+>
+<span class="material-symbols-outlined">how_to_reg</span>
+</button>
+} @else {
+<button
+class="btn icon"
+[class.danger]="e.estado"
+[title]="e.estado ? 'Desactivar empresa' : 'Activar empresa'" [attr.aria-label]="e.estado ? 'Desactivar empresa' : 'Activar empresa'"
+(click)="toggleEmpresaEstado(e)"
+>
+<span class="material-symbols-outlined">
+{{ e.estado ? "block" : "check_circle" }}
+</span>
+</button>
+}
                             <!-- Editar -->
                             <button
                               class="btn icon"
-                              title="Editar"
-                              (click)="openEmpresaForm(e)"
+                              title="Editar empresa" aria-label="Editar empresa" (click)="openEmpresaForm(e)"
                               [disabled]="!e.estado"
                               >
                               <span class="material-symbols-outlined">edit</span>
@@ -632,7 +669,7 @@
                             <!-- Crear servicio -->
                             <button
                               class="btn icon"
-                              title="Servicio del Polo para empresa"
+                              title="Crear servicio del Polo para esta empresa" aria-label="Crear servicio del Polo para esta empresa"
                               (click)="createServicioPoloForEmpresa(e)"
                               [disabled]="!e.estado"
                               >
@@ -641,7 +678,7 @@
                             <!-- Agregar usuario a la empresa -->
                             <button
                               class="btn icon"
-                              title="Agregar usuario a la empresa"
+                              title="Agregar usuario a la empresa" aria-label="Agregar usuario a la empresa"
                               (click)="openAddUsuarioEmpresaForm(e)"
                               [disabled]="!e.estado"
                               >
@@ -649,7 +686,9 @@
                             </button>
                           </div>
                         </div>
-                      }
+                      } @empty {
+<div class="empty-row">No se encontraron empresas.</div>
+}
                     </div>
                   </div>
                 </section>
@@ -658,13 +697,20 @@
               <!-- SOLICITUDES DE REGISTRO -->
               @if (activeTab === 'solicitudes') {
                 <section class="card-stack">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Solicitudes de registro <span class="count-chip">{{ solicitudes.length }}</span></h1>
+<p class="page-desc">Empresas que solicitaron el alta y esperan aprobación.</p>
+</div>
+</header>
+
                   <div class="card card--table">
-                    <h2>Solicitudes de registro pendientes</h2>
+                    
                     @if (solicitudesBusy) {
                       <div class="alert alert--loading">
                         <span class="alert-spinner" aria-hidden="true"></span>
                         <span>
-                          Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                          Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                         </span>
                       </div>
                     }
@@ -690,7 +736,7 @@
                             <div class="row-actions">
                               <button
                                 class="btn icon"
-                                title="Aprobar"
+                                title="Aprobar solicitud" aria-label="Aprobar solicitud"
                                 [disabled]="solicitudesBusy"
                                 (click)="aprobarSolicitud(s)"
                                 >
@@ -698,7 +744,7 @@
                               </button>
                               <button
                                 class="btn icon danger"
-                                title="Rechazar"
+                                title="Rechazar solicitud" aria-label="Rechazar solicitud"
                                 [disabled]="solicitudesBusy"
                                 (click)="rechazarSolicitud(s)"
                                 >
@@ -716,12 +762,19 @@
               <!-- USUARIOS -->
               @if (activeTab === 'usuarios') {
                 <section class="card-stack">
-                  <div class="header-actions">
-                    <button class="btn primary" type="button" (click)="openUsuarioForm()">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Usuarios <span class="count-chip">{{ filteredUsuarios.length }}</span></h1>
+<p class="page-desc">Cuentas con acceso a la plataforma.</p>
+</div>
+<div class="page-head-actions">
+<button class="btn primary" type="button" (click)="openUsuarioForm()">
                       <span class="material-symbols-outlined">person_add</span>
                       <span>Nuevo usuario</span>
                     </button>
-                  </div>
+</div>
+</header>
+
                   <div class="card card--table">
                     <div class="header-search">
                       <input
@@ -734,9 +787,7 @@
                           class="btn ghost"
                           type="button"
                           (click)="clearUsuarioSearch()"
-                          >
-                          Limpiar
-                        </button>
+                          >Limpiar búsqueda</button>
                       </div>
                       <!-- Usuarios -->
                       <div class="table table--usuarios">
@@ -770,15 +821,14 @@
                             <div class="row-actions">
                               <button
                                 class="btn icon"
-                                title="Editar"
-                                (click)="openUsuarioForm(u)"
+                                title="Editar usuario" aria-label="Editar usuario" (click)="openUsuarioForm(u)"
                                 >
                                 <span class="material-symbols-outlined">edit</span>
                               </button>
                               <button
                                 class="btn icon"
                                 [class.danger]="u.estado"
-                                [title]="u.estado ? 'Inhabilitar' : 'Habilitar'"
+                                [title]="u.estado ? 'Inhabilitar usuario' : 'Habilitar usuario'" [attr.aria-label]="u.estado ? 'Inhabilitar usuario' : 'Habilitar usuario'"
                                 (click)="toggleUsuarioEstado(u)"
                                 >
                                 <span class="material-symbols-outlined">{{
@@ -787,7 +837,9 @@
                               </button>
                             </div>
                           </div>
-                        }
+                        } @empty {
+<div class="empty-row">No se encontraron usuarios.</div>
+}
                       </div>
                     </div>
                   </section>
@@ -796,8 +848,13 @@
                 <!-- SERVICIOS DEL POLO -->
                 @if (activeTab === 'servicios') {
                   <section class="card-stack">
-                    <div class="header-actions">
-                      <button
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Servicios del Polo <span class="count-chip">{{ filteredServicios.length }}</span></h1>
+<p class="page-desc">Naves, oficinas, coworking y otros espacios asignados a las empresas.</p>
+</div>
+<div class="page-head-actions">
+<button
                         class="btn primary"
                         type="button"
                         (click)="openServicioPoloForm()"
@@ -805,7 +862,9 @@
                         <span class="material-symbols-outlined">add_circle</span>
                         <span>Nuevo servicio</span>
                       </button>
-                    </div>
+</div>
+</header>
+
                     <div class="card card--table">
                       <div class="header-search">
                         <input
@@ -818,9 +877,7 @@
                             class="btn ghost"
                             type="button"
                             (click)="clearServicioSearch()"
-                            >
-                            Limpiar
-                          </button>
+                            >Limpiar búsqueda</button>
                         </div>
                         <!-- Servicios -->
                         <div class="table table--servicios">
@@ -834,51 +891,40 @@
                           @for (s of filteredServicios; track s) {
                             <div class="row">
                               <div>{{ s.nombre }}</div>
-                              <div class="horario-cell">
-                                @if (
-                                  isHorarioServExpanded(s.id_servicio_polo)) {
-                                  <div class="horario-full">{{ s.horario }}</div>
-                                  <button
-                                    type="button"
-                                    class="link-btn small vermenos"
-                                    (click)="toggleHorarioServ(s.id_servicio_polo)"
-                                    >
-                                    Ocultar
-                                  </button>
-                                } @else {
-                                  @if (s.horario) {
-                                    <button
-                                      type="button"
-                                      class="link-btn"
-                                      (click)="toggleHorarioServ(s.id_servicio_polo)"
-                                      >
-                                      Ver mas
-                                    </button>
-                                  } @else {
-                                    —
-                                  }
-                                }
-                              </div>
+                              <div class="horario-cell" [class.is-open]="isHorarioServExpanded(s.id_servicio_polo)">
+@if (s.horario) {
+@if (isHorarioServExpanded(s.id_servicio_polo)) {
+<div class="horario-full">{{ s.horario }}</div>
+} @else {
+<span class="horario-preview" [title]="s.horario">{{ s.horario }}</span>
+}
+<button class="toggle-btn" type="button" (click)="toggleHorarioServ(s.id_servicio_polo)" [attr.aria-expanded]="isHorarioServExpanded(s.id_servicio_polo)">{{ isHorarioServExpanded(s.id_servicio_polo) ? 'Ocultar detalle' : 'Ver detalle' }}<span class="material-symbols-outlined" aria-hidden="true">{{ isHorarioServExpanded(s.id_servicio_polo) ? 'expand_less' : 'expand_more' }}</span></button>
+} @else {
+<span class="muted">—</span>
+}
+</div>
                               <div>{{ s.propietario || "—" }}</div>
                               <div>{{ getEmpresaNombre(s.cuil) }}</div>
                               <div class="row-actions">
                                 <button
                                   class="btn icon"
-                                  title="Agregar/Asignar lote"
+                                  title="Registrar lote para este servicio" aria-label="Registrar lote para este servicio"
                                   (click)="openLoteForm(s.id_servicio_polo, s.nombre)"
                                   >
                                   <span class="material-symbols-outlined">add_home_work</span>
                                 </button>
                                 <button
                                   class="btn icon danger"
-                                  title="Eliminar servicio"
+                                  title="Eliminar servicio" aria-label="Eliminar servicio"
                                   (click)="deleteServicioPolo(s.id_servicio_polo)"
                                   >
                                   <span class="material-symbols-outlined">delete</span>
                                 </button>
                               </div>
                             </div>
-                          }
+                          } @empty {
+<div class="empty-row">No se encontraron servicios del Polo.</div>
+}
                         </div>
                       </div>
                     </section>
@@ -887,9 +933,13 @@
                   <!-- LOTES -->
                   @if (activeTab === 'lotes') {
                     <section class="card-stack">
-                      <div class="header-actions">
-                        <!-- si querés agregar botones luego, van acá -->
-                      </div>
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Lotes <span class="count-chip">{{ filteredLotes.length }}</span></h1>
+<p class="page-desc">Lotes registrados y su ubicación. Para registrar un lote, utilice la acción correspondiente en Servicios del Polo.</p>
+</div>
+</header>
+
                       <div class="card card--table">
                         <div class="header-search">
                           <input
@@ -898,9 +948,7 @@
                             [(ngModel)]="loteSearchTerm"
                             (input)="filterLotes()"
                             />
-                            <button class="btn ghost" type="button" (click)="clearLoteSearch()">
-                              Limpiar
-                            </button>
+                            <button class="btn ghost" type="button" (click)="clearLoteSearch()">Limpiar búsqueda</button>
                           </div>
                           <!-- Lotes -->
                           <div class="table table--lotes">
@@ -927,30 +975,32 @@
                                 <div class="row-actions">
                                   <button
                                     class="btn icon"
-                                    title="Editar ubicación"
+                                    title="Editar ubicación del lote" aria-label="Editar ubicación del lote"
                                     (click)="openEditLoteUbicacion(l)"
                                     >
                                     <span class="material-symbols-outlined">edit_location_alt</span>
                                   </button>
                                   <button
                                     class="btn icon danger"
-                                    title="Eliminar lote"
+                                    title="Eliminar lote" aria-label="Eliminar lote"
                                     (click)="deleteLote(l.id_lotes)"
                                     >
                                     <span class="material-symbols-outlined">delete</span>
                                   </button>
                                 </div>
                               </div>
-                            }
+                            } @empty {
+<div class="empty-row">No se encontraron lotes.</div>
+}
                           </div>
                         </div>
 
                         <!-- Editar ubicacion de un lote -->
                         @if (showEditLoteUbicacionForm) {
-                          <div class="overlay">
-                            <div class="modal modal--md">
+                          <div class="overlay" tabindex="-1" (keydown.escape)="!savingLoteUbicacion && cancelEditLoteUbicacion()">
+                            <div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-lote-ubicacion-title">
                               <div class="modal-header">
-                                <h3>Ubicación del lote {{ editingLoteLabel }}</h3>
+                                <h3 id="dlg-lote-ubicacion-title">Ubicación del lote {{ editingLoteLabel }}</h3>
                                 <button
                                   type="button"
                                   class="icon-btn"
@@ -982,7 +1032,7 @@
                                   [disabled]="editLoteUbicacion.latitud == null || savingLoteUbicacion"
                                   (click)="submitEditLoteUbicacion()"
                                   >
-                                  Guardar
+                                  Guardar ubicación
                                 </button>
                                 <button
                                   class="btn ghost"
@@ -1002,6 +1052,13 @@
                     <!-- CONFIGURACIÓN -->
                     @if (activeTab === 'config') {
                       <section class="card-grid">
+<header class="page-head">
+<div class="page-head-text">
+<h1 class="page-title">Configuración</h1>
+<p class="page-desc">Seguridad de la cuenta y sesión.</p>
+</div>
+</header>
+
                         <div class="card setting-card">
                           <div class="setting-header">
                             <span class="material-symbols-outlined setting-icon">vpn_key</span>
@@ -1035,7 +1092,7 @@
                                 <p class="muted">Salir de la cuenta del Polo</p>
                               </div>
                             </div>
-                            <app-logout-button></app-logout-button>
+                            <app-logout-button confirmMessage="¿Está seguro de que desea cerrar la sesión?"></app-logout-button>
                           </div>
                         </section>
                       }
@@ -1045,13 +1102,19 @@
                     <app-chatbot-fab></app-chatbot-fab>
                   </div>
                   <!-- ===================== MODALES ===================== -->
+<!-- Sugerencias para los campos "CUIL de la empresa" (empresas ya cargadas en el panel) -->
+<datalist id="dl-empresas">
+@for (e of empresas; track e.cuil) {
+<option [value]="e.cuil">{{ e.nombre }}</option>
+}
+</datalist>
 
                   <!-- Editar Polo (todos opcionales) -->
                   @if (showPoloEditForm) {
-                    <div class="overlay">
-                      <div class="modal modal--md" [attr.aria-busy]="isModalBusy('polo')">
+                    <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('polo')">
+                      <div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-polo-title" [attr.aria-busy]="isModalBusy('polo')">
                         <div class="modal-header">
-                          <h3>Editar datos del Polo</h3>
+                          <h3 id="dlg-polo-title">Editar datos del Polo</h3>
                           <button
                             type="button"
                             class="icon-btn"
@@ -1072,7 +1135,7 @@
                             <div class="alert alert--loading">
                               <span class="alert-spinner" aria-hidden="true"></span>
                               <span>
-                                Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                               </span>
                             </div>
                           }
@@ -1093,10 +1156,14 @@
                             </div>
                           }
                           <div class="modal-body grid-3">
+                            <div class="form-section">
+                              <h4 class="form-section-title">Datos operativos</h4>
+                            </div>
                             <div class="field">
-                              <label for="p_cant_empleados">Cant. empleados</label>
+                              <label for="p_cant_empleados">Cantidad de empleados</label>
                               <input
                                 id="p_cant_empleados"
+inputmode="numeric"
                                 type="number"
                                 [(ngModel)]="poloEditForm.cant_empleados"
                                 name="p_cant_empleados"
@@ -1110,7 +1177,7 @@
                                 }
                               </div>
                               <div class="field">
-                                <label for="p_horario">Horario trabajo</label>
+                                <label for="p_horario">Horario de trabajo</label>
                                 <input
                                   id="p_horario"
                                   type="text"
@@ -1126,12 +1193,15 @@
                                     </div>
                                   }
                                 </div>
+                                <div class="form-section">
+                                  <h4 class="form-section-title">Descripción</h4>
+                                </div>
                                 <div class="field col-3">
-                                  <label for="p_obs">Sobre la empresa</label>
+                                  <label for="p_obs">Sobre el Polo</label>
                                   <textarea
                                     id="p_obs"
                                     rows="4"
-                                    placeholder="Contanos de qué se trata la empresa: a qué se dedica, cómo y cuándo se creó, etc."
+                                    placeholder="Describa la empresa: a qué se dedica, cómo y cuándo se creó, etc."
                                     [(ngModel)]="poloEditForm.observaciones"
                                     name="p_obs"
                                   ></textarea>
@@ -1157,10 +1227,10 @@
 
                       <!-- Informacion comercial del Polo: editar -->
                       @if (showComercialEditForm) {
-                        <div class="overlay">
-                          <div class="modal modal--md" [attr.aria-busy]="comercialSaving">
-                            <div class="modal-header">
-                              <h3>Editar informacion comercial</h3>
+                        <div class="overlay" tabindex="-1" (keydown.escape)="!comercialSaving && cancelComercialEditForm()">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-comercial-title" [attr.aria-busy]="comercialSaving">
+<div class="modal-header">
+<h3 id="dlg-comercial-title">Editar información comercial</h3>
                               <button
                                 type="button"
                                 class="icon-btn"
@@ -1181,7 +1251,7 @@
                                 <div class="alert alert--loading">
                                   <span class="alert-spinner" aria-hidden="true"></span>
                                   <span>
-                                    Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                    Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                                   </span>
                                 </div>
                               }
@@ -1193,8 +1263,11 @@
                                 </div>
                               }
                               <div class="modal-body grid-2">
-                                <div class="field col-2">
-                                  <label for="ce-productos">Productos / servicios</label>
+<div class="form-section">
+<h4 class="form-section-title">Qué ofrece</h4>
+</div>
+<div class="field col-2">
+<label for="ce-productos">Productos / servicios</label>
                                   <textarea
                                     id="ce-productos"
                                     rows="3"
@@ -1202,31 +1275,26 @@
                                     name="productos_servicios"
                                   ></textarea>
                                 </div>
-                                <div class="field">
-                                  <label for="ce-publico">Publico objetivo</label>
-                                  <select
-                                    id="ce-publico"
-                                    [(ngModel)]="comercialEditForm.publico_objetivo"
-                                    name="publico_objetivo"
-                                    >
-                                    @for (op of comercialPublicoOpciones; track op) {
-                                      <option [value]="op">{{ op }}</option>
-                                    }
-                                  </select>
+                                <div class="form-section">
+<h4 class="form-section-title">Atención al público</h4>
+</div>
+<div class="field">
+<span class="field-label" id="ce-publico-label">Público objetivo</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-publico-label">
+@for (op of comercialPublicoOpciones; track op) {
+<label class="segmented-option"><input type="radio" name="publico_objetivo" [(ngModel)]="comercialEditForm.publico_objetivo" [value]="op" /><span>{{ op }}</span></label>
+}
+</div>
                                 </div>
                                 <div class="field">
-                                  <label for="ce-atiende">Atiende al publico</label>
-                                  <select
-                                    id="ce-atiende"
-                                    [(ngModel)]="comercialEditForm.atiende_publico"
-                                    name="atiende_publico"
-                                    >
-                                    <option [ngValue]="true">Si</option>
-                                    <option [ngValue]="false">No</option>
-                                  </select>
+                                  <span class="field-label" id="ce-atiende-label">¿Atiende al público?</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-atiende-label">
+<label class="segmented-option"><input type="radio" name="atiende_publico" [(ngModel)]="comercialEditForm.atiende_publico" [value]="true" /><span>Sí</span></label>
+<label class="segmented-option"><input type="radio" name="atiende_publico" [(ngModel)]="comercialEditForm.atiende_publico" [value]="false" /><span>No</span></label>
+</div>
                                 </div>
                                 <div class="field">
-                                  <label for="ce-horario">Horario de atencion comercial</label>
+                                  <label for="ce-horario">Horario de atención comercial</label>
                                   <input
                                     id="ce-horario"
                                     type="text"
@@ -1234,29 +1302,24 @@
                                     name="horario_atencion_comercial"
                                     />
                                   </div>
-                                  <div class="field">
-                                    <label for="ce-precios">Rango de precios</label>
-                                    <select
-                                      id="ce-precios"
-                                      [(ngModel)]="comercialEditForm.rango_precios"
-                                      name="rango_precios"
-                                      >
-                                      @for (op of comercialRangoPreciosOpciones; track op) {
-                                        <option [value]="op">{{ op }}</option>
-                                      }
-                                    </select>
+                                  <div class="form-section">
+<h4 class="form-section-title">Condiciones comerciales</h4>
+</div>
+<div class="field">
+<span class="field-label" id="ce-precios-label">Rango de precios</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-precios-label">
+@for (op of comercialRangoPreciosOpciones; track op) {
+<label class="segmented-option"><input type="radio" name="rango_precios" [(ngModel)]="comercialEditForm.rango_precios" [value]="op" /><span>{{ op }}</span></label>
+}
+</div>
                                   </div>
                                   <div class="field">
-                                    <label for="ce-modalidad">Modalidad de venta</label>
-                                    <select
-                                      id="ce-modalidad"
-                                      [(ngModel)]="comercialEditForm.modalidad_venta"
-                                      name="modalidad_venta"
-                                      >
-                                      @for (op of comercialModalidadVentaOpciones; track op) {
-                                        <option [value]="op">{{ op }}</option>
-                                      }
-                                    </select>
+                                    <span class="field-label" id="ce-modalidad-label">Modalidad de venta</span>
+<div class="segmented" role="radiogroup" aria-labelledby="ce-modalidad-label">
+@for (op of comercialModalidadVentaOpciones; track op) {
+<label class="segmented-option"><input type="radio" name="modalidad_venta" [(ngModel)]="comercialEditForm.modalidad_venta" [value]="op" /><span>{{ op }}</span></label>
+}
+</div>
                                   </div>
                                   <div class="field">
                                     <label for="ce-marcas">Marcas representadas</label>
@@ -1276,8 +1339,11 @@
                                         name="certificaciones"
                                         />
                                       </div>
-                                      <div class="field col-2">
-                                        <label for="ce-obs">Observaciones</label>
+                                      <div class="form-section">
+<h4 class="form-section-title">Notas</h4>
+</div>
+<div class="field col-2">
+<label for="ce-obs">Observaciones</label>
                                         <textarea
                                           id="ce-obs"
                                           rows="3"
@@ -1309,10 +1375,10 @@
 
                       <!-- Empresa: crear/editar -->
                       @if (showEmpresaForm) {
-                        <div class="overlay">
-                          <div class="modal modal--md" [attr.aria-busy]="isModalBusy('empresa')">
-                            <div class="modal-header">
-                              <h3>{{ editingEmpresa ? "Editar empresa" : "Nueva empresa" }}</h3>
+                        <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('empresa')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-empresa-title" [attr.aria-busy]="isModalBusy('empresa')">
+<div class="modal-header">
+<h3 id="dlg-empresa-title">{{ editingEmpresa ? "Editar empresa" : "Nueva empresa" }}</h3>
                               <button
                                 type="button"
                                 class="icon-btn"
@@ -1333,7 +1399,7 @@
                                 <div class="alert alert--loading">
                                   <span class="alert-spinner" aria-hidden="true"></span>
                                   <span>
-                                    Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                    Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                                   </span>
                                 </div>
                               }
@@ -1353,9 +1419,12 @@
                                   }
                                 </div>
                               }
-                              <div class="modal-body">
-                                <div class="field">
-                                  <label for="e_cuil">CUIL @if (!editingEmpresa) {
+                              <div class="modal-body grid-3">
+<div class="form-section">
+<h4 class="form-section-title">Identificación</h4>
+</div>
+<div class="field">
+<label for="e_cuil">CUIL @if (!editingEmpresa) {
                                     <span class="req">*</span>
                                   }</label>
                                   <input
@@ -1396,7 +1465,7 @@
                                         <div
                                           class="error"
                                           >
-                                          Ingresá un nombre.
+                                          Ingrese un nombre.
                                         </div>
                                       }
                                       @for (err of getFieldErrors('empresa', 'nombre'); track err) {
@@ -1421,7 +1490,7 @@
                                           <div
                                             class="error"
                                             >
-                                            Ingresá un rubro.
+                                            Ingrese un rubro.
                                           </div>
                                         }
                                         @for (err of getFieldErrors('empresa', 'rubro'); track err) {
@@ -1432,10 +1501,14 @@
                                           </div>
                                         }
                                       </div>
-                                      <div class="field">
-                                        <label for="e_empleados">Cant. empleados</label>
+                                      <div class="form-section">
+<h4 class="form-section-title">Operación</h4>
+</div>
+<div class="field">
+<label for="e_empleados">Cantidad de empleados</label>
                                         <input
                                           id="e_empleados"
+inputmode="numeric"
                                           type="number"
                                           [(ngModel)]="empresaForm.cant_empleados"
                                           name="e_empleados"
@@ -1449,7 +1522,7 @@
                                           }
                                         </div>
                                         <div class="field">
-                                          <label for="e_horario">Horario trabajo</label>
+                                          <label for="e_horario">Horario de trabajo</label>
                                           <input
                                             id="e_horario"
                                             type="text"
@@ -1465,22 +1538,16 @@
                                             }
                                           </div>
                                           <div class="field">
-                                            <label for="e_estado">Estado <span class="req">*</span></label>
-                                            <select
-                                              id="e_estado"
-                                              [(ngModel)]="empresaForm.estado"
-                                              name="e_estado"
-                                              required
-                                              #eEstado="ngModel"
-                                              >
-                                              <option [ngValue]="true">Activa</option>
-                                              <option [ngValue]="false">Inactiva</option>
-                                            </select>
+                                            <span class="field-label" id="e_estado_label">Estado <span class="req">*</span></span>
+<div class="segmented" role="radiogroup" aria-labelledby="e_estado_label">
+<label class="segmented-option"><input type="radio" name="e_estado" [(ngModel)]="empresaForm.estado" [value]="true" required #eEstado="ngModel" /><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>Activa</span></label>
+<label class="segmented-option"><input type="radio" name="e_estado" [(ngModel)]="empresaForm.estado" [value]="false" required /><span class="material-symbols-outlined" aria-hidden="true">block</span><span>Inactiva</span></label>
+</div>
                                             @if (eEstado.invalid && (eEstado.touched || fEmp.submitted)) {
                                               <div
                                                 class="error"
                                                 >
-                                                Seleccioná un estado.
+                                                Seleccione un estado.
                                               </div>
                                             }
                                             @for (err of getFieldErrors('empresa', 'estado'); track err) {
@@ -1491,12 +1558,15 @@
                                               </div>
                                             }
                                           </div>
-                                          <div class="field col-3">
-                                            <label for="e_obs">Sobre la empresa</label>
+                                          <div class="form-section">
+<h4 class="form-section-title">Descripción</h4>
+</div>
+<div class="field col-3">
+<label for="e_obs">Sobre la empresa</label>
                                             <textarea
                                               id="e_obs"
                                               rows="3"
-                                              placeholder="Contanos de qué se trata la empresa: a qué se dedica, cómo y cuándo se creó, etc."
+                                              placeholder="Describa la empresa: a qué se dedica, cómo y cuándo se creó, etc."
                                               [(ngModel)]="empresaForm.observaciones"
                                               name="e_obs"
                                             ></textarea>
@@ -1511,7 +1581,7 @@
                                         </div>
                                         <div class="modal-actions">
                                           <button class="btn primary" type="submit">
-                                            {{ editingEmpresa ? "Actualizar" : "Crear" }}
+                                            {{ editingEmpresa ? "Guardar cambios" : "Crear empresa" }}
                                           </button>
                                           <button class="btn ghost" type="button" (click)="cancelForm('empresa')">
                                             Cancelar
@@ -1524,10 +1594,10 @@
 
                                 <!-- Usuario: crear/editar -->
                                 @if (showUsuarioForm) {
-                                  <div class="overlay">
-                                    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('usuario')">
-                                      <div class="modal-header">
-                                        <h3>{{ editingUsuario ? "Editar usuario" : "Nuevo usuario" }}</h3>
+                                  <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('usuario')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-usuario-title" [attr.aria-busy]="isModalBusy('usuario')">
+<div class="modal-header">
+<h3 id="dlg-usuario-title">{{ editingUsuario ? "Editar usuario" : "Nuevo usuario" }}</h3>
                                         <button
                                           type="button"
                                           class="icon-btn"
@@ -1549,7 +1619,7 @@
                                           <div class="alert alert--loading">
                                             <span class="alert-spinner" aria-hidden="true"></span>
                                             <span>
-                                              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                                             </span>
                                           </div>
                                         }
@@ -1569,10 +1639,15 @@
                                               }
                                             </div>
                                           }
-                                          <!-- Podés envolver el body en un contenedor y atenuarlo si querés -->
-                                          <div class="modal-body grid-3" [class.readonly]="isModalBusy('usuario')">
-                                            <div class="field">
-                                              <label for="u_email">Email <span class="req">*</span></label>
+                                          <div class="modal-body grid-2" [class.readonly]="isModalBusy('usuario')">
+<div class="form-section">
+<h4 class="form-section-title">Cuenta</h4>
+@if (editingUsuario) {
+<p class="form-section-desc">El email, el nombre y el CUIL de la empresa no se pueden modificar.</p>
+}
+</div>
+<div class="field">
+<label for="u_email">Email <span class="req">*</span></label>
                                               <input
                                                 id="u_email"
                                                 type="email"
@@ -1587,7 +1662,7 @@
                                                   <div
                                                     class="error"
                                                     >
-                                                    Ingresá un email válido.
+                                                    Ingrese un email válido.
                                                   </div>
                                                 }
                                                 @for (err of getFieldErrors('usuario', 'email'); track err) {
@@ -1614,34 +1689,29 @@
                                                     #uNom="ngModel"
                                                     />
                                                   </div>
-                                                  @if (!editingUsuario) {
-                                                    <div class="field">
-                                                      <label for="u_rol">Rol <span class="req">*</span></label>
-                                                      <select
-                                                        id="u_rol"
-                                                        [(ngModel)]="usuarioForm.id_rol"
-                                                        name="u_rol"
-                                                        required
-                                                        #uRol="ngModel"
-                                                        >
-                                                        <option [ngValue]="null">—</option>
-                                                        @for (r of assignableRoles; track r) {
-                                                          <option [ngValue]="r.id_rol">
-                                                            {{ r.tipo_rol }}
-                                                          </option>
-                                                        }
-                                                      </select>
-                                                      @if (uRol?.invalid && (uRol?.touched || fUsr.submitted)) {
+                                                  <div class="form-section">
+<h4 class="form-section-title">Acceso</h4>
+</div>
+@if (!editingUsuario) {
+<div class="field">
+<span class="field-label" id="u_rol_label">Rol <span class="req">*</span></span>
+<div class="segmented" role="radiogroup" aria-labelledby="u_rol_label">
+@for (r of assignableRoles; track r) {
+<label class="segmented-option"><input type="radio" name="u_rol" [(ngModel)]="usuarioForm.id_rol" [value]="r.id_rol" required /><span>{{ r.tipo_rol === 'admin_polo' ? 'Administrador del Polo' : r.tipo_rol === 'publico' ? 'Público' : getRoleName(r.id_rol) }}</span></label>
+}
+</div>
+<p class="field-hint">Los administradores de empresa se crean al aprobar la solicitud de registro de cada empresa.</p>
+@if (fUsr.form.get('u_rol')?.invalid && (fUsr.form.get('u_rol')?.touched || fUsr.submitted)) {
                                                         <div
                                                           class="error"
                                                           >
-                                                          Seleccioná un rol.
+                                                          Seleccione un rol.
                                                         </div>
                                                       }
                                                     </div>
                                                   }
                                                   <div class="field">
-                                                    <label for="u_cuil">CUIL (empresa) <span class="req">*</span></label>
+                                                    <label for="u_cuil">CUIL de la empresa <span class="req">*</span></label>
                                                     <input
                                                       id="u_cuil"
                                                       type="number"
@@ -1649,8 +1719,15 @@
                                                       name="u_cuil"
                                                       [disabled]="!!editingUsuario || creatingForEmpresa"
                                                       required
+                                                      list="dl-empresas"
+                                                      inputmode="numeric"
+                                                      autocomplete="off"
                                                       #uCuil="ngModel"
                                                       />
+<p class="field-hint">Escriba el CUIL o elija una empresa de la lista. Solo números, sin guiones.</p>
+@if (usuarioForm.cuil && getEmpresaNombre(usuarioForm.cuil) !== usuarioForm.cuil.toString()) {
+<p class="field-hint field-hint--ok"><span class="material-symbols-outlined" aria-hidden="true">apartment</span>{{ getEmpresaNombre(usuarioForm.cuil) }}</p>
+}
                                                       @if (uCuil.invalid && (uCuil.touched || fUsr.submitted)) {
                                                         <div
                                                           class="error"
@@ -1667,11 +1744,11 @@
                                                       }
                                                     </div>
                                                     <div class="field">
-                                                      <label for="u_estado">Estado</label>
-                                                      <select id="u_estado" [(ngModel)]="usuarioForm.estado" name="u_estado">
-                                                        <option [ngValue]="true">Habilitado</option>
-                                                        <option [ngValue]="false">Inhabilitado</option>
-                                                      </select>
+                                                      <span class="field-label" id="u_estado_label">Estado</span>
+<div class="segmented" role="radiogroup" aria-labelledby="u_estado_label">
+<label class="segmented-option"><input type="radio" name="u_estado" [(ngModel)]="usuarioForm.estado" [value]="true" /><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>Habilitado</span></label>
+<label class="segmented-option"><input type="radio" name="u_estado" [(ngModel)]="usuarioForm.estado" [value]="false" /><span class="material-symbols-outlined" aria-hidden="true">block</span><span>Inhabilitado</span></label>
+</div>
                                                       @for (err of getFieldErrors('usuario', 'estado'); track err) {
                                                         <div
                                                           class="error"
@@ -1683,7 +1760,7 @@
                                                   </div>
                                                   <div class="modal-actions">
                                                     <button class="btn primary" type="submit">
-                                                      {{ editingUsuario ? "Actualizar" : "Crear" }}
+                                                      {{ editingUsuario ? "Guardar cambios" : "Crear usuario" }}
                                                     </button>
                                                     <button class="btn ghost" type="button" (click)="cancelForm('usuario')">
                                                       Cancelar
@@ -1696,10 +1773,10 @@
 
                                           <!-- Agregar usuario a una empresa existente -->
                                           @if (showAddUsuarioEmpresaForm) {
-                                            <div class="overlay">
-                                              <div class="modal modal--md" [attr.aria-busy]="addUsuarioEmpresaSubmitting">
+                                            <div class="overlay" tabindex="-1" (keydown.escape)="!addUsuarioEmpresaSubmitting && cancelAddUsuarioEmpresaForm()">
+                                              <div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-addusr-title" [attr.aria-busy]="addUsuarioEmpresaSubmitting">
                                                 <div class="modal-header">
-                                                  <h3>
+                                                  <h3 id="dlg-addusr-title">
                                                     Agregar usuario
                                                     @if (addUsuarioEmpresaTarget) {
                                                       — {{ addUsuarioEmpresaTarget.nombre }}
@@ -1725,7 +1802,7 @@
                                                     <div class="alert alert--loading">
                                                       <span class="alert-spinner" aria-hidden="true"></span>
                                                       <span>
-                                                        Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                                        Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                                                       </span>
                                                     </div>
                                                   }
@@ -1736,11 +1813,14 @@
                                                       }
                                                     </div>
                                                   }
-                                                  <p class="hint">
+                                                  <p class="field-hint form-intro">
                                                     Se genera una contraseña automáticamente y se envía por email junto
                                                     con el nombre de usuario. La cuenta queda lista para el primer ingreso.
                                                   </p>
-                                                  <div class="modal-body" [class.readonly]="addUsuarioEmpresaSubmitting">
+                                                  <div class="modal-body grid-2" [class.readonly]="addUsuarioEmpresaSubmitting">
+<div class="form-section">
+<h4 class="form-section-title">Datos del nuevo usuario</h4>
+</div>
                                                     <div class="field">
                                                       <label for="au_nombre">Nombre de usuario <span class="req">*</span></label>
                                                       <input
@@ -1755,7 +1835,7 @@
                                                         #auNombre="ngModel"
                                                         />
                                                         @if (auNombre.invalid && (auNombre.touched || fAddUsr.submitted)) {
-                                                          <div class="error">Ingresá entre 3 y 50 caracteres.</div>
+                                                          <div class="error">Ingrese entre 3 y 50 caracteres.</div>
                                                         }
                                                         @for (err of getFieldErrors('usuarioEmpresa', 'nombre'); track err) {
                                                           <div class="error">{{ err.message }}</div>
@@ -1774,7 +1854,7 @@
                                                           #auEmail="ngModel"
                                                           />
                                                           @if (auEmail.invalid && (auEmail.touched || fAddUsr.submitted)) {
-                                                            <div class="error">Ingresá un email válido.</div>
+                                                            <div class="error">Ingrese un email válido.</div>
                                                           }
                                                           @for (err of getFieldErrors('usuarioEmpresa', 'email'); track err) {
                                                             <div class="error">{{ err.message }}</div>
@@ -1799,12 +1879,12 @@
                                                 </div>
                                               }
 
-                                              <!-- Servicio del Polo: crear -->
-                                              @if (showServicioPoloForm) {
-                                            <div class="overlay">
-                                              <div class="modal modal-lg" [attr.aria-busy]="isModalBusy('servicioPolo')">
-                                                <div class="modal-header">
-                                                  <h3>Nuevo servicio del Polo</h3>
+                                                                                        <!-- Servicio del Polo: crear -->
+                                          @if (showServicioPoloForm) {
+                                            <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('servicioPolo')">
+<div class="modal modal--lg" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-sp-title" [attr.aria-busy]="isModalBusy('servicioPolo')">
+<div class="modal-header">
+<h3 id="dlg-sp-title">Nuevo servicio del Polo</h3>
                                                   <button
                                                     type="button"
                                                     class="icon-btn"
@@ -1825,7 +1905,7 @@
                                                     <div class="alert alert--loading">
                                                       <span class="alert-spinner" aria-hidden="true"></span>
                                                       <span>
-                                                        Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                                        Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                                                       </span>
                                                     </div>
                                                   }
@@ -1847,11 +1927,14 @@
                                                       }
                                                     </div>
                                                   }
-                                                  <div class="modal-body">
-                                                    <!-- ✅ GRID FIJA (no cambia al agregar extras) -->
-                                                    <div class="sp-base-grid">
-                                                      <!-- Nombre -->
-                                                      <div class="field">
+                                                  <div class="modal-body sp-body">
+<div class="form-section">
+<h4 class="form-section-title">Datos del servicio</h4>
+</div>
+<!-- Distribucion: Nombre | Horario / Tipo / CUIL | Puestos | Superficie / Ocupacion -->
+<div class="sp-base-grid">
+<!-- Nombre -->
+                                                      <div class="field span-2">
                                                         <label for="sp_nombre">Nombre <span class="req">*</span></label>
                                                         <input
                                                           id="sp_nombre"
@@ -1865,49 +1948,10 @@
                                                             <div
                                                               class="error"
                                                               >
-                                                              Ingresá un nombre.
+                                                              Ingrese un nombre.
                                                             </div>
                                                           }
                                                           @for (err of getFieldErrors('servicioPolo', 'nombre'); track err) {
-                                                            <div
-                                                              class="error"
-                                                              >
-                                                              {{ err.message }}
-                                                            </div>
-                                                          }
-                                                        </div>
-                                                        <!-- Tipo -->
-                                                        <div class="field">
-                                                          <label for="sp_tipo">Tipo <span class="req">*</span></label>
-                                                          <select
-                                                            id="sp_tipo"
-                                                            [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo"
-                                                            name="sp_tipo"
-                                                            required
-                                                            #spTipo="ngModel"
-                                                            (ngModelChange)="onTipoServicioChange()"
-                                                            >
-                                                            <option [ngValue]="1">coworking</option>
-                                                            <option [ngValue]="2">nave</option>
-                                                            <option [ngValue]="3">oficina</option>
-                                                            <option [ngValue]="4">local comercial</option>
-                                                            <option [ngValue]="5">container</option>
-                                                            <option [ngValue]="6">lavadero</option>
-                                                          </select>
-                                                          @if (spTipo.invalid && (spTipo.touched || fSP.submitted)) {
-                                                            <div
-                                                              class="error"
-                                                              >
-                                                              Seleccioná un tipo.
-                                                            </div>
-                                                          }
-                                                          @for (
-                                                            err of getFieldErrors(
-                                                            'servicioPolo',
-                                                            'id_tipo_servicio_polo'
-                                                            )
-                                                            ; track
-                                                            err) {
                                                             <div
                                                               class="error"
                                                               >
@@ -1933,30 +1977,59 @@
                                                               </div>
                                                             }
                                                           </div>
-                                                          <!-- Propietario (opcional) -->
-                                                          <div class="field">
-                                                            <label for="sp_propietario">Propietario</label>
-                                                            <select
-                                                              id="sp_propietario"
-                                                              [(ngModel)]="servicioPoloForm.propietario"
-                                                              name="sp_propietario"
-                                                              (ngModelChange)="onPropietarioChange()"
+                                                          <!-- Tipo -->
+                                                        <div class="field field--full">
+                                                          <span class="field-label" id="sp_tipo_label">Tipo <span class="req">*</span></span>
+<div class="choice-grid choice-grid--compact" role="radiogroup" aria-labelledby="sp_tipo_label">
+<label class="choice-card"><input type="radio" name="sp_tipo" [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo" [value]="1" required (ngModelChange)="onTipoServicioChange()" #spTipo="ngModel" />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">groups</span>
+<span class="choice-title">Coworking</span>
+</label>
+<label class="choice-card"><input type="radio" name="sp_tipo" [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo" [value]="2" required (ngModelChange)="onTipoServicioChange()" />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">warehouse</span>
+<span class="choice-title">Nave</span>
+</label>
+<label class="choice-card"><input type="radio" name="sp_tipo" [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo" [value]="3" required (ngModelChange)="onTipoServicioChange()" />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">business_center</span>
+<span class="choice-title">Oficina</span>
+</label>
+<label class="choice-card"><input type="radio" name="sp_tipo" [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo" [value]="4" required (ngModelChange)="onTipoServicioChange()" />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">storefront</span>
+<span class="choice-title">Local comercial</span>
+</label>
+<label class="choice-card"><input type="radio" name="sp_tipo" [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo" [value]="5" required (ngModelChange)="onTipoServicioChange()" />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">inventory_2</span>
+<span class="choice-title">Container</span>
+</label>
+<label class="choice-card"><input type="radio" name="sp_tipo" [(ngModel)]="servicioPoloForm.id_tipo_servicio_polo" [value]="6" required (ngModelChange)="onTipoServicioChange()" />
+<span class="material-symbols-outlined choice-icon" aria-hidden="true">local_laundry_service</span>
+<span class="choice-title">Lavadero</span>
+</label>
+</div>
+                                                          @if (spTipo.invalid && (spTipo.touched || fSP.submitted)) {
+                                                            <div
+                                                              class="error"
                                                               >
-                                                              <option value="">—</option>
-                                                              <option value="propietario">Propietario</option>
-                                                              <option value="inquilino">Inquilino</option>
-                                                            </select>
-                                                            @for (err of getFieldErrors('servicioPolo', 'propietario'); track err) {
-                                                              <div
-                                                                class="error"
-                                                                >
-                                                                {{ err.message }}
-                                                              </div>
-                                                            }
-                                                          </div>
-                                                          <!-- CUIL -->
+                                                              Seleccione un tipo.
+                                                            </div>
+                                                          }
+                                                          @for (
+                                                            err of getFieldErrors(
+                                                            'servicioPolo',
+                                                            'id_tipo_servicio_polo'
+                                                            )
+                                                            ; track
+                                                            err) {
+                                                            <div
+                                                              class="error"
+                                                              >
+                                                              {{ err.message }}
+                                                            </div>
+                                                          }
+                                                        </div>
+                                                        <!-- CUIL -->
                                                           <div class="field">
-                                                            <label for="sp_cuil">CUIL (empresa) <span class="req">*</span></label>
+                                                            <label for="sp_cuil">CUIL de la empresa <span class="req">*</span></label>
                                                             <input
                                                               id="sp_cuil"
                                                               type="number"
@@ -1964,8 +2037,15 @@
                                                               name="sp_cuil"
                                                               [disabled]="creatingForEmpresa"
                                                               required
+                                                              list="dl-empresas"
+                                                              inputmode="numeric"
+                                                              autocomplete="off"
                                                               #spCuil="ngModel"
                                                               />
+<p class="field-hint">Escriba el CUIL o elija una empresa de la lista. Solo números, sin guiones.</p>
+@if (servicioPoloForm.cuil && getEmpresaNombre(servicioPoloForm.cuil) !== servicioPoloForm.cuil.toString()) {
+<p class="field-hint field-hint--ok"><span class="material-symbols-outlined" aria-hidden="true">apartment</span>{{ getEmpresaNombre(servicioPoloForm.cuil) }}</p>
+}
                                                               @if (spCuil.invalid && (spCuil.touched || fSP.submitted)) {
                                                                 <div
                                                                   class="error"
@@ -1986,9 +2066,10 @@
                                                               <div
                                                                 class="field"
                                                                 >
-                                                                <label for="sp_puestos">Cant. puestos <span class="req">*</span></label>
+                                                                <label for="sp_puestos">Cantidad de puestos <span class="req">*</span></label>
                                                                 <input
                                                                   id="sp_puestos"
+inputmode="numeric"
                                                                   type="number"
                                                                   [(ngModel)]="servicioPoloForm.datos.cant_puestos"
                                                                   name="sp_puestos"
@@ -2000,7 +2081,7 @@
                                                                     <div
                                                                       class="error"
                                                                       >
-                                                                      Ingresá un valor ≥ 1.
+                                                                      Ingrese un valor ≥ 1.
                                                                     </div>
                                                                   }
                                                                 </div>
@@ -2012,9 +2093,10 @@
                                                                 <div
                                                                   class="field"
                                                                   >
-                                                                  <label for="sp_puestos_opt">Cant. puestos</label>
+                                                                  <label for="sp_puestos_opt">Cantidad de puestos</label>
                                                                   <input
                                                                     id="sp_puestos_opt"
+inputmode="numeric"
                                                                     type="number"
                                                                     [(ngModel)]="servicioPoloForm.datos.cant_puestos"
                                                                     name="sp_puestos_opt"
@@ -2023,16 +2105,13 @@
                                                                     />
                                                                   </div>
                                                                 }
-                                                              </div>
-                                                              <!-- 🔽 EXTRAS POR TIPO (van DEBAJO, ocupando ancho completo) -->
-                                                              @if (servicioPoloForm.id_tipo_servicio_polo === 1) {
-                                                                <div
-                                                                  class="sp-extra full-row"
-                                                                  >
-                                                                  <div class="field">
+                                                              
+@if (servicioPoloForm.id_tipo_servicio_polo === 1) {
+<div class="field">
                                                                     <label for="sp_m2_cw">Superficie (m²)</label>
                                                                     <input
                                                                       id="sp_m2_cw"
+inputmode="numeric"
                                                                       type="number"
                                                                       [(ngModel)]="servicioPoloForm.datos.m2"
                                                                       name="sp_m2_cw"
@@ -2040,18 +2119,16 @@
                                                                       placeholder="Opcional"
                                                                       />
                                                                     </div>
-                                                                  </div>
-                                                                }
-                                                                @if (
+                                                                  
+}
+@if (
                                                                   [2, 3, 4, 5, 6].includes(servicioPoloForm.id_tipo_servicio_polo)
                                                                   ) {
-                                                                  <div
-                                                                    class="sp-extra full-row"
-                                                                    >
-                                                                    <div class="field">
+<div class="field">
                                                                       <label for="sp_m2">Superficie (m²) <span class="req">*</span></label>
                                                                       <input
                                                                         id="sp_m2"
+inputmode="numeric"
                                                                         type="number"
                                                                         [(ngModel)]="servicioPoloForm.datos.m2"
                                                                         name="sp_m2"
@@ -2063,70 +2140,89 @@
                                                                           <div
                                                                             class="error"
                                                                             >
-                                                                            Ingresá un valor ≥ 1.
+                                                                            Ingrese un valor ≥ 1.
                                                                           </div>
                                                                         }
                                                                       </div>
-                                                                    </div>
-                                                                  }
-                                                                  <!-- 🔽 DATOS PROPIETARIO / INQUILINO (siempre debajo) -->
+                                                                    
+}
+<!-- Propietario (opcional) -->
+                                                          <div class="field field--full">
+                                                            <span class="field-label" id="sp_propietario_label">¿Propietario o inquilino?</span>
+<div class="segmented" role="radiogroup" aria-labelledby="sp_propietario_label">
+<label class="segmented-option"><input type="radio" name="sp_propietario" [(ngModel)]="servicioPoloForm.propietario" [value]="''" (ngModelChange)="onPropietarioChange()" /><span>Sin especificar</span></label>
+<label class="segmented-option"><input type="radio" name="sp_propietario" [(ngModel)]="servicioPoloForm.propietario" [value]="'propietario'" (ngModelChange)="onPropietarioChange()" /><span>Propietario</span></label>
+<label class="segmented-option"><input type="radio" name="sp_propietario" [(ngModel)]="servicioPoloForm.propietario" [value]="'inquilino'" (ngModelChange)="onPropietarioChange()" /><span>Inquilino</span></label>
+</div>
+                                                            @for (err of getFieldErrors('servicioPolo', 'propietario'); track err) {
+                                                              <div
+                                                                class="error"
+                                                                >
+                                                                {{ err.message }}
+                                                              </div>
+                                                            }
+                                                          </div>
+                                                          </div>
+<!-- 🔽 DATOS PROPIETARIO / INQUILINO (siempre debajo) -->
                                                                   @if (servicioPoloForm.propietario === 'propietario') {
                                                                     <div
                                                                       class="sp-extra full-row"
                                                                       >
-                                                                      <div class="field col-3">
-                                                                        <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de grupo (ver aria-labelledby en el contenedor) -->
-                                                                        <label id="sp_datos_prop_label">Datos del propietario</label>
-                                                                        <div class="inline-3" role="group" aria-labelledby="sp_datos_prop_label">
-                                                                          <input
-                                                                            type="text"
-                                                                            [(ngModel)]="servicioPoloForm.datos.datos_prop.nombre"
-                                                                            name="sp_prop_nombre"
-                                                                            aria-label="Nombre"
-                                                                            placeholder="Nombre"
-                                                                            />
-                                                                            <input
-                                                                              type="text"
-                                                                              [(ngModel)]="servicioPoloForm.datos.datos_prop.contacto"
-                                                                              name="sp_prop_contacto"
-                                                                              aria-label="Contacto"
-                                                                              placeholder="Contacto"
-                                                                              />
-                                                                              <input type="text" disabled placeholder="—" />
-                                                                            </div>
-                                                                          </div>
+                                                                      <div class="form-section">
+<h4 class="form-section-title" id="sp_datos_prop_label">Datos del propietario</h4>
+</div>
+<div class="field">
+<label for="sp_prop_nombre">Nombre</label>
+<input
+id="sp_prop_nombre"
+type="text"
+[(ngModel)]="servicioPoloForm.datos.datos_prop.nombre"
+name="sp_prop_nombre"
+/>
+</div>
+<div class="field">
+<label for="sp_prop_contacto">Contacto</label>
+<input
+id="sp_prop_contacto"
+type="text"
+[(ngModel)]="servicioPoloForm.datos.datos_prop.contacto"
+name="sp_prop_contacto"
+placeholder="Teléfono o email"
+/>
+</div>
                                                                         </div>
                                                                       }
                                                                       @if (servicioPoloForm.propietario === 'inquilino') {
                                                                         <div
                                                                           class="sp-extra full-row"
                                                                           >
-                                                                          <div class="field col-3">
-                                                                            <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- encabezado de grupo (ver aria-labelledby en el contenedor) -->
-                                                                            <label id="sp_datos_inq_label">Datos del inquilino</label>
-                                                                            <div class="inline-3" role="group" aria-labelledby="sp_datos_inq_label">
-                                                                              <input
-                                                                                type="text"
-                                                                                [(ngModel)]="servicioPoloForm.datos.datos_inquilino.nombre"
-                                                                                name="sp_inq_nombre"
-                                                                                aria-label="Nombre"
-                                                                                placeholder="Nombre"
-                                                                                />
-                                                                                <input
-                                                                                  type="text"
-                                                                                  [(ngModel)]="servicioPoloForm.datos.datos_inquilino.contacto"
-                                                                                  name="sp_inq_contacto"
-                                                                                  aria-label="Contacto"
-                                                                                  placeholder="Contacto"
-                                                                                  />
-                                                                                  <input type="text" disabled placeholder="—" />
-                                                                                </div>
-                                                                              </div>
+                                                                          <div class="form-section">
+<h4 class="form-section-title" id="sp_datos_inq_label">Datos del inquilino</h4>
+</div>
+<div class="field">
+<label for="sp_inq_nombre">Nombre</label>
+<input
+id="sp_inq_nombre"
+type="text"
+[(ngModel)]="servicioPoloForm.datos.datos_inquilino.nombre"
+name="sp_inq_nombre"
+/>
+</div>
+<div class="field">
+<label for="sp_inq_contacto">Contacto</label>
+<input
+id="sp_inq_contacto"
+type="text"
+[(ngModel)]="servicioPoloForm.datos.datos_inquilino.contacto"
+name="sp_inq_contacto"
+placeholder="Teléfono o email"
+/>
+</div>
                                                                             </div>
                                                                           }
                                                                         </div>
                                                                         <div class="modal-actions">
-                                                                          <button class="btn primary" type="submit">Crear</button>
+                                                                          <button class="btn primary" type="submit">Crear servicio</button>
                                                                           <button
                                                                             class="btn ghost"
                                                                             type="button"
@@ -2142,10 +2238,10 @@
 
                                                                 <!-- Lote: crear -->
                                                                 @if (showLoteForm) {
-                                                                  <div class="overlay">
-                                                                    <div class="modal modal--md" [attr.aria-busy]="isModalBusy('lote')">
-                                                                      <div class="modal-header">
-                                                                        <h3>
+                                                                  <div class="overlay" tabindex="-1" (keydown.escape)="cancelForm('lote')">
+<div class="modal modal--md" role="dialog" appDialogFocus aria-modal="true" aria-labelledby="dlg-lote-title" [attr.aria-busy]="isModalBusy('lote')">
+<div class="modal-header">
+<h3 id="dlg-lote-title">
                                                                           Nuevo lote
                                                                           {{
                                                                           nombreServicioSeleccionado ? "para " + nombreServicioSeleccionado : ""
@@ -2171,7 +2267,7 @@
                                                                           <div class="alert alert--loading">
                                                                             <span class="alert-spinner" aria-hidden="true"></span>
                                                                             <span>
-                                                                              Procesando tu solicitud, puede demorar unos segundos. No cierres esta ventana ni navegues fuera.
+                                                                              Procesando la solicitud. Puede demorar unos segundos; por favor, no cierre esta ventana.
                                                                             </span>
                                                                           </div>
                                                                         }
@@ -2192,8 +2288,11 @@
                                                                           </div>
                                                                         }
                                                                         <div class="modal-body grid-3">
-                                                                          <div class="field">
-                                                                            <label for="l_dueno">Dueño <span class="req">*</span></label>
+<div class="form-section">
+<h4 class="form-section-title">Identificación del lote</h4>
+</div>
+<div class="field">
+<label for="l_dueno">Dueño <span class="req">*</span></label>
                                                                             <input
                                                                               id="l_dueno"
                                                                               type="text"
@@ -2221,6 +2320,7 @@
                                                                               <label for="l_manzana">Manzana <span class="req">*</span></label>
                                                                               <input
                                                                                 id="l_manzana"
+inputmode="numeric"
                                                                                 type="number"
                                                                                 [(ngModel)]="loteForm.manzana"
                                                                                 name="l_manzana"
@@ -2246,6 +2346,7 @@
                                                                                 <label for="l_lote">Lote <span class="req">*</span></label>
                                                                                 <input
                                                                                   id="l_lote"
+inputmode="numeric"
                                                                                   type="number"
                                                                                   [(ngModel)]="loteForm.lote"
                                                                                   name="l_lote"
@@ -2265,8 +2366,10 @@
                                                                                     </div>
                                                                                   }
                                                                                 </div>
-                                                                                <div class="field field--map col-3">
-                                                                                  <label>Ubicacion en Google Maps</label>
+                                                                                <div class="form-section">
+<h4 class="form-section-title">Ubicación en el mapa</h4>
+</div>
+<div class="field field--map col-3">
                                                                                   <app-map-location-picker
                                                                                     [lat]="loteForm.latitud ?? null"
                                                                                     [lng]="loteForm.longitud ?? null"
@@ -2280,7 +2383,7 @@
                                                                                 </div>
                                                                               </div>
                                                                               <div class="modal-actions">
-                                                                                <button class="btn primary" type="submit">Agregar</button>
+                                                                                <button class="btn primary" type="submit">Registrar lote</button>
                                                                                 <button class="btn ghost" type="button" (click)="cancelForm('lote')">
                                                                                   Cancelar
                                                                                 </button>

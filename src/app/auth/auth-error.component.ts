@@ -8,6 +8,8 @@ import { ActivatedRoute, Router } from '@angular/router';
   standalone: true,
   imports: [],
   template: `
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block" rel="stylesheet" />
     <div class="admin-layout auth-error" [class.dark-mode]="isDarkMode">
       <div class="card auth-card">
         <div class="auth-icon">
@@ -25,15 +27,15 @@ import { ActivatedRoute, Router } from '@angular/router';
         <div class="suggestions">
           <h4>Posibles soluciones:</h4>
           <ul>
-            <li>Verifica tu conexión a Internet</li>
-            <li>Intenta cerrar y volver a abrir el navegador</li>
-            <li>Contacta al administrador si el problema persiste</li>
+            <li>Verifique su conexión a Internet</li>
+            <li>Intente cerrar y volver a abrir el navegador</li>
+            <li>Contacte al administrador si el problema persiste</li>
           </ul>
         </div>
     
         <button class="btn primary" (click)="goToLogin()">
           <span class="material-symbols-outlined">refresh</span>
-          Intentar de nuevo
+          Intentar nuevamente
         </button>
       </div>
     </div>

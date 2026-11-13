@@ -22,7 +22,7 @@ interface EmpresaRegisterForm {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css'],
+  styleUrls: ['./register.component.css', '../../shared/styles/auth-modern.css'],
 })
 export class RegisterComponent {
   private authService = inject(AuthenticationService);
@@ -70,7 +70,7 @@ export class RegisterComponent {
     this.errorMessage = '';
 
     if (form.invalid) {
-      this.errorMessage = 'Completá todos los campos obligatorios.';
+      this.errorMessage = 'Complete todos los campos obligatorios.';
       return;
     }
 
@@ -107,10 +107,10 @@ export class RegisterComponent {
           if (typeof detail === 'string') {
             this.errorMessage = detail;
           } else if (Array.isArray(detail) && detail.length) {
-            this.errorMessage = detail[0]?.msg || 'Revisá los datos ingresados.';
+            this.errorMessage = detail[0]?.msg || 'Revise los datos ingresados.';
           } else {
             this.errorMessage =
-              'No pudimos procesar el registro. Intentá nuevamente.';
+              'No pudimos procesar el registro. Intente nuevamente.';
           }
         },
       });

@@ -3,10 +3,10 @@
    selectores "html, body" de abajo no matchean el documento real bajo la
    encapsulación de estilos de Angular). */
 :host {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 .topbar{
@@ -22,7 +22,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .topbar-left { display:flex; align-items:center; gap:.75rem; cursor:pointer; }
 .brand-logo { width:64px; height:64px; object-fit:contain; display:block; transition: width 0.25s ease, height 0.25s ease; }
 .topbar:hover .brand-logo { width:76px; height:76px; }
-.topbar-title .app-title { font-weight:900; font-size:30px;  font-family: 'Inter', sans-serif;}
+.topbar-title .app-title { font-weight:900; font-size:30px;  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
 .topbar-title .app-sub { font-size:.85rem; color:#777; margin-top:-2px; }
 
 .topbar-tabs{
@@ -213,7 +213,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   border-radius:12px;
   font-weight:600;
   font-size:.9rem;
-  font-family:'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   border:1px solid transparent;
   box-shadow:0 2px 8px rgba(16,24,40,.06);
   animation:alert-in .25s ease;
@@ -263,7 +263,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   grid-column:span 3;
   display:flex; align-items:flex-start; gap:.9rem;
 }
-.activity.card{grid-column:span 7 ;  font-family: 'Inter', sans-serif;}
+.activity.card{grid-column:span 7 ;  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
 .quick.card{grid-column:span 5}
 
 .kpi-icon{
@@ -280,18 +280,18 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .kpi-body{ min-width:0; }
 .kpi .kpi-title{
   font-weight:600; font-size:.78rem; letter-spacing:.02em;
-  text-transform:uppercase; color:#8a94ab; font-family:'Inter', sans-serif;
+  text-transform:uppercase; color:#8a94ab; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .kpi .kpi-number{
   font-size:2.1rem; font-weight:800; letter-spacing:-0.02em;
-  color:#161c2d; line-height:1.15; font-family:'Inter', sans-serif;
+  color:#161c2d; line-height:1.15; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
-.kpi .kpi-sub{font-size:.85rem; color:#8a94ab; margin-top:.15rem; font-family: 'Inter', sans-serif;}
+.kpi .kpi-sub{font-size:.85rem; color:#8a94ab; margin-top:.15rem; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
 
 .status-badge{
   display:inline-block; margin-top:.3rem;
   font-size:.85rem; font-weight:700; padding:.2rem .6rem;
-  border-radius:999px; font-family:'Inter', sans-serif;
+  border-radius:999px; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .status-badge.active   { color:#16a34a; background:rgba(22,163,74,.1); }
 .status-badge.inactive { color:#d11a1a; background:rgba(209,26,26,.1); }
@@ -311,7 +311,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .activity-list .dot.warn   { background:#d97706; box-shadow:0 0 0 4px rgba(217,119,6,.12); }
 .activity-list .dot.info   { background:#2563eb; box-shadow:0 0 0 4px rgba(37,99,235,.12); }
 .a-title{font-weight:600; font-size:.88rem; color:#1f2937;}
-.a-when{font-size:.78rem; color:#9aa3b8; margin-top:.1rem; font-family: 'Inter', sans-serif;}
+.a-when{font-size:.78rem; color:#9aa3b8; margin-top:.1rem; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
 
 .quick-list{display:grid; grid-template-columns:1fr 1fr; gap:.7rem}
 .quick-btn{
@@ -337,7 +337,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
 .setting-card,
 .activity-list,
 .quick-list {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: inherit;
 }
 
@@ -412,7 +412,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   border: 1px solid rgba(16,24,40,0.04);
   box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.05);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
-   font-family: 'Inter', sans-serif;
+   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 .card:hover { box-shadow: 0 6px 16px rgba(16,24,40,0.07); }
 .kpi.card:hover { box-shadow: 0 10px 24px rgba(16,24,40,0.09); transform: translateY(-2px); }
@@ -422,7 +422,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   font-weight: 700;
   letter-spacing: .01em;
   margin-bottom: 1rem;
-   font-family: 'Inter', sans-serif;
+   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 .nice-form .field {
@@ -446,7 +446,7 @@ html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, label {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 0.95rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.4;
   transition: all 0.3s ease;
   background: #fff;
@@ -1162,7 +1162,7 @@ textarea.ng-invalid.ng-touched + .error{
 .no-spin input[type="number"]::-webkit-inner-spin-button { appearance:none; -webkit-appearance:none; margin:0; }
 
 html, body {
-  font-size: 18px;   font-family: 'Inter', sans-serif;
+  font-size: 18px;   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.4;
 }
 
@@ -1298,7 +1298,7 @@ html, body {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 0.95rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ============================================================

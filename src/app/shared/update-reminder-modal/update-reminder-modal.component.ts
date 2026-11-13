@@ -1,9 +1,10 @@
+import { DialogFocusDirective } from '../dialog-focus.directive';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-update-reminder-modal',
   standalone: true,
-  imports: [],
+  imports: [DialogFocusDirective],
   template: `
     @if (showModal) {
       <div
@@ -15,10 +16,11 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
         <div
           class="modal modal--sm"
           role="presentation"
+          appDialogFocus
           (click)="$event.stopPropagation()"
         >
           <div class="modal-header">
-            <h3>Actualizá los datos de tu empresa</h3>
+            <h3>Actualice los datos de su empresa</h3>
             <button
               type="button"
               class="icon-btn"
@@ -33,8 +35,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
               >update</span
             >
             <p>
-              Hace más de 6 meses que no se actualizan los datos de tu
-              empresa. Te recomendamos revisarlos para que el asistente
+              Hace más de 6 meses que no se actualizan los datos de su
+              empresa. Le recomendamos revisarlos para que el asistente
               virtual del Polo 52 siga respondiendo con información al día.
             </p>
           </div>

@@ -1,3 +1,4 @@
+import { DialogFocusDirective } from '../shared/dialog-focus.directive';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -35,6 +36,7 @@ import {
 import { UnsavedChangesTracker } from '../shared/unsaved-changes-tracker';
 import { formatActivityMoment as formatActivityMomentUtil } from '../shared/activity-format.util';
 import { ChatbotFabComponent } from '../shared/chatbot-fab/chatbot-fab.component';
+import { ChartSegment, donutBackground, ringBackground, toSegments } from '../shared/dashboard-chart.util';
 import { MapLocationPickerComponent } from '../shared/map-location-picker/map-location-picker.component';
 import { MapLocationViewComponent } from '../shared/map-location-view/map-location-view.component';
 
@@ -61,7 +63,7 @@ interface EmpresaEditForm {
 @Component({
   selector: 'app-empresas',
   standalone: true,
-  imports: [
+  imports: [DialogFocusDirective, 
     CommonModule,
     FormsModule,
     RouterModule,
@@ -72,7 +74,7 @@ interface EmpresaEditForm {
     MapLocationViewComponent,
   ],
   templateUrl: './admin-polo.component.html',
-  styleUrls: ['./admin-polo.component.css'],
+  styleUrls: ['./admin-polo.component.css', '../shared/styles/panel-forms.css', '../shared/styles/panel-ui.css', '../shared/styles/panel-layout.css'],
 })
 export class AdminPoloComponent implements OnInit {
   private adminPoloService = inject(AdminPoloService);
@@ -80,6 +82,12 @@ export class AdminPoloComponent implements OnInit {
   showPasswordModal = false;
 
   activeTab: AdminPoloTab = 'dashboard';
+  // Menu lateral en celular/tablet (solo presentacion). La variable
+  // mobileMenuOpen se declara mas abajo (viene de main).
+  navMobile(tab: AdminPoloTab): void {
+    this.mobileMenuOpen = false;
+    this.setActiveTab(tab);
+  }
 
   // Menu lateral en mobile
   mobileMenuOpen = false;
@@ -303,7 +311,7 @@ export class AdminPoloComponent implements OnInit {
   quickAddLote(): void {
     this.setActiveTab('servicios');
     this.showMessage(
-      'Elegí el servicio del Polo al que pertenece el lote y tocá "Agregar/Asignar lote" en su fila.',
+      'Elija el servicio del Polo al que pertenece el lote y utilice "Registrar lote para este servicio" en su fila.',
       'info'
     );
   }
@@ -389,6 +397,82 @@ export class AdminPoloComponent implements OnInit {
 
   get totalLotes(): number {
     return this.lotes.length;
+  }
+
+  // ===== Indicadores visuales del dashboard =====
+  // Solo presentacion: se calculan a partir de los datos que el panel ya
+  // carga (empresas, usuarios, servicios del Polo y lotes). No piden nada nuevo
+  // al backend.
+  pct(parte: number, total: number): number {
+    return total ? Math.round((parte / total) * 100) : 0;
+  }
+  get pctEmpresasActivas(): number {
+    return this.pct(this.empresasActivas, this.totalEmpresas);
+  }
+  get pctUsuariosActivos(): number {
+    return this.pct(this.usuariosActivos, this.totalUsuarios);
+  }
+  get serviciosConLote(): number {
+    const ids = new Set(this.lotes.map((l) => l.id_servicio_polo));
+    return this.serviciosPolo.filter((s) => ids.has(s.id_servicio_polo)).length;
+  }
+  get pctServiciosConLote(): number {
+    return this.pct(this.serviciosConLote, this.totalServiciosPolo);
+  }
+  get lotesConUbicacion(): number {
+    return this.lotes.filter((l) => l.latitud != null && l.longitud != null).length;
+  }
+  get pctLotesConUbicacion(): number {
+    return this.pct(this.lotesConUbicacion, this.totalLotes);
+  }
+  // Graficos de anillo del dashboard
+  donutBg(segs: ChartSegment[]): string {
+    return donutBackground(segs);
+  }
+  ringBg(pct: number, color = '#ffffff'): string {
+    return ringBackground(pct, color);
+  }
+  get serviciosPorTipoChart(): ChartSegment[] {
+    return toSegments(this.serviciosPorTipo);
+  }
+  get usuariosPorRolChart(): ChartSegment[] {
+    return toSegments(this.usuariosPorRol);
+  }
+  get lotesUbicacionChart(): ChartSegment[] {
+    return toSegments([
+      { label: 'Con ubicación', count: this.lotesConUbicacion },
+      { label: 'Sin ubicación', count: this.totalLotes - this.lotesConUbicacion },
+    ]);
+  }
+  private readonly tiposServicioPoloUi: { id: number; label: string; icon: string }[] = [
+    { id: 1, label: 'Coworking', icon: 'groups' },
+    { id: 2, label: 'Nave', icon: 'warehouse' },
+    { id: 3, label: 'Oficina', icon: 'business_center' },
+    { id: 4, label: 'Local comercial', icon: 'storefront' },
+    { id: 5, label: 'Container', icon: 'inventory_2' },
+    { id: 6, label: 'Lavadero', icon: 'local_laundry_service' },
+  ];
+  get serviciosPorTipo(): { label: string; icon: string; count: number; pct: number }[] {
+    const total = this.totalServiciosPolo;
+    return this.tiposServicioPoloUi
+      .map((t) => {
+        const count = this.serviciosPolo.filter((s) => s.id_tipo_servicio_polo === t.id).length;
+        return { label: t.label, icon: t.icon, count, pct: this.pct(count, total) };
+      })
+      .filter((t) => t.count > 0)
+      .sort((a, b) => b.count - a.count);
+  }
+  get usuariosPorRol(): { label: string; count: number; pct: number; cls: string }[] {
+    const grupos = new Map<string, { label: string; count: number; cls: string }>();
+    for (const u of this.usuarios) {
+      const label = this.getUsuarioRoleLabel(u);
+      const g = grupos.get(label) ?? { label, count: 0, cls: this.getUsuarioRoleBadgeClass(u) };
+      g.count++;
+      grupos.set(label, g);
+    }
+    return [...grupos.values()]
+      .map((g) => ({ ...g, pct: this.pct(g.count, this.totalUsuarios) }))
+      .sort((a, b) => b.count - a.count);
   }
 
   getEmpresaNombre(cuil: number | null | undefined): string {
@@ -504,7 +588,7 @@ export class AdminPoloComponent implements OnInit {
     }
 
     if (this.isModalBusy(formName as any)) {
-      alert('Hay una operación en curso. Por favor esperá a que finalice.');
+      alert('Hay una operación en curso. Por favor, espere a que finalice.');
       return;
     }
 
@@ -513,9 +597,9 @@ export class AdminPoloComponent implements OnInit {
 
     if (hasChanges) {
       const shouldDiscard = confirm(
-        '¿Deseas descartar los cambios?\n\n' +
+        '¿Desea descartar los cambios?\n\n' +
           'Se perderán todos los cambios no guardados.\n\n' +
-          'Presiona "Aceptar" para descartar o "Cancelar" para continuar editando.'
+          'Presione "Aceptar" para descartar o "Cancelar" para continuar editando.'
       );
 
       if (!shouldDiscard) {
@@ -699,7 +783,7 @@ export class AdminPoloComponent implements OnInit {
     }
     const generalError = errorMessages.find((e) => e.field === 'general');
     this.showMessage(
-      generalError?.message || `Error en ${operation}. Intentá de nuevo.`,
+      generalError?.message || `Error en ${operation}. Intente de nuevo.`,
       'error'
     );
   }
@@ -2025,7 +2109,7 @@ export class AdminPoloComponent implements OnInit {
 
   cancelAddUsuarioEmpresaForm(): void {
     if (this.addUsuarioEmpresaSubmitting) {
-      alert('Hay una operación en curso. Por favor esperá a que finalice.');
+      alert('Hay una operación en curso. Por favor, espere a que finalice.');
       return;
     }
     this.showAddUsuarioEmpresaForm = false;
@@ -2107,7 +2191,7 @@ export class AdminPoloComponent implements OnInit {
         c?.markAsTouched?.()
       );
       this.showMessage(
-        'Revisá los campos obligatorios e intentá de nuevo.',
+        'Revise los campos obligatorios e intente de nuevo.',
         'error'
       ); // 👈 NUEVO
       return;
@@ -2128,7 +2212,7 @@ export class AdminPoloComponent implements OnInit {
     };
 
     const ok = window.confirm(
-      `¿Querés ${verbos[kind]} ahora?\n\n• Aceptar: agregar/guardar\n• Cancelar: seguir editando`
+      `¿Desea ${verbos[kind]} ahora?\n\n• Aceptar: confirmar\n• Cancelar: continuar editando`
     );
     if (!ok) return;
 
@@ -2176,7 +2260,7 @@ export class AdminPoloComponent implements OnInit {
   toggleEmpresaEstado(empresa: Empresa): void {
     const accion = empresa.estado ? 'desactivar' : 'activar';
     const confirmar = confirm(
-      `¿Seguro que deseas ${accion} la empresa "${empresa.nombre}"?`
+      `¿Está seguro de que desea ${accion} la empresa "${empresa.nombre}"?`
     );
 
     if (!confirmar) return;
