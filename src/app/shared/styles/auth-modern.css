@@ -105,6 +105,39 @@
 .right-panel > * { width: 100%; max-width: 440px; margin-left: auto !important; margin-right: auto !important; }
 .right-panel.center-content > * { max-width: 460px; }
 
+/* Escritorio: la pantalla queda fija (100vh) y solo el panel del
+   formulario scrollea; el panel de marca no se mueve. */
+@media (min-width: 901px) {
+  .main-container { overflow: hidden !important; }
+  .login-modal,
+  .login-modal.register-modal {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    /* La fila mide exactamente la pantalla: sin esto crece al alto del
+       formulario y recorta el pie del panel izquierdo (Córdoba, Argentina). */
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden !important;
+  }
+  .left-panel {
+    position: relative !important;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box; /* el padding no suma por encima del 100% */
+  }
+  .right-panel {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    /* Centrado vertical que no recorta el contenido cuando es más alto
+       que la pantalla (con justify-content:center se cortaria arriba). */
+    justify-content: flex-start !important;
+  }
+  .right-panel > :first-child { margin-top: auto !important; }
+  .right-panel > :last-child { margin-bottom: auto !important; }
+}
+
 .login-header { text-align: left !important; margin-bottom: 1.75rem !important; }
 .login-icon {
   width: auto !important;
