@@ -565,7 +565,11 @@ export class EmpresaMeComponent implements OnInit {
     return this.empresaData?.contactos?.length ?? 0;
   }
   get estaActiva(): boolean {
-    return !!this.empresaData?.estado;
+    if (!this.empresaData) return false;
+    // Versiones viejas del backend no devuelven `estado` en GET /me. Si falta,
+    // la empresa esta activa: el backend rechaza login y cada request de una
+    // empresa desactivada, asi que si llego a ver el panel, esta activa.
+    return this.empresaData.estado ?? true;
   }
   get desdeIngreso(): string {
     return this.formatMonthYear(this.empresaData?.fecha_ingreso);
