@@ -616,10 +616,9 @@ export class EmpresaMeComponent implements OnInit {
       { label: 'Descripción de la empresa', ok: lleno(e?.observaciones) },
       { label: 'Productos / servicios', ok: lleno(c?.productos_servicios) },
       { label: 'Público objetivo', ok: lleno(c?.publico_objetivo) },
-      { label: 'Horario de atención comercial', ok: lleno(c?.horario_atencion_comercial) },
+      { label: 'Horario de atención comercial', ok: lleno(c?.horario_atencion_comercial) || lleno(e?.horario_trabajo) },
       { label: 'Rango de precios', ok: lleno(c?.rango_precios) },
       { label: 'Modalidad de venta', ok: lleno(c?.modalidad_venta) },
-      { label: 'Al menos un contacto', ok: (e?.contactos?.length ?? 0) > 0 },
     ];
   }
   get pctPerfilCompleto(): number {
