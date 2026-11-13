@@ -27,7 +27,6 @@ import {
   TipoServicioPolo,
   InfoComercial,
   InfoComercialUpdate,
-  ComercialChatResponse,
 } from './admin-empresa.service';
 import { LogoutButtonComponent } from '../shared/logout-button/logout-button.component';
 import { PasswordChangeModalComponent } from '../shared/password-change-modal/password-change-modal.component';
@@ -217,21 +216,34 @@ export class EmpresaMeComponent implements OnInit {
   // Expanded rows
   expandedRows = new Set<string>();
 
-  // Informacion comercial (bot de carga guiado en la pestana de perfil)
+  // Informacion comercial (formulario en la pestana de perfil)
   comercialInfo: InfoComercial | null = null;
   comercialLoadingInfo = false;
-  comercialChatStarted = false;
-  comercialChatLoading = false;
-  comercialDone = false;
-  comercialCampoActual: string | null = null;
-  comercialProgresoActual = 0;
-  comercialProgresoTotal = 0;
-  comercialInput = '';
-  comercialMessages: { from: 'bot' | 'user'; text: string }[] = [];
-
+  comercialSaving = false;
   showComercialEditForm = false;
-  comercialEditForm: InfoComercialUpdate = {};
-  readonly comercialPublicoOpciones = ['B2B', 'B2C', 'Ambos'];
+  comercialForm: InfoComercialUpdate = {};
+  // Valores internos B2B/B2C se mantienen por compatibilidad con el backend;
+  // la interfaz muestra opciones comprensibles.
+  readonly comercialPublicoOpciones = [
+    {
+      value: 'B2B',
+      label: 'Empresas',
+      descripcion: 'Vendo o presto servicios a otras empresas y comercios.',
+      icon: 'apartment',
+    },
+    {
+      value: 'B2C',
+      label: 'Público general',
+      descripcion: 'Atiendo a personas particulares y consumidores finales.',
+      icon: 'groups',
+    },
+    {
+      value: 'Ambos',
+      label: 'Ambos',
+      descripcion: 'Trabajo tanto con empresas como con público general.',
+      icon: 'diversity_3',
+    },
+  ];
   readonly comercialRangoPreciosOpciones = ['Económico', 'Medio', 'Premium'];
   readonly comercialModalidadVentaOpciones = ['Presencial', 'Online', 'Ambas'];
 
@@ -1246,7 +1258,7 @@ export class EmpresaMeComponent implements OnInit {
         nombre: 'El nombre es requerido (minimo 2 caracteres)',
         id_tipo_contacto: 'El tipo de contacto es requerido',
         telefono: 'El telefono debe tener formato valido',
-        direccion: 'La direccion es requerida para contactos comerciales',
+        direccion: 'La direccion no tiene un formato valido',
         id_servicio_polo: 'El ID del servicio polo es requerido',
         'datos.pagina_web':
           'La pagina web debe tener formato valido (https://)',
@@ -1310,6 +1322,11 @@ export class EmpresaMeComponent implements OnInit {
 
         this.expandedVehiculos.clear();
 
+        // Si la ficha comercial no tiene horario, sugerir el horario de trabajo.
+        if (!this.comercialForm.horario_atencion_comercial) {
+          this.comercialForm.horario_atencion_comercial = data.horario_trabajo;
+        }
+
         this.buildActividadRecienteFromData();
         this.loading = false;
         this.checkUpdateReminder(data.cuil);
@@ -1321,109 +1338,116 @@ export class EmpresaMeComponent implements OnInit {
     });
   }
 
-  // ===== Informacion comercial (bot de carga guiado) =====
+  // ===== Informacion comercial (formulario) =====
   loadComercialInfo(): void {
     this.comercialLoadingInfo = true;
     this.adminEmpresaService.getComercialInfo().subscribe({
       next: (data) => {
         this.comercialInfo = data;
-        this.comercialDone = data.completado;
         this.comercialLoadingInfo = false;
+        this.resetComercialForm();
       },
       error: () => {
         // 404 = todavia no se cargo nada: es un estado valido, no un error.
         this.comercialInfo = null;
-        this.comercialDone = false;
         this.comercialLoadingInfo = false;
+        this.resetComercialForm();
       },
     });
   }
 
-  startComercialChat(): void {
-    if (this.comercialChatStarted) return;
-    this.comercialChatStarted = true;
-    this.comercialMessages = [];
-    this.runComercialChatStep(undefined);
+  /** Servicios que la empresa ya cargo (pestana Servicios): solo lectura. */
+  get serviciosCargadosResumen(): string[] {
+    return (this.empresaData?.servicios ?? []).map((s) =>
+      this.getTipoServicioName(s.id_tipo_servicio)
+    );
   }
 
-  sendComercialAnswer(): void {
-    const text = this.comercialInput.trim();
-    if (!text || this.comercialChatLoading) return;
-    this.comercialMessages.push({ from: 'user', text });
-    this.comercialInput = '';
-    this.runComercialChatStep(text);
+  /** Horario de trabajo ya registrado en la empresa (se usa como sugerencia). */
+  get horarioTrabajoEmpresa(): string {
+    return this.empresaData?.horario_trabajo || '';
   }
 
-  private runComercialChatStep(message?: string): void {
-    this.comercialChatLoading = true;
-    this.adminEmpresaService.sendComercialChatMessage(message).subscribe({
-      next: (res: ComercialChatResponse) => {
-        this.comercialMessages.push({ from: 'bot', text: res.reply });
-        this.comercialDone = res.done;
-        this.comercialCampoActual = res.campo_actual ?? null;
-        this.comercialProgresoActual = res.progreso_actual;
-        this.comercialProgresoTotal = res.progreso_total;
-        this.comercialChatLoading = false;
-        if (res.done) {
-          this.pushActivity('ok', 'Informacion comercial completada');
-          // al terminar, el chat se reemplaza por la ficha guardada: sin este
-          // aviso el "¡Listo!" del asistente no llegaba a verse
-          this.showMessage(res.reply || 'Informacion comercial completada', 'success');
-          this.loadComercialInfo();
-        }
-      },
-      error: (error) => {
-        this.handleError(error, 'comercial', 'procesar su respuesta');
-        this.comercialChatLoading = false;
-      },
-    });
+  /** Carga el formulario con lo ya guardado, sin pedir de nuevo lo existente. */
+  resetComercialForm(): void {
+    const info = this.comercialInfo;
+    this.comercialForm = {
+      productos_servicios: info?.productos_servicios || '',
+      publico_objetivo: info?.publico_objetivo || '',
+      atiende_publico: info?.atiende_publico ?? null,
+      // Si no hay horario comercial, se parte del horario de trabajo.
+      horario_atencion_comercial:
+        info?.horario_atencion_comercial || this.horarioTrabajoEmpresa,
+      rango_precios: info?.rango_precios || '',
+      modalidad_venta: info?.modalidad_venta || '',
+      marcas_representadas: info?.marcas_representadas || '',
+      certificaciones: info?.certificaciones || '',
+      observaciones_comerciales: info?.observaciones_comerciales || '',
+    };
+    this.clearFormErrors('comercial');
   }
 
   openComercialEditForm(): void {
-    if (!this.comercialInfo) return;
-    this.clearFormErrors('comercial');
-    this.comercialEditForm = {
-      productos_servicios: this.comercialInfo.productos_servicios || '',
-      publico_objetivo: this.comercialInfo.publico_objetivo || '',
-      atiende_publico: this.comercialInfo.atiende_publico ?? null,
-      horario_atencion_comercial:
-        this.comercialInfo.horario_atencion_comercial || '',
-      rango_precios: this.comercialInfo.rango_precios || '',
-      modalidad_venta: this.comercialInfo.modalidad_venta || '',
-      marcas_representadas: this.comercialInfo.marcas_representadas || '',
-      certificaciones: this.comercialInfo.certificaciones || '',
-      observaciones_comerciales:
-        this.comercialInfo.observaciones_comerciales || '',
-    };
+    this.resetComercialForm();
     this.showComercialEditForm = true;
   }
 
-  cancelComercialEditForm(): void {
+  cancelComercialForm(): void {
+    if (this.comercialSaving) return;
     this.showComercialEditForm = false;
-    this.clearFormErrors('comercial');
+    this.resetComercialForm();
   }
 
-  submitComercialEdit(): void {
-    this.comercialChatLoading = true;
-    this.adminEmpresaService
-      .updateComercialInfo(this.comercialEditForm)
-      .subscribe({
-        next: (data) => {
-          this.comercialInfo = data;
-          this.comercialDone = data.completado;
-          this.showComercialEditForm = false;
-          this.comercialChatLoading = false;
-          this.showMessage(
-            'Informacion comercial actualizada exitosamente',
-            'success'
-          );
-          this.pushActivity('ok', 'Informacion comercial actualizada');
-        },
-        error: (error) => {
-          this.handleError(error, 'comercial', 'actualizar informacion comercial');
-          this.comercialChatLoading = false;
-        },
-      });
+  getPublicoLabel(value: string | null | undefined): string {
+    return (
+      this.comercialPublicoOpciones.find((o) => o.value === value)?.label ??
+      '-'
+    );
+  }
+
+  private blankToNull(v: string | null | undefined): string | null {
+    const t = (v ?? '').trim();
+    return t === '' ? null : t;
+  }
+
+  submitComercialForm(): void {
+    if (this.comercialSaving) return;
+    this.clearFormErrors('comercial');
+    const f = this.comercialForm;
+    // Todos los campos son opcionales: el vacio se guarda como null.
+    const payload: InfoComercialUpdate = {
+      productos_servicios: this.blankToNull(f.productos_servicios),
+      publico_objetivo: this.blankToNull(f.publico_objetivo),
+      atiende_publico: f.atiende_publico ?? null,
+      horario_atencion_comercial: this.blankToNull(
+        f.horario_atencion_comercial
+      ),
+      rango_precios: this.blankToNull(f.rango_precios),
+      modalidad_venta: this.blankToNull(f.modalidad_venta),
+      marcas_representadas: this.blankToNull(f.marcas_representadas),
+      certificaciones: this.blankToNull(f.certificaciones),
+      observaciones_comerciales: this.blankToNull(
+        f.observaciones_comerciales
+      ),
+    };
+    this.comercialSaving = true;
+    this.adminEmpresaService.updateComercialInfo(payload).subscribe({
+      next: (data) => {
+        this.comercialInfo = data;
+        this.comercialSaving = false;
+        this.showComercialEditForm = false;
+        this.resetComercialForm();
+        this.showMessage(
+          'Informacion comercial guardada exitosamente',
+          'success'
+        );
+        this.pushActivity('ok', 'Informacion comercial actualizada');
+      },
+      error: (error) => {
+        this.handleError(error, 'comercial', 'guardar informacion comercial');
+        this.comercialSaving = false;
+      },
+    });
   }
 
   // ===== Recordatorio de actualización de datos (cada 6 meses) =====
@@ -1912,30 +1936,14 @@ export class EmpresaMeComponent implements OnInit {
     this.loading = true;
     this.clearFormErrors('contacto');
 
+    // La direccion es opcional: se sincroniza con datos solo si tiene valor.
+    const dir = (this.contactoForm.direccion ?? '').trim();
+    this.contactoForm.direccion = dir;
     if (this.esTipoComercial()) {
-      if (this.contactoForm.direccion) {
-        this.contactoForm.datos.direccion = this.contactoForm.direccion;
-      } else if (this.contactoForm.datos.direccion) {
-        this.contactoForm.direccion = this.contactoForm.datos.direccion;
-      }
-
-      if (
-        !this.contactoForm.datos.direccion ||
-        this.contactoForm.datos.direccion.trim() === ''
-      ) {
-        this.formErrors['contacto'] = [
-          {
-            field: 'direccion',
-            message: 'La direccion es requerida para contactos comerciales',
-            type: 'required',
-          },
-        ];
-        this.showMessage(
-          'La direccion es requerida para contactos comerciales',
-          'error'
-        );
-        this.loading = false;
-        return;
+      if (dir) {
+        this.contactoForm.datos.direccion = dir;
+      } else {
+        delete this.contactoForm.datos.direccion;
       }
     }
 
@@ -2321,7 +2329,7 @@ export class EmpresaMeComponent implements OnInit {
         this.onSubmitContacto();
         break;
       case 'comercial':
-        this.submitComercialEdit();
+        this.submitComercialForm();
         break;
     }
   }
