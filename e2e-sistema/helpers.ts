@@ -181,3 +181,12 @@ export async function fillLogin(page: Page, username: string, password: string) 
 }
 
 export const loginError = (page: Page) => page.locator('.error-message');
+
+/** Elige una opción de un grupo de radios (botones segmentados o tarjetas) por su nombre y texto. */
+export async function elegir(page: Page, name: string, texto: string) {
+  const labels = page.locator(`label:has(input[name="${name}"])`);
+  const re = new RegExp(`^\s*${texto}\s*$`, 'i');
+  const tarjeta = labels.filter({ has: page.locator('.choice-title').filter({ hasText: re }) });
+  const opcion = labels.filter({ has: page.locator('span').filter({ hasText: re }) });
+  await ((await tarjeta.count()) ? tarjeta : opcion).first().click();
+}

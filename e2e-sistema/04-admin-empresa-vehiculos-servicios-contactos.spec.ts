@@ -4,7 +4,7 @@
  * aislamiento entre empresas (una empresa no puede tocar datos de otra).
  */
 import { test, expect, Page, APIRequestContext } from '@playwright/test';
-import { API, CUIL, storageFor, apiLogin, nextDialog, refreshSessionsIfOld } from './helpers';
+import { API, CUIL, storageFor, apiLogin, nextDialog, refreshSessionsIfOld, elegir } from './helpers';
 
 // sesiones guardadas vigentes (el token dura 30 min y la suite completa tarda más)
 test.beforeAll(async ({ request }) => refreshSessionsIfOld(request));
@@ -43,62 +43,62 @@ test.beforeAll(async ({ request }) => {
 test.describe('4.1 Vehículos', () => {
   const buscar = (page: Page) => page.getByPlaceholder('Buscar por tipo, patente o datos...');
   async function nuevo(page: Page) {
-    await abrir(page, 'Vehiculos');
-    await page.getByRole('button', { name: /Nuevo vehiculo/ }).first().click();
-    await expect(page.getByRole('heading', { name: 'Nuevo vehiculo' })).toBeVisible();
+    await abrir(page, 'Vehículos');
+    await page.getByRole('button', { name: /Nuevo vehículo/ }).first().click();
+    await expect(page.getByRole('heading', { name: 'Nuevo vehículo' })).toBeVisible();
   }
 
   test('viene con "corporativos" elegido; sin completar no se guarda y marca los obligatorios', async ({ page }) => {
     await nuevo(page);
-    await expect(page.locator('#v_tipo option:checked')).toHaveText('corporativos');
-    await enviar(page, /^Agregar$/);
+    await expect(page.locator('label:has(input[name="v_tipo"]:checked) .choice-title')).toHaveText('corporativos');
+    await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
     await expect(modal(page).getByText('Campo obligatorio.')).toHaveCount(3); // horarios, frecuencia, patente
-    await expect(modal(page).getByText('Ingresa una cantidad ≥ 1.')).toBeVisible();
-    await expect(modal(page).getByText('Selecciona la carga.')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Nuevo vehiculo' })).toBeVisible();
+    await expect(modal(page).getByText('Ingrese una cantidad mayor o igual a 1.')).toBeVisible();
+    await expect(modal(page).getByText('Seleccione la carga.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Nuevo vehículo' })).toBeVisible();
   });
 
   // Cada tipo de la tabla tipo_vehiculo (1 corporativos, 2 terceros, 3 personales)
   // tiene que mostrar SUS campos: personales lleva patente, terceros lleva carga.
   test('cada tipo muestra sus campos', async ({ page }) => {
     await nuevo(page);
-    await page.locator('#v_tipo').selectOption({ label: 'corporativos' });
-    for (const id of ['#v_cant_corp', '#v_pat_corp', '#v_carga_corp']) await expect(page.locator(id)).toBeVisible();
-    await page.locator('#v_tipo').selectOption({ label: 'personales' });
+    await elegir(page, 'v_tipo', 'corporativos');
+    for (const id of ['#v_cant_corp', '#v_pat_corp', '[aria-labelledby="v_carga_corp_label"]']) await expect(page.locator(id)).toBeVisible();
+    await elegir(page, 'v_tipo', 'personales');
     for (const id of ['#v_cant_per', '#v_pat_per']) await expect(page.locator(id)).toBeVisible();
-    await expect(page.locator('#v_carga_corp')).toHaveCount(0);
-    await page.locator('#v_tipo').selectOption({ label: 'terceros' });
-    for (const id of ['#v_cant_ter', '#v_carga_ter']) await expect(page.locator(id)).toBeVisible();
+    await expect(page.locator('[aria-labelledby="v_carga_corp_label"]')).toHaveCount(0);
+    await elegir(page, 'v_tipo', 'terceros');
+    for (const id of ['#v_cant_ter', '[aria-labelledby="v_carga_ter_label"]']) await expect(page.locator(id)).toBeVisible();
     await expect(page.locator('#v_pat_per')).toHaveCount(0);
   });
 
   test('la cantidad tiene que ser al menos 1', async ({ page }) => {
     await nuevo(page);
-    await page.locator('#v_tipo').selectOption({ label: 'terceros' });
+    await elegir(page, 'v_tipo', 'terceros');
     await page.locator('#v_cant_ter').fill('0');
     await page.locator('#v_cant_ter').blur();
-    await expect(modal(page).getByText('Ingresa una cantidad ≥ 1.')).toBeVisible();
+    await expect(modal(page).getByText('Ingrese una cantidad mayor o igual a 1.')).toBeVisible();
   });
 
   const altas: [string, (p: Page) => Promise<void>, Record<string, unknown>][] = [
     ['corporativos', async (p) => {
-      await p.locator('#v_cant_corp').fill('2'); await p.locator('#v_pat_corp').fill('AE123EE'); await p.locator('#v_carga_corp').selectOption({ label: 'Alta' });
+      await p.locator('#v_cant_corp').fill('2'); await p.locator('#v_pat_corp').fill('AE123EE'); await elegir(p, 'v_carga_corp', 'Alta');
     }, { cantidad: 2, patente: 'AE123EE', carga: 'alta' }],
     ['personales', async (p) => {
       await p.locator('#v_cant_per').fill('5'); await p.locator('#v_pat_per').fill('ABC123');
     }, { cantidad: 5, patente: 'ABC123' }],
     ['terceros', async (p) => {
-      await p.locator('#v_cant_ter').fill('3'); await p.locator('#v_carga_ter').selectOption({ label: 'Mediana' });
+      await p.locator('#v_cant_ter').fill('3'); await elegir(p, 'v_carga_ter', 'Mediana');
     }, { cantidad: 3, carga: 'mediana' }],
   ];
   for (const [tipo, completar, datos] of altas) {
     test(`alta de vehículos ${tipo}`, async ({ page, request }) => {
       await nuevo(page);
-      await page.locator('#v_tipo').selectOption({ label: tipo });
+      await elegir(page, 'v_tipo', tipo);
       await page.locator('#v_horarios').fill('07-19');
       await page.locator('#v_frecuencia').fill(`E2E ${tipo}`);
       await completar(page);
-      await enviar(page, /^Agregar$/);
+      await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
       await msg(page, 'Vehiculo creado exitosamente');
       await expect(row(page, `E2E ${tipo}`)).toContainText(tipo);
       await expect(row(page, `E2E ${tipo}`)).toContainText('07-19');
@@ -108,7 +108,7 @@ test.describe('4.1 Vehículos', () => {
   }
 
   test('el buscador filtra por tipo y por patente', async ({ page }) => {
-    await abrir(page, 'Vehiculos');
+    await abrir(page, 'Vehículos');
     await expect(row(page, 'E2E corporativos')).toBeVisible();
     await buscar(page).fill('terceros');
     await expect(row(page, 'E2E terceros')).toBeVisible();
@@ -120,21 +120,21 @@ test.describe('4.1 Vehículos', () => {
   });
 
   test('editar: viene precargado y guarda los cambios', async ({ page, request }) => {
-    await abrir(page, 'Vehiculos');
+    await abrir(page, 'Vehículos');
     await row(page, 'E2E corporativos').getByTitle('Editar').click();
-    await expect(page.getByRole('heading', { name: 'Editar vehiculo' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Editar vehículo' })).toBeVisible();
     await expect(page.locator('#v_pat_corp')).toHaveValue('AE123EE');
     await page.locator('#v_frecuencia').fill('E2E corporativos editado');
     await page.locator('#v_cant_corp').fill('4');
-    await enviar(page, /^Actualizar$/);
+    await enviar(page, /^Guardar cambios$/);
     await msg(page, 'Vehiculo actualizado exitosamente');
     const v = (await me(request)).vehiculos.find((x: any) => x.frecuencia === 'E2E corporativos editado');
     expect(v?.datos?.cantidad).toBe(4);
   });
 
   test('eliminar: cancelar no borra; confirmar sí', async ({ page, request }) => {
-    await abrir(page, 'Vehiculos');
-    let d = nextDialog(page, false, 'Estas seguro de que deseas eliminar este vehiculo?');
+    await abrir(page, 'Vehículos');
+    let d = nextDialog(page, false, '¿Está seguro de que desea eliminar este vehículo?');
     await row(page, 'E2E terceros').getByTitle('Eliminar').click();
     await d;
     await expect(row(page, 'E2E terceros')).toBeVisible();
@@ -148,7 +148,7 @@ test.describe('4.1 Vehículos', () => {
 
   test('la patente se valida (formato viejo o Mercosur) y se guarda normalizada', async ({ page, request }) => {
     await nuevo(page);
-    await page.locator('#v_tipo').selectOption({ label: 'personales' });
+    await elegir(page, 'v_tipo', 'personales');
     await page.locator('#v_horarios').fill('07-19');
     await page.locator('#v_frecuencia').fill('E2E patente validada');
     await page.locator('#v_cant_per').fill('2');
@@ -156,12 +156,12 @@ test.describe('4.1 Vehículos', () => {
     await page.locator('#v_pat_per').blur();
     await expect(modal(page).getByText('Formato de patente: ABC123 o AB123CD')).toBeVisible();
     // formulario inválido: no pide confirmación ni se guarda
-    await modal(page).getByRole('button', { name: /^Agregar$/ }).click();
-    await expect(page.getByRole('heading', { name: 'Nuevo vehiculo' })).toBeVisible();
+    await modal(page).getByRole('button', { name: /^Agregar (vehículo|servicio|contacto)$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Nuevo vehículo' })).toBeVisible();
 
     await page.locator('#v_pat_per').fill('ab-123-cd, abc 123');
     await expect(modal(page).getByText('Formato de patente: ABC123 o AB123CD')).toHaveCount(0);
-    await enviar(page, /^Agregar$/);
+    await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
     await msg(page, 'Vehiculo creado exitosamente');
     expect((await me(request)).vehiculos.find((x: any) => x.frecuencia === 'E2E patente validada').datos.patente).toBe('AB123CD, ABC123');
   });
@@ -177,8 +177,8 @@ test.describe('4.2 Servicios', () => {
 
   test('viene con "agua" elegido; sin completar no se guarda', async ({ page }) => {
     await nuevo(page);
-    await expect(page.locator('#s_tipo option:checked')).toHaveText('agua');
-    await enviar(page, /^Agregar$/);
+    await expect(page.locator('label:has(input[name="s_tipo"]:checked) .choice-title')).toHaveText('agua');
+    await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
     await expect(modal(page).getByText('Campo obligatorio.')).toHaveCount(2); // biofiltro, aguas grises
     await expect(page.getByRole('heading', { name: 'Nuevo servicio' })).toBeVisible();
   });
@@ -192,9 +192,9 @@ test.describe('4.2 Servicios', () => {
   for (const [tipo, campos, datos] of tipos) {
     test(`alta de servicio "${tipo}" con sus campos propios`, async ({ page, request }) => {
       await nuevo(page);
-      await page.locator('#s_tipo').selectOption({ label: tipo });
+      await elegir(page, 's_tipo', tipo);
       for (const [id, valor] of Object.entries(campos)) await page.locator(id).fill(valor);
-      await enviar(page, /^Agregar$/);
+      await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
       await msg(page, 'Servicio creado exitosamente');
       const s = (await me(request)).servicios.find((x: any) => JSON.stringify(x.datos).includes(Object.values(campos)[0]));
       expect(s?.datos).toMatchObject(datos);
@@ -203,10 +203,10 @@ test.describe('4.2 Servicios', () => {
 
   test('espacios verdes: la superficie tiene que ser al menos 1', async ({ page }) => {
     await nuevo(page);
-    await page.locator('#s_tipo').selectOption({ label: 'espacios verdes' });
+    await elegir(page, 's_tipo', 'espacios verdes');
     await page.locator('#s_m2').fill('0');
     await page.locator('#s_m2').blur();
-    await expect(modal(page).getByText('Ingresa un valor ≥ 1.')).toBeVisible();
+    await expect(modal(page).getByText('Ingrese un valor mayor o igual a 1.').first()).toBeVisible();
   });
 
   test('el buscador encuentra un servicio por sus datos', async ({ page }) => {
@@ -222,7 +222,7 @@ test.describe('4.2 Servicios', () => {
     await expect(page.getByRole('heading', { name: 'Editar servicio' })).toBeVisible();
     await expect(page.locator('#s_proveedor')).toHaveValue('E2E Proveedor');
     await page.locator('#s_proveedor').fill('E2E Proveedor Nuevo');
-    await enviar(page, /^Actualizar$/);
+    await enviar(page, /^Guardar cambios$/);
     await msg(page, 'Servicio actualizado exitosamente');
     expect((await me(request)).servicios.some((x: any) => x.datos?.proveedor === 'E2E Proveedor Nuevo')).toBe(true);
   });
@@ -230,7 +230,7 @@ test.describe('4.2 Servicios', () => {
   test('eliminar un servicio', async ({ page, request }) => {
     await abrir(page, 'Servicios');
     await page.getByPlaceholder('Buscar por tipo o datos...').fill('E2E reciclables');
-    const d = nextDialog(page, true, 'Estas seguro de que deseas eliminar este servicio?');
+    const d = nextDialog(page, true, '¿Está seguro de que desea eliminar este servicio?');
     await rows(page).first().getByTitle('Eliminar').click();
     await d;
     await msg(page, 'Servicio eliminado exitosamente');
@@ -240,7 +240,7 @@ test.describe('4.2 Servicios', () => {
 
 // ─────────────────────────────── 4.3 Contactos ───────────────────────────────
 test.describe('4.3 Contactos', () => {
-  const buscar = (page: Page) => page.getByPlaceholder('Buscar por nombre, telefono o datos...');
+  const buscar = (page: Page) => page.getByPlaceholder('Buscar por nombre, teléfono o datos...');
   async function nuevo(page: Page) {
     await abrir(page, 'Contactos');
     await page.getByRole('button', { name: /Nuevo contacto/ }).first().click();
@@ -249,24 +249,24 @@ test.describe('4.3 Contactos', () => {
 
   test('viene con "comercial" elegido; sin completar no se guarda y marca los obligatorios', async ({ page }) => {
     await nuevo(page);
-    await enviar(page, /^Agregar$/);
-    await expect(page.locator('#c_tipo option:checked')).toHaveText('comercial');
-    for (const t of ['Ingresa un nombre.', 'Ingresa un telefono.', 'Ingresa una direccion.']) {
+    await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
+    await expect(page.locator('label:has(input[name="c_tipo"]:checked) span')).toHaveText('comercial');
+    for (const t of ['Ingrese un nombre.', 'Ingrese un teléfono.']) {
       await expect(modal(page).getByText(t)).toBeVisible();
     }
   });
 
   test('"comercial" muestra los datos comerciales y "empresarial" no', async ({ page }) => {
     await nuevo(page);
-    await page.locator('#c_tipo').selectOption({ label: 'comercial' });
+    await elegir(page, 'c_tipo', 'comercial');
     await expect(page.locator('#c_datos_comerciales')).toBeVisible();
-    await page.locator('#c_tipo').selectOption({ label: 'empresarial' });
+    await elegir(page, 'c_tipo', 'empresarial');
     await expect(page.locator('#c_datos_comerciales')).toHaveCount(0);
   });
 
   test('el correo comercial tiene que ser un email válido', async ({ page }) => {
     await nuevo(page);
-    await page.locator('#c_tipo').selectOption({ label: 'comercial' });
+    await elegir(page, 'c_tipo', 'comercial');
     await page.getByPlaceholder('mail@empresa.com').fill('no-es-email');
     await page.getByPlaceholder('mail@empresa.com').blur();
     await expect(page.getByPlaceholder('mail@empresa.com')).toHaveClass(/ng-invalid/);
@@ -274,14 +274,14 @@ test.describe('4.3 Contactos', () => {
 
   test('alta de un contacto comercial con web, correo y redes', async ({ page, request }) => {
     await nuevo(page);
-    await page.locator('#c_tipo').selectOption({ label: 'comercial' });
+    await elegir(page, 'c_tipo', 'comercial');
     await page.locator('#c_nombre').fill('E2E Ventas');
     await page.locator('#c_telefono').fill('+54 9 351 555-1111');
     await page.locator('#c_direccion').fill('Calle E2E 123, Córdoba');
     await modal(page).getByPlaceholder('https://empresa.com').fill('https://e2e.example.com');
     await modal(page).getByPlaceholder('mail@empresa.com').fill('ventas@example.com');
     await modal(page).getByPlaceholder('@empresa', { exact: true }).fill('@e2e_ventas');
-    await enviar(page, /^Agregar$/);
+    await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
     await msg(page, 'Contacto creado exitosamente');
     const r = row(page, 'E2E Ventas');
     await expect(r).toContainText('+54 9 351 555-1111');
@@ -292,11 +292,11 @@ test.describe('4.3 Contactos', () => {
 
   test('alta de un contacto empresarial', async ({ page, request }) => {
     await nuevo(page);
-    await page.locator('#c_tipo').selectOption({ label: 'empresarial' });
+    await elegir(page, 'c_tipo', 'empresarial');
     await page.locator('#c_nombre').fill('E2E Gerencia');
     await page.locator('#c_telefono').fill('351-555-2222');
     await page.locator('#c_direccion').fill('Oficina E2E');
-    await enviar(page, /^Agregar$/);
+    await enviar(page, /^Agregar (vehículo|servicio|contacto)$/);
     await msg(page, 'Contacto creado exitosamente');
     expect((await me(request)).contactos.some((x: any) => x.nombre === 'E2E Gerencia')).toBe(true);
   });
@@ -316,14 +316,14 @@ test.describe('4.3 Contactos', () => {
     await expect(page.getByRole('heading', { name: 'Editar contacto' })).toBeVisible();
     await expect(page.locator('#c_nombre')).toHaveValue('E2E Gerencia');
     await page.locator('#c_nombre').fill('E2E Gerencia General');
-    await enviar(page, /^Actualizar$/);
+    await enviar(page, /^Guardar cambios$/);
     await msg(page, 'Contacto actualizado exitosamente');
     expect((await me(request)).contactos.some((x: any) => x.nombre === 'E2E Gerencia General')).toBe(true);
   });
 
   test('eliminar un contacto', async ({ page, request }) => {
     await abrir(page, 'Contactos');
-    const d = nextDialog(page, true, 'Estas seguro de que deseas eliminar este contacto?');
+    const d = nextDialog(page, true, '¿Está seguro de que desea eliminar este contacto?');
     await row(page, 'E2E Gerencia General').getByTitle('Eliminar').click();
     await d;
     await msg(page, 'Contacto eliminado exitosamente');
@@ -338,7 +338,7 @@ test.describe('4.4 Dashboard y aislamiento entre empresas', () => {
     await page.goto('/me');
     await expect(page.getByText('E2E_Empresa_Prueba').first()).toBeVisible({ timeout: 30_000 });
     const kpi = (t: string) => page.locator('.kpi').filter({ hasText: t }).locator('.kpi-number');
-    await expect(kpi('Vehiculos activos')).toHaveText(String(datos.vehiculos.length));
+    await expect(kpi('Vehículos registrados')).toHaveText(String(datos.vehiculos.length));
     await expect(kpi('Servicios')).toHaveText(String(datos.servicios.length));
     await expect(kpi('Contactos')).toHaveText(String(datos.contactos.length));
   });

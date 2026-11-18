@@ -97,9 +97,9 @@ test.describe('2.1 Dashboard', () => {
     const usuarios = await (await request.get(`${API}/usuarios`, auth())).json();
     await openAdmin(page, 'Dashboard');
     const kpi = (titulo: string) => page.locator('.kpi').filter({ hasText: titulo });
-    await expect(kpi('Empresas activas').locator('.kpi-sub')).toHaveText(`de ${empresas.length} registradas`);
+    await expect(kpi('Empresas activas').locator('.kpi-sub')).toHaveText(new RegExp(`de ${empresas.length} registradas$`));
     await expect(kpi('Empresas activas').locator('.kpi-number')).toHaveText(String(empresas.filter((e: any) => e.estado).length));
-    await expect(kpi('Usuarios habilitados').locator('.kpi-sub')).toHaveText(`de ${usuarios.length} usuarios`);
+    await expect(kpi('Usuarios habilitados').locator('.kpi-sub')).toHaveText(new RegExp(`de ${usuarios.length} usuarios$`));
     await expect(kpi('Usuarios habilitados').locator('.kpi-number')).toHaveText(String(usuarios.filter((u: any) => u.estado).length));
   });
 
@@ -112,7 +112,7 @@ test.describe('2.1 Dashboard', () => {
   test('"Solicitudes pendientes" (acceso rápido) lleva a la pestaña', async ({ page }) => {
     await openAdmin(page, 'Dashboard');
     await page.getByRole('button', { name: /Solicitudes pendientes/ }).click();
-    await expect(page.getByRole('heading', { name: 'Solicitudes de registro pendientes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Solicitudes de registro' })).toBeVisible();
   });
 });
 
@@ -191,7 +191,7 @@ test.describe('2.2 Solicitudes de registro', () => {
     await expect(row.locator('.badge')).toHaveText('Inactiva');
     await expect(row.getByTitle('Aprobar solicitud (pendiente)')).toBeEnabled();
     await expect(row.getByTitle('Activar empresa', { exact: true })).toHaveCount(0);
-    for (const t of ['Editar', 'Servicio del Polo para empresa', 'Agregar usuario a la empresa']) {
+    for (const t of ['Editar', 'Crear servicio del Polo para esta empresa', 'Agregar usuario a la empresa']) {
       await expect(row.getByTitle(t)).toBeDisabled();
     }
   });
@@ -234,9 +234,9 @@ test.describe('2.3 Empresas', () => {
     await openAdmin(page, 'Empresas');
     await buscarEmpresa(page).fill(E.nombre);
     const row = empresaRow(page, E.nombre);
-    await row.getByRole('button', { name: 'Ver mas' }).click();
+    await row.getByRole('button', { name: 'Ver detalle' }).click();
     await expect(row.locator('.horario-full')).toHaveText('Lun-Vie 8-17');
-    await row.getByRole('button', { name: 'Ocultar' }).click();
+    await row.getByRole('button', { name: 'Ocultar detalle' }).click();
     await expect(row.locator('.horario-full')).toHaveCount(0);
   });
 
@@ -294,12 +294,12 @@ test.describe('2.3 Empresas', () => {
     await openAdmin(page, 'Empresas');
     await buscarEmpresa(page).fill(E.nombre);
     const row = empresaRow(page, E.nombre);
-    const d = nextDialog(page, true, `¿Seguro que deseas desactivar la empresa "${E.nombre}_Editada"?`);
+    const d = nextDialog(page, true, `¿Está seguro de que desea desactivar la empresa "${E.nombre}_Editada"?`);
     await row.getByTitle('Desactivar empresa', { exact: true }).click();
     await d;
     await expect(alertMsg(page)).toHaveText('Empresa desactivada correctamente', { timeout: 30_000 });
     await expect(row.locator('.badge')).toHaveText('Inactiva');
-    for (const t of ['Editar', 'Servicio del Polo para empresa', 'Agregar usuario a la empresa']) {
+    for (const t of ['Editar', 'Crear servicio del Polo para esta empresa', 'Agregar usuario a la empresa']) {
       await expect(row.getByTitle(t)).toBeDisabled();
     }
     expect((await getEmpresa(request, E.cuil)).estado).toBe(false);
@@ -311,7 +311,7 @@ test.describe('2.3 Empresas', () => {
     await openAdmin(page, 'Empresas');
     await buscarEmpresa(page).fill(E.nombre);
     const row = empresaRow(page, E.nombre);
-    const d = nextDialog(page, true, `¿Seguro que deseas activar la empresa "${E.nombre}_Editada"?`);
+    const d = nextDialog(page, true, `¿Está seguro de que desea activar la empresa "${E.nombre}_Editada"?`);
     await row.getByTitle('Activar empresa', { exact: true }).click();
     await d;
     await expect(alertMsg(page)).toHaveText('Empresa activada correctamente', { timeout: 30_000 });
@@ -324,7 +324,7 @@ test.describe('2.3 Empresas', () => {
     await openAdmin(page, 'Empresas');
     await buscarEmpresa(page).fill(E.nombre);
     await empresaRow(page, E.nombre).getByTitle('Editar').click();
-    await page.locator('#e_estado').selectOption({ label: 'Inactiva' });
+    await page.locator('label.segmented-option').filter({ hasText: 'Inactiva' }).click();
     const d = nextDialog(page, true);
     await page.locator('form:visible button[type=submit]').click();
     await d;
@@ -343,8 +343,8 @@ test.describe('2.3 Empresas', () => {
     await page.locator('#au_nombre').fill('ab');
     await page.locator('#au_email').fill('no-es-email');
     await page.locator('form:has(#au_nombre) button[type=submit]').click();
-    await expect(page.getByText('Ingresá entre 3 y 50 caracteres.')).toBeVisible();
-    await expect(page.getByText('Ingresá un email válido.')).toBeVisible();
+    await expect(page.getByText('Ingrese entre 3 y 50 caracteres.')).toBeVisible();
+    await expect(page.getByText('Ingrese un email válido.')).toBeVisible();
   });
 
   test('agregar usuario: rechaza un nombre de usuario que ya existe', async ({ page }) => {
@@ -381,7 +381,7 @@ test.describe('2.3 Empresas', () => {
   test('"Servicio del Polo para empresa" abre el alta con el CUIL de la empresa', async ({ page }) => {
     await openAdmin(page, 'Empresas');
     await buscarEmpresa(page).fill(E.nombre);
-    await empresaRow(page, E.nombre).getByTitle('Servicio del Polo para empresa').click();
+    await empresaRow(page, E.nombre).getByTitle('Crear servicio del Polo para esta empresa').click();
     await expect(page.getByRole('heading', { name: 'Nuevo servicio del Polo' })).toBeVisible();
     await expect(page.locator('#sp_cuil')).toHaveValue(String(E.cuil));
     await page.locator('form:visible').getByRole('button', { name: 'Cancelar' }).click();
@@ -390,6 +390,6 @@ test.describe('2.3 Empresas', () => {
   test('"Ver solicitudes de registro" lleva a la pestaña de solicitudes', async ({ page }) => {
     await openAdmin(page, 'Empresas');
     await page.getByRole('button', { name: /Ver solicitudes de registro/ }).click();
-    await expect(page.getByRole('heading', { name: 'Solicitudes de registro pendientes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Solicitudes de registro' })).toBeVisible();
   });
 });

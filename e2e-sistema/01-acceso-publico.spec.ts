@@ -57,7 +57,7 @@ test.describe('1.1 Login: formulario', () => {
 
   test('los links llevan a registro y a Google', async ({ page }) => {
     await page.goto('/login');
-    await page.getByRole('link', { name: 'Registrá tu empresa' }).click();
+    await page.getByRole('link', { name: 'Registre su empresa' }).click();
     await expect(page).toHaveURL(/\/register$/);
     await page.getByRole('link', { name: 'Iniciar sesión' }).click();
     await expect(page).toHaveURL(/\/login$/);
@@ -88,7 +88,7 @@ test.describe('1.2 Login: credenciales reales', () => {
   test('contraseña incorrecta: mensaje con intentos restantes', async ({ page }) => {
     const r = await uiLogin(page, USER.publico, 'Incorrecta123');
     expect(r.status()).toBe(401);
-    await expect(loginError(page)).toHaveText('Usuario o contraseña incorrectos. Te quedan 4 intentos.');
+    await expect(loginError(page)).toHaveText('Usuario o contraseña incorrectos. Le quedan 4 intentos.');
     await expect(page).toHaveURL(/\/login$/);
     expect(await page.evaluate(() => localStorage.getItem('sessionToken'))).toBeNull();
   });
@@ -114,10 +114,10 @@ test.describe('1.3 Login: bloqueo y errores de red (backend simulado)', () => {
     await page.goto('/login');
     for (let quedan = 4; quedan >= 1; quedan--) {
       await fillLogin(page, 'alguien', 'Incorrecta123');
-      await expect(loginError(page)).toHaveText(`Usuario o contraseña incorrectos. Te quedan ${quedan} intentos.`);
+      await expect(loginError(page)).toHaveText(`Usuario o contraseña incorrectos. Le quedan ${quedan} intentos.`);
     }
     await fillLogin(page, 'alguien', 'Incorrecta123');
-    await expect(loginError(page)).toContainText('Demasiados intentos fallidos. Intenta en');
+    await expect(loginError(page)).toContainText('Demasiados intentos fallidos. Intente nuevamente en');
 
     // bloqueado: un nuevo intento no llega al backend
     let llamadas = 0;
@@ -127,7 +127,7 @@ test.describe('1.3 Login: bloqueo y errores de red (backend simulado)', () => {
     expect(llamadas).toBe(0);
 
     await page.reload();
-    await expect(loginError(page)).toContainText('Demasiados intentos fallidos. Intenta en');
+    await expect(loginError(page)).toContainText('Demasiados intentos fallidos. Intente nuevamente en');
     await page.evaluate(() => localStorage.removeItem('loginBlock')); // no dejar el bloqueo para otros tests
   });
 
@@ -156,28 +156,28 @@ test.describe('1.3 Login: bloqueo y errores de red (backend simulado)', () => {
     await page.goto('/login');
     await page.evaluate(() => localStorage.removeItem('loginBlock'));
     await fillLogin(page, cuenta, PWD);
-    await expect(loginError(page)).toHaveText('Demasiados intentos. Intenta más tarde.');
+    await expect(loginError(page)).toHaveText('Demasiados intentos. Intente más tarde.');
   });
 
-  test('429 del backend: "Demasiados intentos. Intenta más tarde."', async ({ page }) => {
+  test('429 del backend: "Demasiados intentos. Intente más tarde."', async ({ page }) => {
     await mockLogin(page, 429, { detail: 'Demasiadas solicitudes.' });
     await page.goto('/login');
     await fillLogin(page, 'alguien', 'Incorrecta123');
-    await expect(loginError(page)).toHaveText('Demasiados intentos. Intenta más tarde.');
+    await expect(loginError(page)).toHaveText('Demasiados intentos. Intente más tarde.');
   });
 
   test('backend caído: "Error de conexión..."', async ({ page }) => {
     await page.route(`${API}/login`, (route) => route.abort('connectionrefused'));
     await page.goto('/login');
     await fillLogin(page, 'alguien', 'Incorrecta123');
-    await expect(loginError(page)).toHaveText('Error de conexión. Verifica tu conexión a internet.');
+    await expect(loginError(page)).toHaveText('Error de conexión. Verifique su conexión a internet.');
   });
 });
 
 test.describe('1.4 Recuperar contraseña (modal del login)', () => {
   async function openModal(page: Page) {
     await page.goto('/login');
-    await page.getByText('¿Olvidaste tu contraseña?').click();
+    await page.getByText('¿Olvidó su contraseña?').click();
     await expect(page.locator('#reset-email')).toBeVisible();
   }
   const enviar = (page: Page) => page.locator('form:has(#reset-email) button[type=submit]');
@@ -194,7 +194,7 @@ test.describe('1.4 Recuperar contraseña (modal del login)', () => {
       await openModal(page);
       await page.locator('#reset-email').fill(email);
       await enviar(page).click();
-      const ok = page.locator('.alert--success');
+      const ok = page.locator('.success-message');
       await expect(ok).toBeVisible({ timeout: 30_000 });
       respuestas.push((await ok.innerText()).trim());
     }
@@ -277,8 +277,8 @@ test.describe('1.6 Registro de empresa', () => {
       await page.locator(id).focus();
       await page.locator(id).blur();
     }
-    for (const msg of ['Ingresá el CUIL de la empresa.', 'Ingresá el nombre de la empresa.', 'Ingresá el rubro de la empresa.',
-      'Ingresá la cantidad de empleados.', 'Ingresá el horario de trabajo.', 'Entre 3 y 50 caracteres.', 'Ingresá un email válido.']) {
+    for (const msg of ['Ingrese el CUIL de la empresa.', 'Ingrese el nombre de la empresa.', 'Ingrese el rubro de la empresa.',
+      'Ingrese la cantidad de empleados.', 'Ingrese el horario de trabajo.', 'Entre 3 y 50 caracteres.', 'Ingrese un email válido.']) {
       await expect(page.getByText(msg)).toBeVisible();
     }
   });
@@ -311,7 +311,7 @@ test.describe('1.6 Registro de empresa', () => {
     await completar(page);
     await enviar(page).click();
     await expect(page.getByText('¡Solicitud enviada!')).toBeVisible();
-    await expect(page.getByText('Tu registro quedó pendiente de aprobación')).toBeVisible();
+    await expect(page.getByText('Su registro quedó pendiente de aprobación')).toBeVisible();
 
     const { access_token } = await apiLogin(request, USER.admin_polo);
     const sol = await (await request.get(`${API}/empresas/solicitudes`, { headers: { Authorization: `Bearer ${access_token}` } })).json();

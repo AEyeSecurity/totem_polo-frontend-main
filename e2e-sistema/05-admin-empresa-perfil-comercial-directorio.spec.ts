@@ -1,6 +1,6 @@
 /**
- * PARTE 5 — Admin Empresa: perfil de la empresa, información comercial (chat
- * guiado de 9 preguntas y formulario), Servicios del Polo asociados,
+ * PARTE 5 — Admin Empresa: perfil de la empresa, información comercial
+ * (formulario único), Servicios del Polo asociados,
  * directorio de empresas del parque, aviso de bienvenida, recordatorio de
  * actualización y cambio de contraseña.
  */
@@ -28,8 +28,8 @@ async function abrir(page: Page, tab?: string) {
   await page.goto('/me');
   await expect(page.getByText('E2E_Empresa_Prueba').first()).toBeVisible({ timeout: 30_000 });
   await page.waitForLoadState('networkidle');
-  if (tab === 'perfil') await page.getByRole('button', { name: 'Ver informacion de la empresa' }).click();
-  else if (tab === 'config') await page.getByRole('button', { name: 'Abrir configuracion' }).click();
+  if (tab === 'perfil') await page.getByRole('button', { name: 'Ver información de la empresa' }).click();
+  else if (tab === 'config') await page.getByRole('button', { name: 'Abrir configuración' }).click();
   else if (tab) await page.getByRole('button', { name: tab, exact: true }).first().click();
 }
 
@@ -91,44 +91,34 @@ test.describe('5.1 Perfil de la empresa', () => {
 });
 
 // ──────────────────────── 5.2 Información comercial ────────────────────────
-test.describe('5.2 Información comercial (chat guiado y formulario)', () => {
-  const input = (page: Page) => page.getByPlaceholder('Escribi tu respuesta...');
-  async function responder(page: Page, texto: string, espera: string | RegExp) {
-    await input(page).fill(texto);
-    await input(page).press('Enter');
-    await expect(page.locator('main').getByText(espera).last()).toBeVisible({ timeout: 30_000 });
-  }
-
-  test('sin información cargada solo ofrece completarla por chat', async ({ page, request }) => {
+test.describe('5.2 Información comercial (formulario)', () => {
+  test('sin información cargada muestra la ficha vacía y permite cargarla con el formulario', async ({ page, request }) => {
     expect(await comercial(request)).toBeNull();
     await abrir(page, 'perfil');
-    await expect(page.getByRole('button', { name: /Completar informacion comercial/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Editar datos/ })).toHaveCount(1); // solo el de la empresa
+    await expect(page.getByRole('heading', { name: 'Informacion comercial' })).toBeVisible();
+    await expect(page.locator('#co-productos')).toHaveValue('-');
+    await expect(page.getByRole('button', { name: /Editar datos/ })).toHaveCount(2); // empresa + información comercial
   });
 
-  test('el chat hace las 9 preguntas, valida las respuestas y guarda todo', async ({ page, request }) => {
+  test('el formulario carga todos los campos y guarda la ficha (todos opcionales)', async ({ page, request }) => {
     await abrir(page, 'perfil');
-    await page.getByRole('button', { name: /Completar informacion comercial/ }).click();
-    await expect(page.getByText('Pregunta 1 de 9')).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('¿qué productos o servicios ofrece tu empresa exactamente?').first()).toBeVisible();
-
-    await responder(page, 'Software de gestión E2E', /A quién le vendés principalmente/);
-    await expect(page.getByText('Pregunta 2 de 9')).toBeVisible();
-    await responder(page, 'a cualquiera', 'No reconocí esa opción. Elegí una de estas: B2B, B2C, Ambos.');
-    await responder(page, 'b2b', /Atendés al público directamente/);
-    await responder(page, 'quizás', 'Respondeme con sí o no, por favor.');
-    await responder(page, 'sí', /horario de atención comercial/);
-    await responder(page, 'Lun-Vie 9-17', /Cómo describirías tus precios/);
-    await responder(page, 'medio', /Vendés de forma presencial, online/);
-    await responder(page, 'ambas', /Representás o distribuís marcas/);
-    await responder(page, 'No aplica', /Contás con certificaciones/);
-    await responder(page, 'ISO 9001', /algo más que quieras agregar/);
-    await expect(page.getByText('Pregunta 9 de 9')).toBeVisible();
-    // al responder la última, el chat se cierra y se muestra la ficha guardada
-    await input(page).fill('Atención personalizada E2E');
-    await input(page).press('Enter');
+    await page.getByRole('button', { name: /Editar datos/ }).nth(1).click();
+    await expect(page.getByRole('heading', { name: 'Editar informacion comercial' })).toBeVisible();
+    await page.locator('#ce-productos').fill('Software de gestión E2E');
+    await modal(page).locator('label.publico-option').filter({ has: page.locator('strong', { hasText: /^Empresas$/ }) }).click();
+    await page.locator('#ce-atiende').selectOption({ label: 'Si' });
+    await page.locator('#ce-horario').fill('Lun-Vie 9-17');
+    await page.locator('#ce-precios').selectOption('Medio');
+    await page.locator('#ce-modalidad').selectOption('Ambas');
+    await page.locator('#ce-marcas').fill('No aplica');
+    await page.locator('#ce-certif').fill('ISO 9001');
+    await page.locator('#ce-obs').fill('Atención personalizada E2E');
+    const d = nextDialog(page, true);
+    await modal(page).getByRole('button', { name: /Guardar cambios/ }).click();
+    await d;
+    await msg(page, 'Informacion comercial guardada exitosamente');
     await expect(page.locator('#co-productos')).toHaveValue('Software de gestión E2E', { timeout: 30_000 });
-    await expect(input(page)).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Editar informacion comercial' })).toHaveCount(0);
     const c = await comercial(request);
     expect(c).toMatchObject({
       productos_servicios: 'Software de gestión E2E', publico_objetivo: 'B2B', atiende_publico: true,
@@ -139,17 +129,16 @@ test.describe('5.2 Información comercial (chat guiado y formulario)', () => {
 
   test('ya completa: se edita con el formulario', async ({ page, request }) => {
     await abrir(page, 'perfil');
-    await expect(page.getByRole('button', { name: /Completar informacion comercial/ })).toHaveCount(0);
     await page.getByRole('button', { name: /Editar datos/ }).nth(1).click();
     await expect(page.getByRole('heading', { name: 'Editar informacion comercial' })).toBeVisible();
     await expect(page.locator('#ce-productos')).toHaveValue('Software de gestión E2E');
-    await page.locator('#ce-publico').selectOption('Ambos');
+    await modal(page).locator('label.publico-option').filter({ has: page.locator('strong', { hasText: /^Ambos$/ }) }).click();
     await page.locator('#ce-atiende').selectOption({ label: 'No' });
     await page.locator('#ce-certif').fill('ISO 9001, ISO 14001');
     const d = nextDialog(page, true);
     await modal(page).getByRole('button', { name: /Guardar cambios/ }).click();
     await d;
-    await msg(page, 'Informacion comercial actualizada exitosamente');
+    await msg(page, 'Informacion comercial guardada exitosamente');
     await expect(page.locator('#co-atiende')).toHaveValue('No');
     expect(await comercial(request)).toMatchObject({ publico_objetivo: 'Ambos', atiende_publico: false, certificaciones: 'ISO 9001, ISO 14001' });
   });
@@ -280,7 +269,7 @@ test.describe('5.6 Configuración: contraseña y sesión', () => {
 
   test('cambia la contraseña: la nueva funciona y la vieja no', async ({ page, request }) => {
     await uiLogin(page, 'e2e_emp_pwd');
-    await page.getByRole('button', { name: 'Abrir configuracion' }).click();
+    await page.getByRole('button', { name: 'Abrir configuración' }).click();
     await page.getByRole('button', { name: /Cambiar contraseña/ }).click();
     await page.locator('#currentPassword').fill(PWD);
     await page.locator('#newPassword').fill(NUEVA);
@@ -293,7 +282,7 @@ test.describe('5.6 Configuración: contraseña y sesión', () => {
 
   test('"Cerrar sesión" desde Configuración', async ({ page }) => {
     await uiLogin(page, 'e2e_emp_pwd', NUEVA);
-    await page.getByRole('button', { name: 'Abrir configuracion' }).click();
+    await page.getByRole('button', { name: 'Abrir configuración' }).click();
     await page.locator('main').getByRole('button', { name: /Cerrar sesi[oó]n/ }).click();
     await page.getByRole('button', { name: 'Salir' }).click();
     await expect(page).toHaveURL(/\/login$/);

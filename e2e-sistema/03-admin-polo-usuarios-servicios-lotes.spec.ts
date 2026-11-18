@@ -8,7 +8,7 @@
  * un registro nuevo en el Polo real.
  */
 import { test, expect, Page, APIRequestContext } from '@playwright/test';
-import { API, PWD, CUIL, storageFor, apiLogin, loginStatus, nextDialog, openAdminPolo, refreshSessionsIfOld } from './helpers';
+import { API, PWD, CUIL, storageFor, apiLogin, loginStatus, nextDialog, openAdminPolo, refreshSessionsIfOld, elegir } from './helpers';
 
 // sesiones guardadas vigentes (el token dura 30 min y la suite completa tarda más)
 test.beforeAll(async ({ request }) => refreshSessionsIfOld(request));
@@ -50,7 +50,7 @@ test.describe('3.1 Usuarios', () => {
   async function completar(page: Page, o: { email: string; nombre: string; rol: string; cuil: number }) {
     await page.locator('#u_email').fill(o.email);
     await page.locator('#u_nombre').fill(o.nombre);
-    await page.locator('#u_rol').selectOption({ label: o.rol });
+    await page.locator('label.segmented-option').filter({ hasText: o.rol === 'admin_polo' ? 'Administrador del Polo' : 'Público' }).click();
     await page.locator('#u_cuil').fill(String(o.cuil));
     const d = nextDialog(page, true);
     await modal(page).getByRole('button', { name: 'Crear' }).click();
@@ -74,8 +74,8 @@ test.describe('3.1 Usuarios', () => {
 
   test('el alta solo ofrece los roles admin_polo y publico', async ({ page }) => {
     await abrirNuevo(page);
-    const opciones = await page.locator('#u_rol option').allTextContents();
-    expect(opciones.map((o) => o.trim())).toEqual(['—', 'admin_polo', 'publico']);
+    const opciones = await modal(page).locator('[aria-labelledby="u_rol_label"] label.segmented-option').allTextContents();
+    expect(opciones.map((o) => o.trim())).toEqual(['Administrador del Polo', 'Público']);
   });
 
   test('valida campos obligatorios y formato de email', async ({ page }) => {
@@ -118,8 +118,8 @@ test.describe('3.1 Usuarios', () => {
     await row(page, 'usuarios', 'e2e_p3_nuevo@example.com').getByTitle('Editar').click();
     await expect(page.getByRole('heading', { name: 'Editar usuario' })).toBeVisible();
     for (const id of ['#u_nombre', '#u_email', '#u_cuil']) await expect(page.locator(id)).toBeDisabled();
-    await expect(page.locator('#u_rol')).toHaveCount(0);
-    await page.locator('#u_estado').selectOption({ label: 'Inhabilitado' });
+    await expect(page.locator('#u_rol_label')).toHaveCount(0); // el rol no se edita
+    await page.locator('label.segmented-option').filter({ hasText: 'Inhabilitado' }).click();
     const d = nextDialog(page, true);
     await modal(page).getByRole('button', { name: /Guardar|Actualizar/ }).click();
     await d;
@@ -133,12 +133,12 @@ test.describe('3.1 Usuarios', () => {
     await buscar(page).fill('e2e_p3_nuevo');
     const r = row(page, 'usuarios', 'e2e_p3_nuevo@example.com');
     let d = nextDialog(page, true, '¿Está seguro de que desea habilitar este usuario?');
-    await r.getByTitle('Habilitar', { exact: true }).click();
+    await r.getByTitle('Habilitar usuario', { exact: true }).click();
     await d;
     await expect(alertMsg(page)).toHaveText('Usuario habilitado exitosamente', { timeout: 30_000 });
     await expect(r.locator('.badge').last()).toHaveText('Habilitado');
     d = nextDialog(page, true, '¿Está seguro de que desea inhabilitar este usuario?');
-    await r.getByTitle('Inhabilitar', { exact: true }).click();
+    await r.getByTitle('Inhabilitar usuario', { exact: true }).click();
     await d;
     await expect(alertMsg(page)).toHaveText('Usuario inhabilitado exitosamente', { timeout: 30_000 });
     expect((await list(request, '/usuarios')).find((x) => x.nombre === 'e2e_p3_nuevo').estado).toBe(false);
@@ -162,7 +162,7 @@ test.describe('3.1 Usuarios', () => {
 test.describe('3.2 Servicios del Polo', () => {
   const buscar = (page: Page) => page.getByPlaceholder('Buscar por nombre o empresa…');
   async function abrirNuevo(page: Page) {
-    await openAdminPolo(page, 'Servicios Polo');
+    await openAdminPolo(page, 'Servicios del Polo');
     await page.getByRole('button', { name: /Nuevo servicio/ }).first().click();
     await expect(page.getByRole('heading', { name: 'Nuevo servicio del Polo' })).toBeVisible();
   }
@@ -176,11 +176,11 @@ test.describe('3.2 Servicios del Polo', () => {
     await abrirNuevo(page);
     await page.locator('#sp_nombre').fill('E2E Validacion');
     await page.locator('#sp_cuil').fill(String(CUIL.empresa));
-    await page.locator('#sp_tipo').selectOption({ label: 'coworking' });
+    await elegir(page, 'sp_tipo', 'coworking');
     await expect(page.locator('#sp_puestos')).toBeVisible();
     await crear(page);
     await expect(page.locator('#sp_puestos')).toHaveClass(/ng-invalid/);
-    await page.locator('#sp_tipo').selectOption({ label: 'nave' });
+    await elegir(page, 'sp_tipo', 'nave');
     await expect(page.locator('#sp_m2')).toBeVisible();
     await expect(page.locator('#sp_puestos')).toHaveCount(0);
     await crear(page);
@@ -190,9 +190,9 @@ test.describe('3.2 Servicios del Polo', () => {
 
   test('"Propietario" / "Inquilino" muestran sus datos de contacto', async ({ page }) => {
     await abrirNuevo(page);
-    await page.locator('#sp_propietario').selectOption({ label: 'Propietario' });
+    await elegir(page, 'sp_propietario', 'Propietario');
     await expect(page.locator('#sp_datos_prop_label')).toBeVisible();
-    await page.locator('#sp_propietario').selectOption({ label: 'Inquilino' });
+    await elegir(page, 'sp_propietario', 'Inquilino');
     await expect(page.locator('#sp_datos_inq_label')).toBeVisible();
     await expect(page.locator('#sp_datos_prop_label')).toHaveCount(0);
   });
@@ -200,14 +200,14 @@ test.describe('3.2 Servicios del Polo', () => {
   test('crea un coworking con propietario y queda asociado a la empresa', async ({ page, request }) => {
     await abrirNuevo(page);
     await page.locator('#sp_nombre').fill('E2E Coworking P3');
-    await page.locator('#sp_tipo').selectOption({ label: 'coworking' });
+    await elegir(page, 'sp_tipo', 'coworking');
     await page.locator('#sp_horario').fill('08-20');
-    await page.locator('#sp_propietario').selectOption({ label: 'Propietario' });
+    await elegir(page, 'sp_propietario', 'Propietario');
     await page.locator('#sp_cuil').fill(String(CUIL.empresa));
     await page.locator('#sp_puestos').fill('15');
     await page.locator('#sp_m2_cw').fill('120');
-    await modal(page).getByPlaceholder('Nombre').first().fill('E2E Dueño Cowork');
-    await modal(page).getByPlaceholder('Contacto').first().fill('351-555-0000');
+    await page.locator('#sp_prop_nombre').fill('E2E Dueño Cowork');
+    await page.locator('#sp_prop_contacto').fill('351-555-0000');
     await crear(page);
     await expect(alertMsg(page)).toHaveText('Servicio del polo creado exitosamente', { timeout: 30_000 });
     await buscar(page).fill('E2E Coworking P3');
@@ -222,7 +222,7 @@ test.describe('3.2 Servicios del Polo', () => {
   test('crea una nave con superficie', async ({ page, request }) => {
     await abrirNuevo(page);
     await page.locator('#sp_nombre').fill('E2E Nave P3');
-    await page.locator('#sp_tipo').selectOption({ label: 'nave' });
+    await elegir(page, 'sp_tipo', 'nave');
     await page.locator('#sp_cuil').fill(String(CUIL.empresa));
     await page.locator('#sp_m2').fill('800');
     await crear(page);
@@ -233,7 +233,7 @@ test.describe('3.2 Servicios del Polo', () => {
   test('con un CUIL que no existe muestra un error claro (no un error del servidor)', async ({ page }) => {
     await abrirNuevo(page);
     await page.locator('#sp_nombre').fill('E2E Cuil Invalido');
-    await page.locator('#sp_tipo').selectOption({ label: 'nave' });
+    await elegir(page, 'sp_tipo', 'nave');
     await page.locator('#sp_cuil').fill('20999999999');
     await page.locator('#sp_m2').fill('50');
     const resp = page.waitForResponse((r) => r.url() === `${API}/serviciopolo` && r.request().method() === 'POST');
@@ -245,10 +245,10 @@ test.describe('3.2 Servicios del Polo', () => {
   });
 
   test('"Ver mas" muestra el horario del servicio', async ({ page }) => {
-    await openAdminPolo(page, 'Servicios Polo');
+    await openAdminPolo(page, 'Servicios del Polo');
     await buscar(page).fill('E2E Coworking P3');
     const r = row(page, 'servicios', 'E2E Coworking P3');
-    await r.getByRole('button', { name: 'Ver mas' }).click();
+    await r.getByRole('button', { name: 'Ver detalle' }).click();
     await expect(r.locator('.horario-full')).toHaveText('08-20');
   });
 });
@@ -257,9 +257,9 @@ test.describe('3.2 Servicios del Polo', () => {
 test.describe('3.3 Lotes', () => {
   const buscarLote = (page: Page) => page.getByPlaceholder('Buscar por dueño, lote, manzana o servicio de polo…');
   async function abrirLote(page: Page, servicio: string) {
-    await openAdminPolo(page, 'Servicios Polo');
+    await openAdminPolo(page, 'Servicios del Polo');
     await page.getByPlaceholder('Buscar por nombre o empresa…').fill(servicio);
-    await row(page, 'servicios', servicio).getByTitle('Agregar/Asignar lote').click();
+    await row(page, 'servicios', servicio).getByTitle('Registrar lote para este servicio').click();
     await expect(page.locator('#l_dueno')).toBeVisible();
   }
   async function crearLote(page: Page, dueno: string, manzana: number, lote: number) {
@@ -369,7 +369,7 @@ test.describe('3.4 Dashboard y accesos rápidos', () => {
     await openAdminPolo(page, 'Dashboard');
     await page.locator('.quick-btn').filter({ hasText: 'Registrar lote' }).click();
     await expect(page.locator('#l_dueno')).toHaveCount(0); // no abre el alta atada a ningún servicio
-    await expect(alertMsg(page)).toContainText('Elegí el servicio del Polo al que pertenece el lote');
+    await expect(alertMsg(page)).toContainText('Elija el servicio del Polo al que pertenece el lote');
     await expect(page.getByRole('button', { name: /Nuevo servicio/ })).toBeVisible(); // pestaña Servicios Polo
   });
 });
@@ -404,7 +404,7 @@ test.describe('3.5 Perfil del Polo (registro real: se restaura al final)', () =>
     await openAdminPolo(page);
     await page.getByRole('button', { name: 'Ver información del polo' }).click();
     await page.getByRole('button', { name: /Editar datos/ }).nth(1).click();
-    await expect(page.getByRole('heading', { name: 'Editar informacion comercial' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Editar información comercial' })).toBeVisible();
     await expect(page.locator('#ce-productos')).toBeVisible();
     await modal(page).getByRole('button', { name: 'Cancelar' }).click();
     await expect(page.locator('#ce-productos')).toHaveCount(0);
@@ -435,7 +435,7 @@ test.describe('3.6 Configuración: contraseña y sesión', () => {
     await page.locator('#currentPassword').fill(PWD);
     await page.locator('#newPassword').fill(NUEVA);
     await page.locator('#confirmPassword').fill('E2e#Distinta2026!');
-    await expect(page.getByText('Las contraseñas no coinciden.')).toBeVisible();
+    await expect(page.getByText('Las contraseñas no coinciden')).toBeVisible();
     await expect(enviar(page)).toBeDisabled();
   });
 

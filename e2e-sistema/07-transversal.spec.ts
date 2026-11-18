@@ -175,12 +175,12 @@ test.describe('7.4 Vista mobile (Chromium con pantalla de celular)', () => {
       await page.goto('/empresas');
       await expect(page.locator('.kpi-number').first()).not.toHaveText('0', { timeout: 30_000 });
       await page.waitForLoadState('networkidle');
-      for (const tab of ['Empresas', 'Usuarios', 'Servicios Polo', 'Lotes']) {
-        await page.getByRole('button', { name: 'Abrir menu' }).click();
-        const menu = page.locator('.mobile-sidebar.open');
+      for (const tab of ['Empresas', 'Usuarios', 'Servicios del Polo', 'Lotes']) {
+        await page.getByRole('button', { name: 'Abrir menú' }).click();
+        const menu = page.locator('aside.drawer');
         await expect(menu).toBeVisible();
         await menu.getByRole('button', { name: new RegExp(`^${tab}( \\d+)?$`) }).click();
-        await expect(page.locator('.mobile-sidebar.open')).toHaveCount(0); // se cierra al elegir
+        await expect(page.locator('aside.drawer')).toHaveCount(0); // se cierra al elegir
         await page.waitForTimeout(800);
         await sinScrollHorizontal(page, `Admin Polo › ${tab}`);
       }
@@ -193,15 +193,15 @@ test.describe('7.4 Vista mobile (Chromium con pantalla de celular)', () => {
       await page.goto('/me');
       await expect(page.getByText('E2E_Empresa_Prueba').first()).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState('networkidle');
-      for (const tab of ['Vehiculos', 'Servicios', 'Contactos', 'Empresas']) {
-        await page.getByRole('button', { name: 'Abrir menu' }).click();
-        await page.locator('.mobile-sidebar.open').getByRole('button', { name: tab, exact: true }).click();
+      for (const tab of ['Vehículos', 'Servicios', 'Contactos', 'Empresas del parque']) {
+        await page.getByRole('button', { name: 'Abrir menú' }).click();
+        await page.locator('aside.drawer').getByRole('button', { name: tab, exact: true }).click();
         await page.waitForTimeout(800);
         await sinScrollHorizontal(page, `Admin Empresa › ${tab}`);
       }
-      await page.getByRole('button', { name: 'Abrir menu' }).click();
-      await page.locator('.mobile-sidebar.open').getByRole('button', { name: 'Vehiculos', exact: true }).click();
-      await page.getByRole('button', { name: /Nuevo vehiculo/ }).first().click();
+      await page.getByRole('button', { name: 'Abrir menú' }).click();
+      await page.locator('aside.drawer').getByRole('button', { name: 'Vehículos', exact: true }).click();
+      await page.getByRole('button', { name: /Nuevo vehículo/ }).first().click();
       const caja = await page.locator('.modal:visible').first().boundingBox();
       expect(caja!.width, 'el formulario es más ancho que la pantalla').toBeLessThanOrEqual(412);
       await expect(page.locator('form:visible').last().getByRole('button', { name: 'Agregar' })).toBeVisible();
